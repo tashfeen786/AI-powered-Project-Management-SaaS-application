@@ -6,6 +6,7 @@ from .task import Task
 from .document import Document
 from .activity import Activity
 from .embedding import DocumentEmbedding
+from .requirement import Requirement
 
 # For Alembic to discover all models easily
 __all__ = [
@@ -16,5 +17,6 @@ __all__ = [
     "Task",
     "Document",
     "Activity",
-    "DocumentEmbedding"
+    "DocumentEmbedding",
+    "Requirement"
 ]

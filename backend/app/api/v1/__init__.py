@@ -17,7 +17,7 @@ api_router = APIRouter()
 api_router.include_router(auth_router, prefix="/auth", tags=["Auth"])
 api_router.include_router(organizations_router, prefix="/organizations", tags=["Organizations"])
 api_router.include_router(projects_router, prefix="/projects", tags=["Projects"])
-api_router.include_router(requirements_router, prefix="/projects", tags=["Requirements"]) # specific paths are configured in router
+api_router.include_router(requirements_router, prefix="", tags=["Requirements"]) # specific paths are configured in router
 api_router.include_router(planning_router, prefix="/projects", tags=["Planning"])
 api_router.include_router(tasks_router, prefix="", tags=["Tasks"])
 api_router.include_router(documents_router, prefix="", tags=["Documents"])
