@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     JWT_SECRET: str = os.getenv("JWT_SECRET", "supersecretkey_please_change_in_production")
     JWT_EXPIRE_MINUTES: int = 60 * 24 * 7 # 7 days
     ALGORITHM: str = "HS256"
+    BACKEND_CORS_ORIGINS: list[str] = ["*"] # Override in prod: ["https://myapp.com"]
     
     # Database
     DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost:5432/ai_saas")

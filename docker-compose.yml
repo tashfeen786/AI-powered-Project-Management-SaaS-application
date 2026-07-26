@@ -54,6 +54,10 @@ services:
       - "8000:8000"
     volumes:
       - ./backend/uploads:/app/uploads
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     networks:
       - ai_pm_network
 
@@ -73,6 +77,10 @@ services:
     command: ["celery", "-A", "app.core.celery_app.celery_app", "worker", "--loglevel=info"]
     volumes:
       - ./backend/uploads:/app/uploads
+    deploy:
+      resources:
+        limits:
+          memory: 2G
     networks:
       - ai_pm_network
 

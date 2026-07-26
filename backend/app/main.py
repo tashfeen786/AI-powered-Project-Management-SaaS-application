@@ -20,11 +20,13 @@ app = FastAPI(
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Adjust for production
+    allow_origins=settings.BACKEND_CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# TODO: Add Rate Limiting Middleware (e.g. slowapi) here before production release
 
 # Logging Middleware
 app.add_middleware(LoggingMiddleware)
@@ -51,6 +53,5 @@ async def global_exception_handler(request: Request, exc: Exception):
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
 @app.get("/")
-@app.get("/health")
-async def health_check():
-    return {"status": "ok", "service": settings.PROJECT_NAME}
+async def root_redirect():
+    return {"status": "ok", "service": settings.PROJECT_NAME, "health_endpoint": "/api/v1/health"}
