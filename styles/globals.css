@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #FAFAFA;
+    --surface: #FFFFFF;
+    --primary: #4F46E5;
+    --border: #E5E5E5;
+    --text-primary: #18181B;
+    --text-secondary: #71717A;
+    --success: #16A34A;
+    --warning: #D97706;
+    --danger: #DC2626;
+    
+    --radius: 8px;
+  }
+
+  .dark {
+    /* For later dark mode implementation, keep variables consistent for now */
+    --background: #09090B;
+    --surface: #18181B;
+    --primary: #4F46E5;
+    --border: #27272A;
+    --text-primary: #FAFAFA;
+    --text-secondary: #A1A1AA;
+    --success: #16A34A;
+    --warning: #D97706;
+    --danger: #DC2626;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-text-primary antialiased font-sans;
+  }
+}
