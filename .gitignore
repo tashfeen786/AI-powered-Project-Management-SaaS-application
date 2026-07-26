@@ -22,3 +22,31 @@ Thumbs.db
 
 # build
 dist/
+
+
+# Python
+backend/.venv/
+backend/**/__pycache__/
+backend/**/*.pyc
+backend/.pytest_cache/
+backend/.mypy_cache/
+
+# Environment
+backend/.env
+backend/.env.*
+
+# Node
+node_modules/
+.next/
+dist/
+build/
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
