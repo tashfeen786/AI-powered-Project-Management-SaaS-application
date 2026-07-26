@@ -14,6 +14,7 @@ from .task_generation import TaskGeneration
 from .ai_insight import AIInsight
 from .conversation import Conversation
 from .message import Message
+from .background_job import BackgroundJob
 
 # For Alembic to discover all models easily
 __all__ = [
@@ -32,5 +33,6 @@ __all__ = [
     "TaskGeneration",
     "AIInsight",
     "Conversation",
-    "Message"
+    "Message",
+    "BackgroundJob"
 ]
