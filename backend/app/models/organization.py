@@ -9,5 +9,5 @@ class Organization(BaseModel):
     name: Mapped[str] = mapped_column(String(255), index=True)
     domain: Mapped[str | None] = mapped_column(String(255), unique=True, index=True)
     
-    users: Mapped[List["User"]] = relationship(back_populates="organization", cascade="all, delete-orphan")
+    user_organizations: Mapped[List["UserOrganization"]] = relationship(back_populates="organization", cascade="all, delete-orphan")
     projects: Mapped[List["Project"]] = relationship(back_populates="organization", cascade="all, delete-orphan")
