@@ -10,6 +10,7 @@ from .requirement import Requirement
 from .milestone import Milestone
 from .sprint import Sprint
 from .planning import Planning
+from .task_generation import TaskGeneration
 
 # For Alembic to discover all models easily
 __all__ = [
@@ -24,5 +25,6 @@ __all__ = [
     "Requirement",
     "Milestone",
     "Sprint",
-    "Planning"
+    "Planning",
+    "TaskGeneration"
 ]

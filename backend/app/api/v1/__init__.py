@@ -11,6 +11,7 @@ from .analytics import router as analytics_router
 from .ai import router as ai_router
 from .settings import router as settings_router
 from .copilot import router as copilot_router
+from .task_generation import router as task_generation_router
 
 api_router = APIRouter()
 
@@ -27,3 +28,4 @@ api_router.include_router(analytics_router, prefix="/analytics", tags=["Analytic
 api_router.include_router(ai_router, prefix="/ai", tags=["AI"])
 api_router.include_router(settings_router, prefix="/settings", tags=["Settings"])
 api_router.include_router(copilot_router, prefix="/copilot", tags=["Copilot"])
+api_router.include_router(task_generation_router, prefix="", tags=["Task Generation"])
