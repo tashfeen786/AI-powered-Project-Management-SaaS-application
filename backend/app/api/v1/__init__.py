@@ -18,7 +18,7 @@ api_router.include_router(organizations_router, prefix="/organizations", tags=["
 api_router.include_router(projects_router, prefix="/projects", tags=["Projects"])
 api_router.include_router(requirements_router, prefix="/projects", tags=["Requirements"]) # specific paths are configured in router
 api_router.include_router(planning_router, prefix="/projects", tags=["Planning"])
-api_router.include_router(tasks_router, prefix="/projects", tags=["Tasks"])
+api_router.include_router(tasks_router, prefix="", tags=["Tasks"])
 api_router.include_router(documents_router, prefix="/projects", tags=["Documents"])
 api_router.include_router(activity_router, prefix="/projects", tags=["Activity"])
 api_router.include_router(team_router, prefix="/team", tags=["Team"])
