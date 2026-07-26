@@ -4,6 +4,9 @@ from app.repositories.document_repository import DocumentRepository
 from app.repositories.project_repository import ProjectRepository
 from app.services.storage_service import StorageService
 from app.services.parser_service import ParserService
+from app.services.chunking_service import ChunkingService
+from app.services.embedding_service import EmbeddingService
+from app.services.vector_service import VectorService
 from app.models.document import Document
 from app.utils.file_utils import compute_checksum
 import uuid
@@ -103,11 +106,28 @@ class DocumentService:
             elif doc.extension in [".txt", ".md"]:
                 parsed_text = await ParserService.parse_markdown(content)
                 
-            # TODO: Future AI Pipeline Extensions
-            # 1. Chunking: split `parsed_text` into chunks
-            # 2. Embeddings: Generate vector embeddings for each chunk
-            # 3. Vector Database: Store chunks in Pinecone/Weaviate/pgvector
-            # 4. Semantic Search setup
+            # AI Pipeline Integration
+            if parsed_text:
+                # 1. Chunking
+                chunks = ChunkingService.chunk_text(
+                    text=parsed_text, 
+                    metadata={"filename": doc.filename, "original_filename": doc.original_filename}
+                )
+                chunk_dicts = [{"chunk_index": c.chunk_index, "text": c.text, "metadata": c.metadata} for c in chunks]
+                
+                # 2. Embeddings
+                texts = [c["text"] for c in chunk_dicts]
+                embeddings = EmbeddingService.generate_embeddings_batch(texts)
+                
+                # 3. Vector Database Storage
+                vector_service = VectorService(self.db)
+                await vector_service.store_document_vectors(
+                    document_id=doc.id,
+                    project_id=doc.project_id,
+                    org_id=org_id,
+                    chunks=chunk_dicts,
+                    embeddings=embeddings
+                )
             
             doc.processing_status = "Processed"
             doc.parser_version = ParserService.VERSION

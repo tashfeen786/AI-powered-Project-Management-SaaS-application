@@ -8,6 +8,7 @@ from .documents import router as documents_router
 from .activity import router as activity_router
 from .team import router as team_router
 from .analytics import router as analytics_router
+from .ai import router as ai_router
 from .settings import router as settings_router
 from .copilot import router as copilot_router
 
@@ -23,5 +24,6 @@ api_router.include_router(documents_router, prefix="", tags=["Documents"])
 api_router.include_router(activity_router, prefix="/projects", tags=["Activity"])
 api_router.include_router(team_router, prefix="/team", tags=["Team"])
 api_router.include_router(analytics_router, prefix="/analytics", tags=["Analytics"])
+api_router.include_router(ai_router, prefix="/ai", tags=["AI"])
 api_router.include_router(settings_router, prefix="/settings", tags=["Settings"])
 api_router.include_router(copilot_router, prefix="/copilot", tags=["Copilot"])
