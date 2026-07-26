@@ -11,6 +11,7 @@ from .milestone import Milestone
 from .sprint import Sprint
 from .planning import Planning
 from .task_generation import TaskGeneration
+from .ai_insight import AIInsight
 
 # For Alembic to discover all models easily
 __all__ = [
@@ -26,5 +27,6 @@ __all__ = [
     "Milestone",
     "Sprint",
     "Planning",
-    "TaskGeneration"
+    "TaskGeneration",
+    "AIInsight"
 ]
