@@ -7,6 +7,9 @@ from .document import Document
 from .activity import Activity
 from .embedding import DocumentEmbedding
 from .requirement import Requirement
+from .milestone import Milestone
+from .sprint import Sprint
+from .planning import Planning
 
 # For Alembic to discover all models easily
 __all__ = [
@@ -18,5 +21,8 @@ __all__ = [
     "Document",
     "Activity",
     "DocumentEmbedding",
-    "Requirement"
+    "Requirement",
+    "Milestone",
+    "Sprint",
+    "Planning"
 ]
