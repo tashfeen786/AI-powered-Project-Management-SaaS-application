@@ -1,49 +1,20 @@
-import { mockMembers, TeamMember, TeamRole } from "@/features/team/mock-data";
-
-let currentMembers = [...mockMembers];
+import { apiClient } from "./api";
+import { TeamMember } from "@/features/team/mock-data";
 
 export const TeamService = {
-  getMembers: async (): Promise<TeamMember[]> => {
-    // API Contract: GET /api/v1/team
-    return new Promise(resolve => setTimeout(() => resolve([...currentMembers]), 600));
+  getMembers: async (orgId: string): Promise<TeamMember[]> => {
+    const response = await apiClient.get(`/organizations/${orgId}/members`);
+    return response.data || [];
   },
-  
-  inviteMember: async (email: string, role: TeamRole): Promise<TeamMember> => {
-    // API Contract: POST /api/v1/team/invite
-    return new Promise(resolve => setTimeout(() => {
-      const newMember: TeamMember = {
-        id: Math.random().toString(),
-        name: email.split('@')[0],
-        email,
-        avatar: email.substring(0, 2).toUpperCase(),
-        role,
-        joinedDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-        lastActive: "Never",
-        status: "Pending"
-      };
-      currentMembers = [...currentMembers, newMember];
-      resolve(newMember);
-    }, 800));
+  inviteMember: async (orgId: string, email: string, role: string) => {
+    const response = await apiClient.post(`/organizations/${orgId}/invite`, { email, role });
+    return response.data;
   },
-  
-  updateRole: async (id: string, newRole: TeamRole): Promise<TeamMember> => {
-    // API Contract: PATCH /api/v1/team/{id}
-    return new Promise((resolve, reject) => setTimeout(() => {
-      const idx = currentMembers.findIndex(m => m.id === id);
-      if (idx > -1) {
-        currentMembers[idx] = { ...currentMembers[idx], role: newRole };
-        resolve(currentMembers[idx]);
-      } else {
-        reject(new Error("Not found"));
-      }
-    }, 400));
+  updateRole: async (orgId: string, userId: string, role: string) => {
+    const response = await apiClient.patch(`/organizations/${orgId}/members/${userId}/role`, { role });
+    return response.data;
   },
-  
-  deleteMember: async (id: string): Promise<void> => {
-    // API Contract: DELETE /api/v1/team/{id}
-    return new Promise((resolve) => setTimeout(() => {
-      currentMembers = currentMembers.filter(m => m.id !== id);
-      resolve();
-    }, 500));
+  removeMember: async (orgId: string, userId: string) => {
+    await apiClient.delete(`/organizations/${orgId}/members/${userId}`);
   }
 };

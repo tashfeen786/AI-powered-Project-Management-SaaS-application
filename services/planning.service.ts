@@ -1,24 +1,26 @@
-import { mockPlanningConversation, mockPlanningDraft, Message, PlanningData } from "@/features/planning/mock-data";
+import { apiClient } from "./api";
+import { Message, PlanningData } from "@/features/planning/mock-data";
 
 export const PlanningService = {
-  sendMessage: async (projectId: string, content: string): Promise<Message> => {
-    return new Promise(resolve => setTimeout(() => resolve({
-      id: Math.random().toString(),
-      role: 'user',
-      content,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    }), 500));
+  generatePlan: async (projectId: string, requirementId: string, additionalContext?: string): Promise<PlanningData> => {
+    const response = await apiClient.post(`/projects/${projectId}/planning/generate`, {
+      requirement_id: requirementId,
+      additional_context: additionalContext
+    });
+    return response.data;
   },
-  getDraft: async (projectId: string): Promise<PlanningData> => {
-    return new Promise(resolve => setTimeout(() => resolve(mockPlanningDraft), 500));
+  getPlans: async (projectId: string): Promise<PlanningData[]> => {
+    const response = await apiClient.get(`/projects/${projectId}/planning`);
+    return response.data?.items || [];
   },
-  updateDraft: async (projectId: string, payload: any): Promise<void> => {
-    return new Promise(resolve => setTimeout(resolve, 500));
+  getPlan: async (planId: string): Promise<PlanningData> => {
+    const response = await apiClient.get(`/planning/${planId}`);
+    return response.data;
   },
-  approvePlan: async (projectId: string): Promise<void> => {
-    return new Promise(resolve => setTimeout(resolve, 2000));
+  updatePlan: async (planId: string, payload: any): Promise<void> => {
+    await apiClient.patch(`/planning/${planId}`, payload);
   },
-  getConversation: async (projectId: string): Promise<Message[]> => {
-    return new Promise(resolve => setTimeout(() => resolve(mockPlanningConversation), 500));
+  approvePlan: async (planId: string): Promise<void> => {
+    await apiClient.post(`/planning/${planId}/approve`, {});
   }
 };

@@ -5,6 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
+import { AuthService } from "@/services/auth.service";
+import { useRouter } from "next/navigation";
 
 import { loginSchema, LoginValues } from "@/features/auth/schemas/login.schema";
 import { AuthCard } from "@/components/auth/AuthCard";
@@ -27,12 +29,19 @@ export default function LoginPage() {
     },
   });
 
+  const router = useRouter();
+
   const onSubmit = async (data: LoginValues) => {
     setIsLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    console.log("Login data:", data);
-    setIsLoading(false);
+    try {
+      await AuthService.login(data);
+      router.push("/dashboard");
+    } catch (error) {
+      console.error("Login failed", error);
+      // Ideally show toast error here
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

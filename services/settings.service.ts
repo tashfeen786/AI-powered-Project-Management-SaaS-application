@@ -1,18 +1,12 @@
-import { mockSettings, OrganizationSettings } from "@/features/settings/mock-data";
-
-let currentSettings = { ...mockSettings };
+import { apiClient } from "./api";
 
 export const SettingsService = {
-  getSettings: async (): Promise<OrganizationSettings> => {
-    // API Contract: GET /api/v1/settings
-    return new Promise(resolve => setTimeout(() => resolve({ ...currentSettings }), 800));
+  getOrganizationSettings: async (orgId: string) => {
+    const response = await apiClient.get(`/organizations/${orgId}/settings`);
+    return response.data;
   },
-  
-  updateSettings: async (updates: Partial<OrganizationSettings>): Promise<OrganizationSettings> => {
-    // API Contract: PATCH /api/v1/settings
-    return new Promise((resolve) => setTimeout(() => {
-      currentSettings = { ...currentSettings, ...updates };
-      resolve({ ...currentSettings });
-    }, 600));
+  updateOrganizationSettings: async (orgId: string, settings: any) => {
+    const response = await apiClient.patch(`/organizations/${orgId}/settings`, settings);
+    return response.data;
   }
 };

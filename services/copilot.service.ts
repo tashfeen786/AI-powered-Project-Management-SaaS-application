@@ -1,25 +1,31 @@
-import { mockConversations, mockMessages, CopilotConversation, CopilotMessage } from "@/features/copilot/mock-data";
+import { apiClient } from "./api";
+import { Message } from "@/features/copilot/mock-data";
 
 export const CopilotService = {
-  getConversations: async (): Promise<CopilotConversation[]> => {
-    // API Contract: GET /api/v1/copilot/conversations
-    return new Promise(resolve => setTimeout(() => resolve([...mockConversations]), 600));
+  createConversation: async (projectId?: string) => {
+    const response = await apiClient.post("/copilot/conversations", { project_id: projectId });
+    return response.data;
   },
   
-  getConversation: async (id: string): Promise<CopilotMessage[]> => {
-    // API Contract: GET /api/v1/copilot/{id}
-    return new Promise(resolve => setTimeout(() => resolve(mockMessages[id] || []), 500));
+  getConversations: async () => {
+    const response = await apiClient.get("/copilot/conversations");
+    return response.data || [];
   },
 
-  sendMessage: async (conversationId: string, content: string): Promise<CopilotMessage> => {
-    // API Contract: POST /api/v1/copilot/message
-    return new Promise(resolve => setTimeout(() => {
-      resolve({
-        id: Math.random().toString(),
-        role: 'ai',
-        content: `I received your message: "${content}". I am analyzing the workspace now...`,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      });
-    }, 1500)); // Simulate thinking time
+  getConversationDetails: async (conversationId: string) => {
+    const response = await apiClient.get(`/copilot/conversations/${conversationId}`);
+    return response.data;
+  },
+  
+  sendMessage: async (conversationId: string, content: string): Promise<Message> => {
+    const response = await apiClient.post(`/copilot/chat`, {
+      conversation_id: conversationId,
+      content
+    });
+    return response.data;
+  },
+
+  deleteConversation: async (conversationId: string) => {
+    await apiClient.delete(`/copilot/conversations/${conversationId}`);
   }
 };

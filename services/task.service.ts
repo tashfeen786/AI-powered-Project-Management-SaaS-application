@@ -1,35 +1,24 @@
-import { mockTasks, Task, TaskStatus } from "@/features/tasks/mock-data";
-
-// Simple in-memory store for optimistic updates during the session
-let currentTasks = [...mockTasks];
+import { apiClient } from "./api";
+import { Task, TaskStatus } from "@/features/tasks/mock-data";
 
 export const TaskService = {
   getTasks: async (projectId: string): Promise<Task[]> => {
-    // API Contract: GET /api/v1/projects/{id}/tasks
-    return new Promise(resolve => setTimeout(() => resolve([...currentTasks]), 600));
+    const response = await apiClient.get(`/projects/${projectId}/tasks`);
+    return response.data || [];
   },
   getTask: async (taskId: string): Promise<Task> => {
-    // API Contract: GET /api/v1/tasks/{id}
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const t = currentTasks.find(t => t.id === taskId);
-        if (t) resolve(t);
-        else reject(new Error("Not found"));
-      }, 300);
-    });
+    const response = await apiClient.get(`/tasks/${taskId}`);
+    return response.data;
   },
   updateTaskStatus: async (taskId: string, newStatus: TaskStatus): Promise<Task> => {
-    // API Contract: PATCH /api/v1/tasks/{id}
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const index = currentTasks.findIndex(t => t.id === taskId);
-        if (index > -1) {
-          currentTasks[index] = { ...currentTasks[index], status: newStatus };
-          resolve(currentTasks[index]);
-        } else {
-          reject(new Error("Not found"));
-        }
-      }, 500);
-    });
+    const response = await apiClient.patch(`/tasks/${taskId}`, { status: newStatus });
+    return response.data;
+  },
+  createTask: async (projectId: string, data: Partial<Task>): Promise<Task> => {
+    const response = await apiClient.post(`/projects/${projectId}/tasks`, data);
+    return response.data;
+  },
+  deleteTask: async (taskId: string): Promise<void> => {
+    await apiClient.delete(`/tasks/${taskId}`);
   }
 };

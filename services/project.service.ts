@@ -1,33 +1,25 @@
 import { apiClient } from "./api";
-import { mockProjectsDetail, ProjectDetail } from "@/features/projects/mock-projects";
+import { ProjectDetail } from "@/features/projects/mock-projects";
 
 export const ProjectService = {
   getProjects: async (): Promise<ProjectDetail[]> => {
-    // API Contract: GET /api/v1/projects
-    // await apiClient.get('/projects');
-    return new Promise((resolve) => setTimeout(() => resolve(mockProjectsDetail), 500));
+    const response = await apiClient.get('/projects');
+    // Assuming backend returns StandardResponse with data array
+    return response.data || [];
   },
   getProject: async (id: string): Promise<ProjectDetail> => {
-    // API Contract: GET /api/v1/projects/{id}
-    // await apiClient.get(`/projects/${id}`);
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const project = mockProjectsDetail.find(p => p.id === id);
-        if (project) resolve(project);
-        else reject(new Error("Project not found"));
-      }, 500);
-    });
+    const response = await apiClient.get(`/projects/${id}`);
+    return response.data;
   },
   createProject: async (data: Partial<ProjectDetail>): Promise<ProjectDetail> => {
-    // API Contract: POST /api/v1/projects
-    return new Promise((resolve) => setTimeout(() => resolve(mockProjectsDetail[0]), 500));
+    const response = await apiClient.post('/projects', data);
+    return response.data;
   },
   updateProject: async (id: string, data: Partial<ProjectDetail>): Promise<ProjectDetail> => {
-    // API Contract: PATCH /api/v1/projects/{id}
-    return new Promise((resolve) => setTimeout(() => resolve(mockProjectsDetail[0]), 500));
+    const response = await apiClient.patch(`/projects/${id}`, data);
+    return response.data;
   },
   deleteProject: async (id: string): Promise<void> => {
-    // API Contract: DELETE /api/v1/projects/{id}
-    return new Promise((resolve) => setTimeout(resolve, 500));
+    await apiClient.delete(`/projects/${id}`);
   }
 };

@@ -1,24 +1,23 @@
-import { mockConversation, mockDraft, Message, SRSData } from "@/features/requirements/mock-data";
+import { apiClient } from "./api";
+import { Message, SRSData } from "@/features/requirements/mock-data";
 
 export const RequirementsService = {
-  sendMessage: async (projectId: string, content: string): Promise<Message> => {
-    return new Promise(resolve => setTimeout(() => resolve({
-      id: Math.random().toString(),
-      role: 'user',
-      content,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    }), 500));
+  generateSrs: async (projectId: string): Promise<SRSData> => {
+    const response = await apiClient.post(`/projects/${projectId}/requirements/generate`, {});
+    return response.data;
   },
-  getDraft: async (projectId: string): Promise<SRSData> => {
-    return new Promise(resolve => setTimeout(() => resolve(mockDraft), 500));
+  getRequirements: async (projectId: string): Promise<SRSData[]> => {
+    const response = await apiClient.get(`/projects/${projectId}/requirements`);
+    return response.data?.items || [];
   },
-  updateDraft: async (projectId: string, sectionId: string, content: string): Promise<void> => {
-    return new Promise(resolve => setTimeout(resolve, 500));
+  getRequirement: async (requirementId: string): Promise<SRSData> => {
+    const response = await apiClient.get(`/requirements/${requirementId}`);
+    return response.data;
   },
-  approveDraft: async (projectId: string): Promise<void> => {
-    return new Promise(resolve => setTimeout(resolve, 2000));
+  updateRequirement: async (requirementId: string, content: string): Promise<void> => {
+    await apiClient.patch(`/requirements/${requirementId}`, { generated_content: content });
   },
-  getConversation: async (projectId: string): Promise<Message[]> => {
-    return new Promise(resolve => setTimeout(() => resolve(mockConversation), 500));
+  approveRequirement: async (requirementId: string): Promise<void> => {
+    await apiClient.post(`/requirements/${requirementId}/approve`, {});
   }
 };
