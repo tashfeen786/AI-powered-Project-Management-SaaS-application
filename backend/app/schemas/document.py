@@ -1,23 +1,26 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
+from datetime import datetime
 import uuid
 
-class DocumentBase(BaseModel):
-    title: str
-    content: Optional[str] = None
-    type: str
+class DocumentUpdate(BaseModel):
+    filename: Optional[str] = None
 
-class DocumentCreate(DocumentBase):
-    project_id: uuid.UUID
-
-class DocumentUpdate(DocumentBase):
-    title: Optional[str] = None
-    type: Optional[str] = None
-
-class DocumentResponse(DocumentBase):
+class DocumentResponse(BaseModel):
     id: uuid.UUID
+    organization_id: uuid.UUID
     project_id: uuid.UUID
-    author_id: Optional[uuid.UUID]
+    uploaded_by_id: uuid.UUID
+    filename: str
+    original_filename: str
+    extension: str
+    mime_type: str
+    file_size: int
+    checksum: str
+    processing_status: str
+    parser_version: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
     
     class Config:
         from_attributes = True
