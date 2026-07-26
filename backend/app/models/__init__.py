@@ -5,6 +5,7 @@ from .project import Project
 from .task import Task
 from .document import Document
 from .activity import Activity
+from .embedding import DocumentEmbedding
 
 # For Alembic to discover all models easily
 __all__ = [
@@ -14,5 +15,6 @@ __all__ = [
     "Project",
     "Task",
     "Document",
-    "Activity"
+    "Activity",
+    "DocumentEmbedding"
 ]
