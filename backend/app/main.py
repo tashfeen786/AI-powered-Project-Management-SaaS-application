@@ -1,0 +1,56 @@
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+from app.api.v1 import api_router
+from app.core.config import settings
+from app.core.logging import setup_logging, logger
+from app.middleware.logging import LoggingMiddleware
+from app.utils.response import error_response
+
+setup_logging()
+
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
+)
+
+# CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # Adjust for production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Logging Middleware
+app.add_middleware(LoggingMiddleware)
+
+# Exception Handlers
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    errors = [{"loc": err["loc"], "msg": err["msg"], "type": err["type"]} for err in exc.errors()]
+    logger.warning("Validation error", path=request.url.path, errors=errors)
+    return JSONResponse(
+        status_code=422,
+        content=error_response("Validation Error", data=errors).model_dump()
+    )
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error("Unhandled exception", path=request.url.path, error=str(exc))
+    return JSONResponse(
+        status_code=500,
+        content=error_response("Internal Server Error").model_dump()
+    )
+
+# Routers
+app.include_router(api_router, prefix=settings.API_V1_STR)
+
+@app.get("/")
+@app.get("/health")
+async def health_check():
+    return {"status": "ok", "service": settings.PROJECT_NAME}
