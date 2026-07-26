@@ -1,5 +1,5 @@
-from fastapi import APIRouter
 from .auth import router as auth_router
+from .organizations import router as organizations_router
 from .projects import router as projects_router
 from .requirements import router as requirements_router
 from .planning import router as planning_router
@@ -14,6 +14,7 @@ from .copilot import router as copilot_router
 api_router = APIRouter()
 
 api_router.include_router(auth_router, prefix="/auth", tags=["Auth"])
+api_router.include_router(organizations_router, prefix="/organizations", tags=["Organizations"])
 api_router.include_router(projects_router, prefix="/projects", tags=["Projects"])
 api_router.include_router(requirements_router, prefix="/projects", tags=["Requirements"]) # specific paths are configured in router
 api_router.include_router(planning_router, prefix="/projects", tags=["Planning"])
