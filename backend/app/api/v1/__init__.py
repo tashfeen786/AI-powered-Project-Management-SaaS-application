@@ -15,6 +15,7 @@ from .task_generation import router as task_generation_router
 from .ai_insights import router as ai_insights_router
 from .websocket import router as websocket_router
 from .jobs import router as jobs_router
+from .health import router as health_router
 
 api_router = APIRouter()
 
@@ -35,3 +36,4 @@ api_router.include_router(task_generation_router, prefix="", tags=["Task Generat
 api_router.include_router(ai_insights_router, prefix="", tags=["AI Insights"])
 api_router.include_router(websocket_router, prefix="/ws", tags=["WebSocket"])
 api_router.include_router(jobs_router, prefix="/jobs", tags=["Background Jobs"])
+api_router.include_router(health_router, prefix="/health", tags=["Health"])

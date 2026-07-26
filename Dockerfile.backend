@@ -1,0 +1,30 @@
+FROM python:3.11-slim
+
+# Prevent python from writing pyc files to disc
+ENV PYTHONDONTWRITEBYTECODE 1
+# Prevent python from buffering stdout and stderr
+ENV PYTHONUNBUFFERED 1
+
+WORKDIR /app
+
+# Install system dependencies (required for pgvector / asyncpg / building native extensions)
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install python dependencies
+COPY backend/requirements.txt .
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Copy the actual application
+COPY backend /app/
+
+# Make the wait script executable
+RUN chmod +x /app/scripts/wait_for_db.py
+
+EXPOSE 8000
+
+# Start script running migrations then uvicorn
+CMD ["sh", "-c", "python scripts/wait_for_db.py && alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
