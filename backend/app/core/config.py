@@ -1,27 +1,38 @@
 import os
+from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional
+
+# Resolve .env from backend/ or project root
+_backend_dir = Path(__file__).resolve().parent.parent.parent  # backend/
+_env_file = _backend_dir / ".env"
+if not _env_file.exists():
+    _env_file = _backend_dir.parent / ".env"  # project root
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "AI Project Management SaaS"
     API_V1_STR: str = "/api/v1"
     
     # Security
-    JWT_SECRET: str = os.getenv("JWT_SECRET")
+    JWT_SECRET: str
     JWT_EXPIRE_MINUTES: int = 60 * 24 * 7 # 7 days
     ALGORITHM: str = "HS256"
     BACKEND_CORS_ORIGINS: list[str] = ["*"] # Override in prod: ["https://myapp.com"]
     
-    # Database
-    DATABASE_URL: str = os.getenv("DATABASE_URL")
+    # Database (Supabase PostgreSQL via asyncpg)
+    DATABASE_URL: str
     
-    # Redis
-    REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+    # Redis (local)
+    REDIS_URL: str = "redis://localhost:6379/0"
     
-    # AI Keys (Placeholders)
-    GROQ_API_KEY: Optional[str] = os.getenv("GROQ_API_KEY")
-    OPENAI_API_KEY: Optional[str] = os.getenv("OPENAI_API_KEY")
+    # AI Keys
+    GROQ_API_KEY: Optional[str] = None
+    OPENAI_API_KEY: Optional[str] = None
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=str(_env_file),
+        env_file_encoding="utf-8",
+        extra="ignore"
+    )
 
 settings = Settings()
