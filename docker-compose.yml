@@ -1,25 +1,7 @@
 version: "3.8"
 
 services:
-  db:
-    image: pgvector/pgvector:pg15
-    container_name: ai_pm_db
-    restart: always
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-ai_pm}
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-ai_pm}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - ai_pm_network
+
 
   redis:
     image: redis:7-alpine
@@ -44,8 +26,6 @@ services:
     container_name: ai_pm_backend
     restart: always
     depends_on:
-      db:
-        condition: service_healthy
       redis:
         condition: service_healthy
     env_file:
@@ -68,8 +48,6 @@ services:
     container_name: ai_pm_celery_worker
     restart: always
     depends_on:
-      db:
-        condition: service_healthy
       redis:
         condition: service_healthy
     env_file:
@@ -91,8 +69,6 @@ services:
     container_name: ai_pm_celery_beat
     restart: always
     depends_on:
-      db:
-        condition: service_healthy
       redis:
         condition: service_healthy
     env_file:
@@ -147,7 +123,6 @@ services:
       - ai_pm_network
 
 volumes:
-  postgres_data:
   redis_data:
 
 networks:
