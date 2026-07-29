@@ -1,44 +1,71 @@
 import { apiClient } from "./api";
 import { LoginValues } from "@/features/auth/schemas/login.schema";
 import { SignupValues } from "@/features/auth/schemas/signup.schema";
+import { Token, UserResponse, StandardResponse } from "@/types/api";
 
 export const AuthService = {
   login: async (data: LoginValues) => {
-    // API Contract: POST /api/v1/auth/login
-    // Assuming FastAPI expects OAuth2 Password Request Form, we send FormData
-    const formData = new FormData();
-    formData.append("username", data.email);
-    formData.append("password", data.password);
-    
-    const response = await apiClient.post("/auth/login", formData, { requireAuth: false });
-    
-    if (typeof window !== "undefined" && response.access_token) {
-      localStorage.setItem("token", response.access_token);
-    }
-    
-    return response;
-  },
-
-  signup: async (data: SignupValues) => {
-    // API Contract: POST /api/v1/auth/register
-    const response = await apiClient.post("/auth/register", {
+    // Backend expects JSON body: { email, password } via UserLogin schema
+    const response: StandardResponse<Token> = await apiClient.post("/auth/login", {
       email: data.email,
       password: data.password,
-      full_name: data.fullName
     }, { requireAuth: false });
+
+    if (typeof window !== "undefined" && response.data) {
+      localStorage.setItem("token", response.data.access_token);
+      if (response.data.refresh_token) {
+        localStorage.setItem("refresh_token", response.data.refresh_token);
+      }
+    }
+
     return response.data;
   },
 
-  logout: () => {
+  signup: async (data: SignupValues) => {
+    // Backend expects: { email, password, full_name, organization_name }
+    const response: StandardResponse<UserResponse> = await apiClient.post("/auth/register", {
+      email: data.email,
+      password: data.password,
+      full_name: data.fullName,
+      organization_name: data.organizationName,
+    }, { requireAuth: false });
+
+    return response.data;
+  },
+
+  refreshToken: async () => {
+    const refreshToken = typeof window !== "undefined" ? localStorage.getItem("refresh_token") : null;
+    if (!refreshToken) throw new Error("No refresh token available");
+
+    const response: StandardResponse<Token> = await apiClient.post("/auth/refresh", {
+      refresh_token: refreshToken,
+    }, { requireAuth: false });
+
+    if (typeof window !== "undefined" && response.data) {
+      localStorage.setItem("token", response.data.access_token);
+      if (response.data.refresh_token) {
+        localStorage.setItem("refresh_token", response.data.refresh_token);
+      }
+    }
+
+    return response.data;
+  },
+
+  logout: async () => {
+    try {
+      await apiClient.post("/auth/logout", {});
+    } catch {
+      // Ignore errors — clear tokens regardless
+    }
     if (typeof window !== "undefined") {
       localStorage.removeItem("token");
+      localStorage.removeItem("refresh_token");
       window.location.href = "/login";
     }
   },
 
-  getCurrentUser: async () => {
-    // API Contract: GET /api/v1/auth/me
-    const response = await apiClient.get("/auth/me");
-    return response.data;
-  }
+  getCurrentUser: async (): Promise<UserResponse | null> => {
+    const response: StandardResponse<UserResponse> = await apiClient.get("/auth/me");
+    return response.data ?? null;
+  },
 };

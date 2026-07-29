@@ -1,31 +1,45 @@
 import { apiClient } from "./api";
-import { Message } from "@/features/copilot/mock-data";
+import {
+  ConversationResponse,
+  ConversationDetailResponse,
+  MessageResponse,
+  StandardResponse,
+} from "@/types/api";
 
 export const CopilotService = {
-  createConversation: async (projectId?: string) => {
-    const response = await apiClient.post("/copilot/conversations", { project_id: projectId });
-    return response.data;
-  },
-  
-  getConversations: async () => {
-    const response = await apiClient.get("/copilot/conversations");
-    return response.data || [];
-  },
-
-  getConversationDetails: async (conversationId: string) => {
-    const response = await apiClient.get(`/copilot/conversations/${conversationId}`);
-    return response.data;
-  },
-  
-  sendMessage: async (conversationId: string, content: string): Promise<Message> => {
-    const response = await apiClient.post(`/copilot/chat`, {
-      conversation_id: conversationId,
-      content
+  createConversation: async (projectId?: string): Promise<ConversationResponse> => {
+    const response: StandardResponse<ConversationResponse> = await apiClient.post("/copilot/conversations", {
+      project_id: projectId || null,
     });
-    return response.data;
+    return response.data!;
   },
 
-  deleteConversation: async (conversationId: string) => {
+  getConversations: async (): Promise<ConversationResponse[]> => {
+    const response: StandardResponse<ConversationResponse[]> = await apiClient.get("/copilot/conversations");
+    return response.data ?? [];
+  },
+
+  getConversation: async (conversationId: string): Promise<ConversationDetailResponse> => {
+    const response: StandardResponse<ConversationDetailResponse> = await apiClient.get(
+      `/copilot/conversations/${conversationId}`
+    );
+    return response.data!;
+  },
+
+  // Alias for backward compat
+  getConversationDetails: async (conversationId: string): Promise<ConversationDetailResponse> => {
+    return CopilotService.getConversation(conversationId);
+  },
+
+  sendMessage: async (conversationId: string, content: string): Promise<MessageResponse> => {
+    const response: StandardResponse<MessageResponse> = await apiClient.post("/copilot/chat", {
+      conversation_id: conversationId,
+      content,
+    });
+    return response.data!;
+  },
+
+  deleteConversation: async (conversationId: string): Promise<void> => {
     await apiClient.delete(`/copilot/conversations/${conversationId}`);
-  }
+  },
 };

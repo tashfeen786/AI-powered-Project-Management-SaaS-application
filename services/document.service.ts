@@ -1,19 +1,39 @@
 import { apiClient } from "./api";
-import { ProjectDocument } from "@/features/documents/mock-data";
+import { DocumentResponse, PaginatedData, StandardResponse } from "@/types/api";
 
 export const DocumentService = {
-  getDocuments: async (projectId: string): Promise<ProjectDocument[]> => {
-    const response = await apiClient.get(`/projects/${projectId}/documents`);
-    return response.data || [];
+  getDocuments: async (projectId: string, params?: { page?: number; limit?: number; search?: string }): Promise<PaginatedData<DocumentResponse>> => {
+    const response: StandardResponse<PaginatedData<DocumentResponse>> = await apiClient.get(
+      `/projects/${projectId}/documents`,
+      params
+    );
+    return response.data ?? { items: [], total: 0, page: 1, limit: 20 };
   },
-  uploadDocument: async (projectId: string, file: File): Promise<ProjectDocument> => {
+
+  getDocument: async (documentId: string): Promise<DocumentResponse> => {
+    const response: StandardResponse<DocumentResponse> = await apiClient.get(`/documents/${documentId}`);
+    return response.data!;
+  },
+
+  uploadDocument: async (projectId: string, file: File): Promise<DocumentResponse> => {
     const formData = new FormData();
     formData.append("file", file);
-    
-    const response = await apiClient.post(`/projects/${projectId}/documents`, formData);
-    return response.data;
+
+    const response: StandardResponse<DocumentResponse> = await apiClient.post(
+      `/projects/${projectId}/documents`,
+      formData
+    );
+    return response.data!;
   },
+
+  renameDocument: async (documentId: string, filename: string): Promise<DocumentResponse> => {
+    const response: StandardResponse<DocumentResponse> = await apiClient.patch(`/documents/${documentId}`, {
+      filename,
+    });
+    return response.data!;
+  },
+
   deleteDocument: async (documentId: string): Promise<void> => {
     await apiClient.delete(`/documents/${documentId}`);
-  }
+  },
 };

@@ -1,23 +1,67 @@
 import { apiClient } from "./api";
-import { Message, SRSData } from "@/features/requirements/mock-data";
+import { RequirementResponse, PaginatedData, StandardResponse } from "@/types/api";
 
 export const RequirementsService = {
-  generateSrs: async (projectId: string): Promise<SRSData> => {
-    const response = await apiClient.post(`/projects/${projectId}/requirements/generate`, {});
-    return response.data;
+  generateSrs: async (projectId: string, additionalContext?: string): Promise<RequirementResponse> => {
+    const response: StandardResponse<RequirementResponse> = await apiClient.post(
+      `/projects/${projectId}/requirements/generate`,
+      { additional_context: additionalContext }
+    );
+    return response.data!;
   },
-  getRequirements: async (projectId: string): Promise<SRSData[]> => {
-    const response = await apiClient.get(`/projects/${projectId}/requirements`);
-    return response.data?.items || [];
+
+  getRequirements: async (projectId: string, params?: { page?: number; limit?: number }): Promise<PaginatedData<RequirementResponse>> => {
+    const response: StandardResponse<PaginatedData<RequirementResponse>> = await apiClient.get(
+      `/projects/${projectId}/requirements`,
+      params
+    );
+    return response.data ?? { items: [], total: 0, page: 1, limit: 10 };
   },
-  getRequirement: async (requirementId: string): Promise<SRSData> => {
-    const response = await apiClient.get(`/requirements/${requirementId}`);
-    return response.data;
+
+  getRequirement: async (requirementId: string): Promise<RequirementResponse> => {
+    const response: StandardResponse<RequirementResponse> = await apiClient.get(`/requirements/${requirementId}`);
+    return response.data!;
   },
-  updateRequirement: async (requirementId: string, content: string): Promise<void> => {
-    await apiClient.patch(`/requirements/${requirementId}`, { generated_content: content });
+
+  updateRequirement: async (requirementId: string, data: { generated_content?: any; status?: string }): Promise<RequirementResponse> => {
+    const response: StandardResponse<RequirementResponse> = await apiClient.patch(`/requirements/${requirementId}`, data);
+    return response.data!;
   },
+
+  deleteRequirement: async (requirementId: string): Promise<void> => {
+    await apiClient.delete(`/requirements/${requirementId}`);
+  },
+
+  // Aliases used by hooks and pages
+  getConversation: async (projectId: string): Promise<RequirementResponse[]> => {
+    // Reuse getRequirements — the conversation is derived from the requirement history
+    const data = await RequirementsService.getRequirements(projectId);
+    return data.items;
+  },
+
+  getDraft: async (projectId: string): Promise<RequirementResponse | null> => {
+    // Get the most recent requirement for this project as the "draft"
+    const data = await RequirementsService.getRequirements(projectId, { page: 1, limit: 1 });
+    return data.items.length > 0 ? data.items[0] : null;
+  },
+
+  updateDraft: async (projectId: string, sectionId: string, content: string): Promise<void> => {
+    // Get the latest requirement, then patch its content
+    const draft = await RequirementsService.getDraft(projectId);
+    if (draft) {
+      await RequirementsService.updateRequirement(draft.id, { generated_content: content });
+    }
+  },
+
+  approveDraft: async (projectId: string): Promise<void> => {
+    // Get the latest requirement, then approve it
+    const draft = await RequirementsService.getDraft(projectId);
+    if (draft) {
+      await apiClient.post(`/requirements/${draft.id}/approve`, {});
+    }
+  },
+
   approveRequirement: async (requirementId: string): Promise<void> => {
     await apiClient.post(`/requirements/${requirementId}/approve`, {});
-  }
+  },
 };

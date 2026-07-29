@@ -1,12 +1,17 @@
 import { apiClient } from "./api";
+import { StandardResponse } from "@/types/api";
 
+/**
+ * Settings service — Backend route: /settings (no org prefix, derived from JWT)
+ */
 export const SettingsService = {
-  getOrganizationSettings: async (orgId: string) => {
-    const response = await apiClient.get(`/organizations/${orgId}/settings`);
-    return response.data;
+  getSettings: async (): Promise<any> => {
+    const response: StandardResponse<any> = await apiClient.get("/settings");
+    return response.data ?? {};
   },
-  updateOrganizationSettings: async (orgId: string, settings: any) => {
-    const response = await apiClient.patch(`/organizations/${orgId}/settings`, settings);
-    return response.data;
-  }
+
+  updateSettings: async (settings: any): Promise<any> => {
+    const response: StandardResponse<any> = await apiClient.patch("/settings", settings);
+    return response.data ?? {};
+  },
 };

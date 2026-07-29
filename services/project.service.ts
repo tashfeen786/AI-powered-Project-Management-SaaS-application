@@ -1,25 +1,52 @@
 import { apiClient } from "./api";
-import { ProjectDetail } from "@/features/projects/mock-projects";
+import {
+  ProjectResponse,
+  ProjectCreate,
+  ProjectUpdate,
+  ProjectStatistics,
+  QuickAction,
+  PaginatedData,
+  StandardResponse,
+  ProjectQueryParams,
+} from "@/types/api";
 
 export const ProjectService = {
-  getProjects: async (): Promise<ProjectDetail[]> => {
-    const response = await apiClient.get('/projects');
-    // Assuming backend returns StandardResponse with data array
-    return response.data || [];
+  getProjects: async (params?: ProjectQueryParams): Promise<PaginatedData<ProjectResponse>> => {
+    const response: StandardResponse<PaginatedData<ProjectResponse>> = await apiClient.get("/projects", params);
+    return response.data ?? { items: [], total: 0, page: 1, limit: 10 };
   },
-  getProject: async (id: string): Promise<ProjectDetail> => {
-    const response = await apiClient.get(`/projects/${id}`);
-    return response.data;
+
+  getRecentProjects: async (limit: number = 5): Promise<ProjectResponse[]> => {
+    const response: StandardResponse<ProjectResponse[]> = await apiClient.get("/projects/recent", { limit });
+    return response.data ?? [];
   },
-  createProject: async (data: Partial<ProjectDetail>): Promise<ProjectDetail> => {
-    const response = await apiClient.post('/projects', data);
-    return response.data;
+
+  getStatistics: async (): Promise<ProjectStatistics> => {
+    const response: StandardResponse<ProjectStatistics> = await apiClient.get("/projects/statistics");
+    return response.data ?? { total: 0, planning: 0, active: 0, completed: 0, on_hold: 0 };
   },
-  updateProject: async (id: string, data: Partial<ProjectDetail>): Promise<ProjectDetail> => {
-    const response = await apiClient.patch(`/projects/${id}`, data);
-    return response.data;
+
+  getQuickActions: async (): Promise<QuickAction[]> => {
+    const response: StandardResponse<QuickAction[]> = await apiClient.get("/projects/quick-actions");
+    return response.data ?? [];
   },
+
+  getProject: async (id: string): Promise<ProjectResponse> => {
+    const response: StandardResponse<ProjectResponse> = await apiClient.get(`/projects/${id}`);
+    return response.data!;
+  },
+
+  createProject: async (data: ProjectCreate): Promise<ProjectResponse> => {
+    const response: StandardResponse<ProjectResponse> = await apiClient.post("/projects", data);
+    return response.data!;
+  },
+
+  updateProject: async (id: string, data: ProjectUpdate): Promise<ProjectResponse> => {
+    const response: StandardResponse<ProjectResponse> = await apiClient.patch(`/projects/${id}`, data);
+    return response.data!;
+  },
+
   deleteProject: async (id: string): Promise<void> => {
     await apiClient.delete(`/projects/${id}`);
-  }
+  },
 };
