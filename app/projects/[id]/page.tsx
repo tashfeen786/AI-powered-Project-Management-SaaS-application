@@ -8,20 +8,14 @@ import { ProjectSummary } from "@/components/projects/ProjectSummary";
 import { ProjectStats } from "@/components/projects/ProjectStats";
 import { ProjectMembers } from "@/components/projects/ProjectMembers";
 import { QuickActions } from "@/components/projects/QuickActions";
-import { mockProjectsDetail } from "@/features/projects/mock-projects";
+import { useProject } from "@/features/projects/hooks/useProject";
+
 import { Loader2, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 
 export default function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
-  const [isLoading, setIsLoading] = useState(true);
-  
-  const project = mockProjectsDetail.find(p => p.id === resolvedParams.id) || mockProjectsDetail[0];
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 300);
-    return () => clearTimeout(timer);
-  }, []);
+  const { data: project, isLoading } = useProject(resolvedParams.id);
 
   return (
     <AppLayout>
@@ -38,14 +32,14 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
           <div className="flex justify-center items-center h-64">
             <Loader2 className="w-6 h-6 animate-spin text-text-secondary" />
           </div>
-        ) : (
+        ) : project ? (
           <>
-            <ProjectHeader project={project} />
+            <ProjectHeader project={project as any} />
             <ProjectTabs>
               <div className="flex flex-col xl:flex-row gap-6 mt-6">
                 <div className="flex-1 space-y-6">
-                  <ProjectSummary summary={project.summary} />
-                  <ProjectStats tasks={project.tasks} />
+                  <ProjectSummary summary={project.description || "No description provided."} />
+                  <ProjectStats tasks={{ total: 0, completed: 0, inProgress: 0, pending: 0 } as any} />
                   <div className="bg-surface border border-border rounded-lg p-5">
                     <h3 className="text-sm font-semibold text-text-primary mb-4">Recent Activity</h3>
                     <p className="text-sm text-text-secondary">No recent activity for this project yet.</p>
@@ -53,11 +47,13 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                 </div>
                 <div className="w-full xl:w-80 space-y-6 shrink-0">
                   <QuickActions />
-                  <ProjectMembers members={project.members} />
+                  <ProjectMembers members={[]} />
                 </div>
               </div>
             </ProjectTabs>
           </>
+        ) : (
+          <div className="flex justify-center items-center h-64 text-text-secondary">Project not found</div>
         )}
       </div>
     </AppLayout>

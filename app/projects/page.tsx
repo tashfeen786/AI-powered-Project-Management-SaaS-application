@@ -4,17 +4,12 @@ import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ProjectGrid } from "@/components/projects/ProjectGrid";
 import { EmptyProjects } from "@/components/projects/EmptyProjects";
-import { ProjectGridSkeleton } from "@/components/projects/ProjectSkeleton";
-import { mockProjectsDetail } from "@/features/projects/mock-projects";
+import { useProjects } from "@/features/projects/hooks/useProjects";
 import { Plus, Search, Filter, ArrowUpDown } from "lucide-react";
 
 export default function ProjectsPage() {
-  const [isLoading, setIsLoading] = useState(true);
+  const { data, isLoading } = useProjects();
 
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 400);
-    return () => clearTimeout(timer);
-  }, []);
 
   return (
     <AppLayout>
@@ -54,10 +49,10 @@ export default function ProjectsPage() {
 
         {isLoading ? (
           <ProjectGridSkeleton />
-        ) : mockProjectsDetail.length === 0 ? (
+        ) : (!data?.items || data.items.length === 0) ? (
           <EmptyProjects />
         ) : (
-          <ProjectGrid projects={mockProjectsDetail} />
+          <ProjectGrid projects={data.items as any} />
         )}
       </div>
     </AppLayout>

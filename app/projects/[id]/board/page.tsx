@@ -7,7 +7,7 @@ import { KanbanBoard } from "@/components/board/KanbanBoard";
 import { BoardSkeleton } from "@/components/board/BoardSkeleton";
 import { useTasks } from "@/features/tasks/hooks/useTasks";
 import { useUpdateTask } from "@/features/tasks/hooks/useUpdateTask";
-import { TaskStatus } from "@/features/tasks/mock-data";
+import { TaskStatus } from "@/types/api";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -74,7 +74,7 @@ export default function KanbanBoardPage({ params }: { params: Promise<{ id: stri
         <div className="flex-1 min-h-0 relative">
           {isLoading ? (
             <BoardSkeleton />
-          ) : !tasks || tasks.length === 0 ? (
+          ) : !tasks?.items || tasks.items.length === 0 ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8 bg-surface border border-dashed border-border rounded-lg">
               <div className="w-16 h-16 rounded-full bg-background flex items-center justify-center mb-4">
                 <svg className="w-8 h-8 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -87,7 +87,7 @@ export default function KanbanBoardPage({ params }: { params: Promise<{ id: stri
               </p>
             </div>
           ) : (
-            <KanbanBoard tasks={tasks} onUpdateTaskStatus={handleUpdateTaskStatus} />
+            <KanbanBoard tasks={tasks.items as any} onUpdateTaskStatus={handleUpdateTaskStatus} />
           )}
         </div>
         

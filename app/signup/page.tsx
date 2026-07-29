@@ -7,6 +7,9 @@ import { useState } from "react";
 import Link from "next/link";
 
 import { signupSchema, SignupValues } from "@/features/auth/schemas/signup.schema";
+import { AuthService } from "@/services/auth.service";
+import { useRouter } from "next/navigation";
+
 import { AuthCard } from "@/components/auth/AuthCard";
 import { AuthHeader } from "@/components/auth/AuthHeader";
 import { AuthInput } from "@/components/auth/AuthInput";
@@ -17,6 +20,8 @@ import { AuthFooter } from "@/components/auth/AuthFooter";
 
 export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
   
   const { register, handleSubmit, formState: { errors } } = useForm<SignupValues>({
     resolver: zodResolver(signupSchema),
@@ -31,10 +36,17 @@ export default function SignupPage() {
 
   const onSubmit = async (data: SignupValues) => {
     setIsLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    console.log("Signup data:", data);
-    setIsLoading(false);
+    try {
+      await AuthService.signup(data);
+      // Auto-login after signup
+      await AuthService.login({ email: data.email, password: data.password });
+      router.push("/dashboard");
+    } catch (error) {
+      console.error("Signup failed", error);
+      alert(error instanceof Error ? error.message : "Signup failed");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

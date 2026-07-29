@@ -9,16 +9,13 @@ import { TaskTable } from "@/components/dashboard/TaskTable";
 import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
 import { NotificationWidget } from "@/components/dashboard/NotificationWidget";
 import { SkeletonDashboard } from "@/components/dashboard/SkeletonDashboard";
-import { mockProjects, mockTasks, mockActivities, mockNotifications } from "@/features/dashboard/mockData";
 import { FolderKanban, RotateCw, CheckCircle2, ListTodo, Plus } from "lucide-react";
+import { useDashboard } from "@/features/dashboard/hooks/useDashboard";
+
 
 export default function DashboardPage() {
-  const [isLoading, setIsLoading] = useState(true);
+  const { data, isLoading } = useDashboard();
 
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
 
   return (
     <AppLayout>
@@ -31,10 +28,10 @@ export default function DashboardPage() {
             
             {/* Quick Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <StatsCard title="Projects" value={12} icon={FolderKanban} delay={0.0} />
-              <StatsCard title="Active Sprint" value={3} icon={RotateCw} delay={0.05} />
-              <StatsCard title="Pending Tasks" value={18} icon={ListTodo} delay={0.1} />
-              <StatsCard title="Completed" value={146} icon={CheckCircle2} delay={0.15} />
+              <StatsCard title="Total Projects" value={data?.stats?.total || 0} icon={FolderKanban} delay={0.0} />
+              <StatsCard title="Active Projects" value={data?.stats?.active || 0} icon={RotateCw} delay={0.05} />
+              <StatsCard title="Planning Phase" value={data?.stats?.planning || 0} icon={ListTodo} delay={0.1} />
+              <StatsCard title="Completed" value={data?.stats?.completed || 0} icon={CheckCircle2} delay={0.15} />
             </div>
             
             {/* Project Grid */}
@@ -42,7 +39,7 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-sm font-semibold text-text-primary">Projects Overview</h2>
               </div>
-              {mockProjects.length === 0 ? (
+              {(!data?.recentProjects || data.recentProjects.length === 0) ? (
                 <div className="w-full bg-surface border border-border rounded-lg border-dashed p-12 flex flex-col items-center justify-center text-center">
                   <div className="w-16 h-16 bg-background rounded-full flex items-center justify-center mb-4">
                     <FolderKanban className="w-8 h-8 text-text-secondary" />
@@ -56,8 +53,8 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {mockProjects.map((project, index) => (
-                    <ProjectCard key={project.id} project={project} index={index} />
+                  {data.recentProjects.map((project, index) => (
+                    <ProjectCard key={project.id} project={project as any} index={index} />
                   ))}
                 </div>
               )}
@@ -66,11 +63,11 @@ export default function DashboardPage() {
             {/* Bottom Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
-                <TaskTable tasks={mockTasks} />
+                <TaskTable tasks={[]} />
               </div>
               <div className="flex flex-col gap-6">
-                <ActivityTimeline activities={mockActivities} />
-                <NotificationWidget notifications={mockNotifications} />
+                <ActivityTimeline activities={[]} />
+                <NotificationWidget notifications={[]} />
               </div>
             </div>
           </>

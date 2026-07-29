@@ -11,7 +11,7 @@ import { EmptyDocuments } from "@/components/documents/EmptyDocuments";
 import { DocumentsSkeleton } from "@/components/documents/DocumentsSkeleton";
 import { DocumentPreview } from "@/components/documents/DocumentPreview";
 import { DeleteDocumentDialog } from "@/components/documents/DeleteDocumentDialog";
-import { ProjectDocument } from "@/features/documents/mock-data";
+import { DocumentResponse } from "@/types/api";
 import { useDocuments } from "@/features/documents/hooks/useDocuments";
 import { useUploadDocument } from "@/features/documents/hooks/useUploadDocument";
 import { useDeleteDocument } from "@/features/documents/hooks/useDeleteDocument";
@@ -30,7 +30,7 @@ export default function DocumentsWorkspacePage({ params }: { params: Promise<{ i
   const [showUpload, setShowUpload] = useState(false);
   const [activeUpload, setActiveUpload] = useState<{ file: File; progress: number } | null>(null);
   
-  const [selectedDoc, setSelectedDoc] = useState<ProjectDocument | null>(null);
+  const [selectedDoc, setSelectedDoc] = useState<DocumentResponse | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const handleUploadClick = () => {
@@ -141,10 +141,10 @@ export default function DocumentsWorkspacePage({ params }: { params: Promise<{ i
         <div className="mt-2">
           {isLoading ? (
             <DocumentsSkeleton />
-          ) : !documents || documents.length === 0 ? (
+          ) : !documents?.items || documents.items.length === 0 ? (
             <EmptyDocuments onUploadClick={() => setShowUpload(true)} />
           ) : (
-            <DocumentGrid documents={documents} onDocumentClick={setSelectedDoc} />
+            <DocumentGrid documents={documents.items as any} onDocumentClick={setSelectedDoc as any} />
           )}
         </div>
 
