@@ -1,6 +1,6 @@
 "use client";
 
-import { CopilotMessage } from "@/features/copilot/mock-data";
+import { MessageResponse } from "@/types/api";
 import { cn } from "@/lib/utils";
 import { Bot, User } from "lucide-react";
 import { motion } from "framer-motion";
@@ -8,8 +8,8 @@ import { SourceReference } from "./SourceReference";
 import { AIActionCard } from "./AIActionCard";
 import { AttachmentCard } from "./AttachmentCard";
 
-export function MessageBubble({ message }: { message: CopilotMessage }) {
-  const isAi = message.role === 'ai';
+export function MessageBubble({ message }: { message: MessageResponse }) {
+  const isAi = message.role === 'ai' || message.role === 'assistant';
 
   return (
     <motion.div 
@@ -33,36 +33,36 @@ export function MessageBubble({ message }: { message: CopilotMessage }) {
         </div>
 
         {/* Attachments (if any) */}
-        {message.attachments && message.attachments.length > 0 && (
+        {(message as any).attachments && (message as any).attachments.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-1">
-            {message.attachments.map(att => (
+            {(message as any).attachments.map((att: any) => (
               <AttachmentCard key={att.id} attachment={att} />
             ))}
           </div>
         )}
 
         {/* AI Actions (if any) */}
-        {message.actions && message.actions.length > 0 && (
+        {(message as any).actions && (message as any).actions.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-1">
-            {message.actions.map(action => (
+            {(message as any).actions.map((action: any) => (
               <AIActionCard key={action.id} action={action} />
             ))}
           </div>
         )}
 
         {/* AI Sources (if any) */}
-        {message.sources && message.sources.length > 0 && (
+        {(message as any).sources && (message as any).sources.length > 0 && (
           <div className="w-full mt-2 space-y-1.5">
             <div className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Sources</div>
             <div className="flex flex-wrap gap-2">
-              {message.sources.map(source => (
+              {(message as any).sources.map((source: any) => (
                 <SourceReference key={source.id} source={source} />
               ))}
             </div>
           </div>
         )}
 
-        <span className="text-[10px] text-text-secondary px-1 mt-1">{message.timestamp}</span>
+        <span className="text-[10px] text-text-secondary px-1 mt-1">{(message as any).timestamp || new Date(message.created_at || '').toLocaleTimeString()}</span>
       </div>
     </motion.div>
   );

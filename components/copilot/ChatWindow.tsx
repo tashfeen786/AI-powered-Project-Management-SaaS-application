@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import { CopilotMessage } from "@/features/copilot/mock-data";
+import { MessageResponse } from "@/types/api";
 import { MessageBubble } from "./MessageBubble";
 import { MessageInput } from "./MessageInput";
 import { AIThinkingCard } from "./AIThinkingCard";
@@ -9,7 +9,7 @@ import { EmptyConversation } from "./EmptyConversation";
 import { CopilotHeader } from "./CopilotHeader";
 
 interface ChatWindowProps {
-  messages: CopilotMessage[];
+  messages: MessageResponse[];
   isThinking: boolean;
   onSendMessage: (content: string) => void;
 }
