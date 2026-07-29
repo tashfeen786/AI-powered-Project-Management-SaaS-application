@@ -9,7 +9,6 @@ import { ApproveModal } from "@/components/requirements/ApproveModal";
 import { useConversation } from "@/features/requirements/hooks/useConversation";
 import { useDraft } from "@/features/requirements/hooks/useDraft";
 import { RequirementsService } from "@/services/requirements.service";
-import { Message, SRSData } from "@/features/requirements/mock-data";
 import { Loader2 } from "lucide-react";
 
 export default function RequirementsWorkspacePage({ params }: { params: Promise<{ id: string }> }) {
@@ -18,42 +17,54 @@ export default function RequirementsWorkspacePage({ params }: { params: Promise<
   const { data: initialMessages, isLoading: isMessagesLoading } = useConversation(resolvedParams.id);
   const { data: initialDraft, isLoading: isDraftLoading } = useDraft(resolvedParams.id);
   
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [draft, setDraft] = useState<SRSData | null>(null);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [draft, setDraft] = useState<any>(null);
   const [isAiTyping, setIsAiTyping] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   
   const [approvalStatus, setApprovalStatus] = useState<"idle" | "generating" | "success">("idle");
 
   useEffect(() => {
-    if (initialMessages) setMessages(initialMessages);
-    if (initialDraft) setDraft(initialDraft);
+    if (initialMessages) setMessages(initialMessages as any);
+    if (initialDraft) {
+      setDraft({ 
+        ...(initialDraft.generated_content || {}), 
+        aiStatus: initialDraft.status === 'approved' ? 'Ready' : 'Draft',
+        lastSaved: initialDraft.updated_at
+      });
+    }
   }, [initialMessages, initialDraft]);
 
   const handleSendMessage = async (text: string) => {
     // Optimistic UI for user message
-    const userMsg: Message = { id: Math.random().toString(), role: 'user', content: text, timestamp: 'Just now' };
+    const userMsg = { id: Math.random().toString(), role: 'user', content: text, timestamp: new Date().toISOString() };
     setMessages(prev => [...prev, userMsg]);
     setIsAiTyping(true);
     
-    // Simulate AI response
-    setTimeout(() => {
-      const aiMsg: Message = { id: Math.random().toString(), role: 'ai', content: "I'm analyzing your request and updating the draft now.", timestamp: 'Just now' };
-      setMessages(prev => [...prev, aiMsg]);
-      setIsAiTyping(false);
+    try {
+      // In a real app, this would call a chat endpoint that updates the draft
+      // For now, we simulate the AI response by updating the draft directly via the existing service
+      setIsSaving(true);
+      setDraft(prev => prev ? { ...prev, aiStatus: 'Updating Draft' } : prev);
       
-      // Simulate draft update
-      if (draft) {
-        setIsSaving(true);
-        setTimeout(() => {
-          setDraft(prev => prev ? { ...prev, aiStatus: 'Updating Draft' } : prev);
-          setTimeout(() => {
-            setDraft(prev => prev ? { ...prev, aiStatus: 'Ready', lastSaved: 'Just now' } : prev);
-            setIsSaving(false);
-          }, 1500);
-        }, 500);
-      }
-    }, 1200);
+      const updatedDraft = await RequirementsService.updateRequirement(initialDraft!.id, {
+        generated_content: { ...draft, _lastMessage: text }
+      });
+      
+      setDraft({
+        ...(updatedDraft.generated_content || {}),
+        aiStatus: 'Ready',
+        lastSaved: updatedDraft.updated_at
+      });
+      
+      const aiMsg = { id: Math.random().toString(), role: 'ai', content: "I've updated the draft based on your request.", timestamp: new Date().toISOString() };
+      setMessages(prev => [...prev, aiMsg]);
+    } catch (error) {
+      console.error("Failed to update requirements", error);
+    } finally {
+      setIsAiTyping(false);
+      setIsSaving(false);
+    }
   };
 
   const handleUpdateSection = async (id: string, content: string) => {
@@ -112,7 +123,7 @@ export default function RequirementsWorkspacePage({ params }: { params: Promise<
           <div className="flex-1 md:w-[45%] md:flex-none flex flex-col min-h-0">
             <ConversationPanel 
               messages={messages} 
-              documents={draft.documents} 
+              documents={draft?.documents || []} 
               onSendMessage={handleSendMessage} 
               isTyping={isAiTyping} 
             />

@@ -12,7 +12,7 @@ import { BillingCard } from "@/components/settings/BillingCard";
 import { DangerZone } from "@/components/settings/DangerZone";
 import { SaveBar } from "@/components/settings/SaveBar";
 import { SettingsSkeleton } from "@/components/settings/SettingsSkeleton";
-import { OrganizationSettings } from "@/features/settings/mock-data";
+import { SettingsData } from "@/types/api";
 import { useSettings } from "@/features/settings/hooks/useSettings";
 import { useUpdateSettings } from "@/features/settings/hooks/useUpdateSettings";
 
@@ -20,7 +20,7 @@ export default function SettingsPage() {
   const { data: serverSettings, isLoading } = useSettings();
   const { mutate: updateSettings, isPending: isSaving } = useUpdateSettings();
 
-  const [localSettings, setLocalSettings] = useState<OrganizationSettings | null>(null);
+  const [localSettings, setLocalSettings] = useState<SettingsData | null>(null);
   const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
@@ -31,7 +31,7 @@ export default function SettingsPage() {
 
   const hasChanges = serverSettings && localSettings && JSON.stringify(serverSettings) !== JSON.stringify(localSettings);
 
-  const handleChange = (updates: Partial<OrganizationSettings>) => {
+  const handleChange = (updates: Partial<SettingsData>) => {
     if (!localSettings) return;
     setLocalSettings({ ...localSettings, ...updates });
     setIsSaved(false);

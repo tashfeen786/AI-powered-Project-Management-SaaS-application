@@ -15,7 +15,7 @@ import { useMembers } from "@/features/team/hooks/useMembers";
 import { useInviteMember } from "@/features/team/hooks/useInviteMember";
 import { useUpdateRole } from "@/features/team/hooks/useUpdateRole";
 import { useDeleteMember } from "@/features/team/hooks/useDeleteMember";
-import { TeamMember, TeamRole } from "@/features/team/mock-data";
+import { TeamMemberResponse, TeamRole } from "@/types/api";
 
 export default function TeamManagementPage() {
   const { data: members, isLoading } = useMembers();
@@ -24,7 +24,7 @@ export default function TeamManagementPage() {
   const { mutate: deleteMember, isPending: isRemoving } = useDeleteMember();
 
   const [isInviteOpen, setIsInviteOpen] = useState(false);
-  const [memberToRemove, setMemberToRemove] = useState<TeamMember | null>(null);
+  const [memberToRemove, setMemberToRemove] = useState<TeamMemberResponse | null>(null);
 
   const handleInvite = (email: string, role: TeamRole) => {
     inviteMember({ email, role }, {

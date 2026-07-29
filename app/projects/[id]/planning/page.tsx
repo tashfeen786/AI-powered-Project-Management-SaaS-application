@@ -9,8 +9,6 @@ import { ApproveModal } from "@/components/requirements/ApproveModal";
 import { usePlanningConversation } from "@/features/planning/hooks/usePlanningConversation";
 import { usePlanningDraft } from "@/features/planning/hooks/usePlanningDraft";
 import { PlanningService } from "@/services/planning.service";
-import { Message } from "@/features/requirements/mock-data";
-import { PlanningData } from "@/features/planning/mock-data";
 import { Loader2, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 
@@ -20,8 +18,8 @@ export default function PlanningWorkspacePage({ params }: { params: Promise<{ id
   const { data: initialMessages, isLoading: isMessagesLoading } = usePlanningConversation(resolvedParams.id);
   const { data: initialDraft, isLoading: isDraftLoading } = usePlanningDraft(resolvedParams.id);
   
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [draft, setDraft] = useState<PlanningData | null>(null);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [draft, setDraft] = useState<any>(null);
   const [isAiTyping, setIsAiTyping] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   
@@ -29,30 +27,42 @@ export default function PlanningWorkspacePage({ params }: { params: Promise<{ id
 
   useEffect(() => {
     if (initialMessages) setMessages(initialMessages as any);
-    if (initialDraft) setDraft(initialDraft);
+    if (initialDraft) {
+      setDraft({
+        ...(initialDraft.generated_content || {}),
+        aiStatus: initialDraft.status === 'approved' ? 'Ready' : 'Draft',
+        lastSaved: initialDraft.updated_at
+      });
+    }
   }, [initialMessages, initialDraft]);
 
   const handleSendMessage = async (text: string) => {
-    const userMsg: Message = { id: Math.random().toString(), role: 'user', content: text, timestamp: 'Just now' };
+    const userMsg = { id: Math.random().toString(), role: 'user', content: text, timestamp: new Date().toISOString() };
     setMessages(prev => [...prev, userMsg]);
     setIsAiTyping(true);
     
-    setTimeout(() => {
-      const aiMsg: Message = { id: Math.random().toString(), role: 'ai', content: "I'm updating the sprint plan based on your feedback.", timestamp: 'Just now' };
-      setMessages(prev => [...prev, aiMsg]);
-      setIsAiTyping(false);
+    try {
+      setIsSaving(true);
+      setDraft(prev => prev ? { ...prev, aiStatus: 'Updating Draft' } : prev);
       
-      if (draft) {
-        setIsSaving(true);
-        setTimeout(() => {
-          setDraft(prev => prev ? { ...prev, aiStatus: 'Updating Draft' } : prev);
-          setTimeout(() => {
-            setDraft(prev => prev ? { ...prev, aiStatus: 'Ready', lastSaved: 'Just now' } : prev);
-            setIsSaving(false);
-          }, 1500);
-        }, 500);
-      }
-    }, 1200);
+      const updatedDraft = await PlanningService.updatePlan(initialDraft!.id, {
+        generated_content: { ...draft, _lastMessage: text }
+      });
+      
+      setDraft({
+        ...(updatedDraft.generated_content || {}),
+        aiStatus: 'Ready',
+        lastSaved: updatedDraft.updated_at
+      });
+      
+      const aiMsg = { id: Math.random().toString(), role: 'ai', content: "I've updated the sprint plan based on your feedback.", timestamp: new Date().toISOString() };
+      setMessages(prev => [...prev, aiMsg]);
+    } catch (error) {
+      console.error("Failed to update plan", error);
+    } finally {
+      setIsAiTyping(false);
+      setIsSaving(false);
+    }
   };
 
   const handleApprove = async () => {
