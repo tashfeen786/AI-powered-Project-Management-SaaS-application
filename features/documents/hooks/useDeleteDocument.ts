@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { DocumentService } from "@/services/document.service";
-import { ProjectDocument } from "@/features/documents/mock-data";
+import { DocumentResponse, PaginatedData } from "@/types/api";
 
 export function useDeleteDocument(projectId: string) {
   const queryClient = useQueryClient();
@@ -9,19 +9,23 @@ export function useDeleteDocument(projectId: string) {
     mutationFn: (documentId: string) => DocumentService.deleteDocument(documentId),
     onMutate: async (documentId) => {
       await queryClient.cancelQueries({ queryKey: ["documents", projectId] });
-      const previousDocs = queryClient.getQueryData<ProjectDocument[]>(["documents", projectId]);
+      const previousData = queryClient.getQueryData<PaginatedData<DocumentResponse>>(["documents", projectId]);
       
-      if (previousDocs) {
-        queryClient.setQueryData<ProjectDocument[]>(
+      if (previousData) {
+        queryClient.setQueryData<PaginatedData<DocumentResponse>>(
           ["documents", projectId],
-          previousDocs.filter(d => d.id !== documentId)
+          {
+            ...previousData,
+            items: previousData.items.filter(d => d.id !== documentId),
+            total: previousData.total - 1,
+          }
         );
       }
-      return { previousDocs };
+      return { previousData };
     },
     onError: (err, variables, context) => {
-      if (context?.previousDocs) {
-        queryClient.setQueryData(["documents", projectId], context.previousDocs);
+      if (context?.previousData) {
+        queryClient.setQueryData(["documents", projectId], context.previousData);
       }
     },
     onSettled: () => {

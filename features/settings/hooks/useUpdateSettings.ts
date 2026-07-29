@@ -1,18 +1,17 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { SettingsService } from "@/services/settings.service";
-import { OrganizationSettings } from "@/features/settings/mock-data";
 
 export function useUpdateSettings() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (updates: Partial<OrganizationSettings>) => SettingsService.updateSettings(updates),
+    mutationFn: (updates: any) => SettingsService.updateSettings(updates),
     onMutate: async (updates) => {
       await queryClient.cancelQueries({ queryKey: ["settings"] });
-      const previousSettings = queryClient.getQueryData<OrganizationSettings>(["settings"]);
+      const previousSettings = queryClient.getQueryData<any>(["settings"]);
       
       if (previousSettings) {
-        queryClient.setQueryData<OrganizationSettings>(
+        queryClient.setQueryData<any>(
           ["settings"],
           { ...previousSettings, ...updates }
         );

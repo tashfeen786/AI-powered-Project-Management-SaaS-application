@@ -1,20 +1,20 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TeamService } from "@/services/team.service";
-import { TeamMember, TeamRole } from "@/features/team/mock-data";
+import { TeamMemberResponse } from "@/types/api";
 
 export function useUpdateRole() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, role }: { id: string; role: TeamRole }) => TeamService.updateRole(id, role),
+    mutationFn: ({ id, role }: { id: string; role: string }) => TeamService.updateRole(id, role),
     onMutate: async ({ id, role }) => {
       await queryClient.cancelQueries({ queryKey: ["teamMembers"] });
-      const previousMembers = queryClient.getQueryData<TeamMember[]>(["teamMembers"]);
+      const previousMembers = queryClient.getQueryData<TeamMemberResponse[]>(["teamMembers"]);
       
       if (previousMembers) {
-        queryClient.setQueryData<TeamMember[]>(
+        queryClient.setQueryData<TeamMemberResponse[]>(
           ["teamMembers"],
-          previousMembers.map(m => m.id === id ? { ...m, role } : m)
+          previousMembers.map(m => m.id === id ? { ...m, role: role as any } : m)
         );
       }
       return { previousMembers };

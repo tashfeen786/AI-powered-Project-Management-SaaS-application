@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TeamService } from "@/services/team.service";
-import { TeamMember } from "@/features/team/mock-data";
+import { TeamMemberResponse } from "@/types/api";
 
 export function useDeleteMember() {
   const queryClient = useQueryClient();
@@ -9,10 +9,10 @@ export function useDeleteMember() {
     mutationFn: (id: string) => TeamService.deleteMember(id),
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: ["teamMembers"] });
-      const previousMembers = queryClient.getQueryData<TeamMember[]>(["teamMembers"]);
+      const previousMembers = queryClient.getQueryData<TeamMemberResponse[]>(["teamMembers"]);
       
       if (previousMembers) {
-        queryClient.setQueryData<TeamMember[]>(
+        queryClient.setQueryData<TeamMemberResponse[]>(
           ["teamMembers"],
           previousMembers.filter(m => m.id !== id)
         );

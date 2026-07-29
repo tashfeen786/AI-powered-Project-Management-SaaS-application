@@ -1,14 +1,14 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TeamService } from "@/services/team.service";
-import { TeamMember, TeamRole } from "@/features/team/mock-data";
+import { TeamMemberResponse } from "@/types/api";
 
 export function useInviteMember() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ email, role }: { email: string; role: TeamRole }) => TeamService.inviteMember(email, role),
+    mutationFn: ({ email, role }: { email: string; role: string }) => TeamService.inviteMember(email, role),
     onSuccess: (newMember) => {
-      queryClient.setQueryData<TeamMember[]>(["teamMembers"], (old = []) => [
+      queryClient.setQueryData<TeamMemberResponse[]>(["teamMembers"], (old = []) => [
         ...old,
         newMember
       ]);
