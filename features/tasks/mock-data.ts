@@ -32,4 +32,4 @@ export interface Task {
   activity: Activity[];
 }
 
-export const mockDataRemoved = [];
+

@@ -18,4 +18,4 @@ export interface ProjectDetail {
   summary: string;
 }
 
-export const mockDataRemoved = [];
+

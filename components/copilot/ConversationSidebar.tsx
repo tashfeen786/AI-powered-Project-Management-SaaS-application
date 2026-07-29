@@ -1,20 +1,20 @@
 "use client";
 
-import { CopilotConversation } from "@/features/copilot/mock-data";
+import { ConversationResponse } from "@/types/api";
 import { ConversationItem } from "./ConversationItem";
 import { ConversationSearch } from "./ConversationSearch";
 import { Plus } from "lucide-react";
 
 interface ConversationSidebarProps {
-  conversations: CopilotConversation[];
+  conversations: ConversationResponse[];
   activeId: string | null;
   onSelect: (id: string) => void;
   onNewChat: () => void;
 }
 
 export function ConversationSidebar({ conversations, activeId, onSelect, onNewChat }: ConversationSidebarProps) {
-  const pinned = conversations.filter(c => c.isPinned);
-  const recent = conversations.filter(c => !c.isPinned);
+  const pinned = conversations.filter((c: any) => c.isPinned);
+  const recent = conversations.filter((c: any) => !c.isPinned);
 
   return (
     <div className="w-full md:w-[280px] h-full flex flex-col bg-surface border-r border-border shrink-0">

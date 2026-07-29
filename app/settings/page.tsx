@@ -65,7 +65,7 @@ export default function SettingsPage() {
             <AppearanceSettings settings={localSettings} onChange={handleChange} />
             <NotificationSettings settings={localSettings} onChange={handleChange} />
             <AISettings settings={localSettings} onChange={handleChange} />
-            <BillingCard />
+            <BillingCard settings={localSettings} />
             <DangerZone />
           </div>
         )}

@@ -1,11 +1,11 @@
 "use client";
 
-import { CopilotConversation } from "@/features/copilot/mock-data";
 import { MessageSquare, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ConversationResponse } from "@/types/api";
 
 interface ConversationItemProps {
-  conversation: CopilotConversation;
+  conversation: ConversationResponse;
   isActive: boolean;
   onClick: () => void;
 }
@@ -15,18 +15,14 @@ export function ConversationItem({ conversation, isActive, onClick }: Conversati
     <div 
       onClick={onClick}
       className={cn(
-        "group flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors",
-        isActive ? "bg-primary/10 text-primary" : "text-text-secondary hover:bg-background hover:text-text-primary"
+        "group flex flex-col p-3 rounded-md cursor-pointer transition-colors border border-transparent",
+        isActive ? "bg-primary/5 border-primary/20" : "hover:bg-background hover:border-border"
       )}
     >
-      <div className="flex items-center gap-2.5 overflow-hidden">
-        <MessageSquare className="w-4 h-4 shrink-0" />
-        <span className={cn("text-sm truncate", isActive ? "font-medium" : "")}>
-          {conversation.title}
-        </span>
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-sm font-medium text-text-primary line-clamp-1">{conversation.title || "New Chat"}</span>
+        <span className="text-[10px] text-text-secondary whitespace-nowrap ml-2">{(conversation as any).updatedAt}</span>
       </div>
-      <button className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-background transition-opacity shrink-0">
-        <MoreHorizontal className="w-4 h-4" />
       </button>
     </div>
   );

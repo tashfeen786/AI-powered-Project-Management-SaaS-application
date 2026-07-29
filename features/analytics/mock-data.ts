@@ -57,4 +57,4 @@ export interface AnalyticsData {
   recentAIEvents: AIEvent[];
 }
 
-export const mockDataRemoved = {};
+

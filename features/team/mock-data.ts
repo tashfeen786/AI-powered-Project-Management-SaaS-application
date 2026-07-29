@@ -12,4 +12,4 @@ export interface TeamMember {
   status: MemberStatus;
 }
 
-export const mockDataRemoved = [];
+

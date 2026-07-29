@@ -11,4 +11,4 @@ export interface ProjectDocument {
   url: string;
 }
 
-export const mockDataRemoved = [];
+

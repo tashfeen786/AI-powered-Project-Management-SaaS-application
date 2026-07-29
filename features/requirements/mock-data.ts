@@ -34,6 +34,6 @@ export interface SRSData {
   documents: Document[];
 }
 
-export const mockDataRemoved = [];
 
-export const mockDataRemoved = {};
+
+

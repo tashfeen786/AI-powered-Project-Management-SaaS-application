@@ -60,6 +60,6 @@ export interface PlanningData {
   team: TeamRecommendation;
 }
 
-export const mockDataRemoved = [];
 
-export const mockDataRemoved = {};
+
+

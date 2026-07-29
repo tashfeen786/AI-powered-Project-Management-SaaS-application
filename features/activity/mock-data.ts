@@ -19,4 +19,4 @@ export interface ActivityLog {
   documentRef?: string;
 }
 
-export const mockDataRemoved = [];
+

@@ -34,7 +34,7 @@ export interface CopilotMessage {
   attachments?: CopilotAttachment[];
 }
 
-export const mockDataRemoved = [];
+
 
 export const mockMessages: Record<string, CopilotMessage[]> = {
   'c1': [
