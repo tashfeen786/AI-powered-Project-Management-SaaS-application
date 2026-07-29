@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { TeamRole } from "@/features/team/mock-data";
+import { TeamRole } from "@/types/api";
 import { Mail, Loader2, X } from "lucide-react";
 
 interface InviteMemberDialogProps {
@@ -14,7 +14,7 @@ interface InviteMemberDialogProps {
 
 export function InviteMemberDialog({ isOpen, onClose, onInvite, isInviting }: InviteMemberDialogProps) {
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<TeamRole>("Developer");
+  const [role, setRole] = useState<TeamRole>("developer");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,10 +68,10 @@ export function InviteMemberDialog({ isOpen, onClose, onInvite, isInviting }: In
                   onChange={(e) => setRole(e.target.value as TeamRole)}
                   className="w-full h-9 px-3 bg-background border border-border rounded-md text-sm text-text-primary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 >
-                  <option value="Developer">Developer</option>
-                  <option value="Project Manager">Project Manager</option>
-                  <option value="Designer">Designer</option>
-                  <option value="QA">QA</option>
+                  <option value="developer">Developer</option>
+                  <option value="project_manager">Project Manager</option>
+                  <option value="designer">Designer</option>
+                  <option value="qa">QA</option>
                 </select>
               </div>
 

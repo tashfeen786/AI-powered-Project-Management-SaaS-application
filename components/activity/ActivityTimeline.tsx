@@ -1,6 +1,6 @@
 "use client";
 
-import { ActivityLog } from "@/features/activity/mock-data";
+import { ActivityLog } from "@/types/api";
 import { ActivityItem } from "./ActivityItem";
 import { motion } from "framer-motion";
 

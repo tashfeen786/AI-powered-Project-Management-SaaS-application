@@ -45,7 +45,7 @@ export default function RequirementsWorkspacePage({ params }: { params: Promise<
       // In a real app, this would call a chat endpoint that updates the draft
       // For now, we simulate the AI response by updating the draft directly via the existing service
       setIsSaving(true);
-      setDraft(prev => prev ? { ...prev, aiStatus: 'Updating Draft' } : prev);
+      setDraft((prev: any) => prev ? { ...prev, aiStatus: 'Updating Draft' } : prev);
       
       const updatedDraft = await RequirementsService.updateRequirement(initialDraft!.id, {
         generated_content: { ...draft, _lastMessage: text }
@@ -71,11 +71,11 @@ export default function RequirementsWorkspacePage({ params }: { params: Promise<
     if (!draft) return;
     setIsSaving(true);
     // Optimistic update
-    setDraft(prev => {
+    setDraft((prev: any) => {
       if (!prev) return prev;
       return {
         ...prev,
-        sections: prev.sections.map(s => s.id === id ? { ...s, content } : s)
+        sections: prev.sections.map((s: any) => s.id === id ? { ...s, content } : s)
       };
     });
     

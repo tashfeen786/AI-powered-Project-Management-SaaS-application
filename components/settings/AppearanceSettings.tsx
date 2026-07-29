@@ -1,11 +1,11 @@
 "use client";
 
-import { OrganizationSettings } from "@/features/settings/mock-data";
+import { SettingsData } from "@/types/api";
 import { Monitor, Sun, Moon } from "lucide-react";
 
 interface AppearanceSettingsProps {
-  settings: OrganizationSettings;
-  onChange: (updates: Partial<OrganizationSettings>) => void;
+  settings: SettingsData;
+  onChange: (updates: any) => void;
 }
 
 export function AppearanceSettings({ settings, onChange }: AppearanceSettingsProps) {
@@ -27,7 +27,7 @@ export function AppearanceSettings({ settings, onChange }: AppearanceSettingsPro
           <div className="flex gap-4">
             {themes.map((theme) => {
               const Icon = theme.icon;
-              const isActive = settings.theme === theme.id;
+              const isActive = ((settings as any).theme || (settings as any).appearance?.theme) === theme.id;
               return (
                 <button
                   key={theme.id}
@@ -60,10 +60,10 @@ export function AppearanceSettings({ settings, onChange }: AppearanceSettingsPro
             <div className="text-xs text-text-secondary">Reduce padding across all tables and lists.</div>
           </div>
           <button 
-            onClick={() => onChange({ compactMode: !settings.compactMode })}
-            className={`w-9 h-5 rounded-full transition-colors relative ${settings.compactMode ? 'bg-primary' : 'bg-[#E5E5E5]'}`}
+            onClick={() => onChange({ compactMode: !((settings as any).compactMode || (settings as any).appearance?.compactMode) })}
+            className={`w-9 h-5 rounded-full transition-colors relative ${((settings as any).compactMode || (settings as any).appearance?.compactMode) ? 'bg-primary' : 'bg-[#E5E5E5]'}`}
           >
-            <div className={`w-4 h-4 rounded-full bg-white absolute top-0.5 transition-all shadow-sm ${settings.compactMode ? 'left-[18px]' : 'left-0.5'}`} />
+            <div className={`w-4 h-4 rounded-full bg-white absolute top-0.5 transition-all shadow-sm ${((settings as any).compactMode || (settings as any).appearance?.compactMode) ? 'left-[18px]' : 'left-0.5'}`} />
           </button>
         </div>
       </div>

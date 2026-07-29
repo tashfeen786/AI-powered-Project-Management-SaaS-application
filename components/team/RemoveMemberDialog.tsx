@@ -2,10 +2,10 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertTriangle, Loader2 } from "lucide-react";
-import { TeamMember } from "@/features/team/mock-data";
+import { TeamMemberResponse } from "@/types/api";
 
 interface RemoveMemberDialogProps {
-  member: TeamMember | null;
+  member: TeamMemberResponse | null;
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
@@ -34,7 +34,7 @@ export function RemoveMemberDialog({ member, isOpen, onClose, onConfirm, isRemov
               </div>
               <h3 className="text-lg font-bold text-text-primary mb-2">Remove Member?</h3>
               <p className="text-sm text-text-secondary mb-6">
-                Are you sure you want to remove <span className="font-semibold text-text-primary">{member.name}</span> from the organization? They will lose access to all projects.
+                Are you sure you want to remove <span className="font-semibold text-text-primary">{member.full_name || member.email}</span> from the organization? They will lose access to all projects.
               </p>
               <div className="flex gap-3 w-full">
                 <button 

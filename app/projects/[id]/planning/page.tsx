@@ -43,7 +43,7 @@ export default function PlanningWorkspacePage({ params }: { params: Promise<{ id
     
     try {
       setIsSaving(true);
-      setDraft(prev => prev ? { ...prev, aiStatus: 'Updating Draft' } : prev);
+      setDraft((prev: any) => prev ? { ...prev, aiStatus: 'Updating Draft' } : prev);
       
       const updatedDraft = await PlanningService.updatePlan(initialDraft!.id, {
         generated_content: { ...draft, _lastMessage: text }

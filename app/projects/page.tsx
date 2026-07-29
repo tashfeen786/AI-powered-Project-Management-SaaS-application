@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ProjectGrid } from "@/components/projects/ProjectGrid";
+import { ProjectGridSkeleton } from "@/components/projects/ProjectSkeleton";
 import { EmptyProjects } from "@/components/projects/EmptyProjects";
 import { useProjects } from "@/features/projects/hooks/useProjects";
 import { Plus, Search, Filter, ArrowUpDown } from "lucide-react";

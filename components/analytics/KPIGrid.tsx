@@ -6,7 +6,7 @@ export function KPIGrid({ kpis }: { kpis: KPIStats }) {
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
       <KPICard title="Total Projects" value={kpis.totalProjects} delay={0.05} />
       <KPICard title="Active Projects" value={kpis.activeProjects} trend="+2" trendDirection="up" delay={0.1} />
-      <KPICard title="Delayed Projects" value={kpis.delayedProjects} trend="-1" trendDirection="success" delay={0.15} />
+      <KPICard title="Delayed Projects" value={kpis.delayedProjects} trend="-1" trendDirection="up" delay={0.15} />
       <KPICard title="Completed Projects" value={kpis.completedProjects} delay={0.2} />
       
       <KPICard title="AI Generated Docs" value={kpis.aiGeneratedDocs} trend="+12%" trendDirection="up" delay={0.25} />

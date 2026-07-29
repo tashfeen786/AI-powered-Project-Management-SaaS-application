@@ -1,11 +1,11 @@
 "use client";
 
-import { OrganizationSettings } from "@/features/settings/mock-data";
+import { SettingsData } from "@/types/api";
 import { Sparkles } from "lucide-react";
 
 interface AISettingsProps {
-  settings: OrganizationSettings;
-  onChange: (updates: Partial<OrganizationSettings>) => void;
+  settings: SettingsData;
+  onChange: (updates: any) => void;
 }
 
 export function AISettings({ settings, onChange }: AISettingsProps) {
@@ -21,7 +21,7 @@ export function AISettings({ settings, onChange }: AISettingsProps) {
           <div>
             <label className="block text-sm font-medium text-text-primary mb-1.5">Default AI Provider</label>
             <select
-              value={settings.aiProvider}
+              value={(settings as any).aiProvider || (settings as any).ai?.provider || "OpenAI"}
               onChange={(e) => onChange({ aiProvider: e.target.value })}
               className="w-full h-9 px-3 bg-background border border-border rounded-md text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
             >
@@ -33,7 +33,7 @@ export function AISettings({ settings, onChange }: AISettingsProps) {
           <div>
             <label className="block text-sm font-medium text-text-primary mb-1.5">Default Model</label>
             <select
-              value={settings.aiModel}
+              value={(settings as any).aiModel || (settings as any).ai?.model || "gpt-4o"}
               onChange={(e) => onChange({ aiModel: e.target.value })}
               className="w-full h-9 px-3 bg-background border border-border rounded-md text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
             >
@@ -50,10 +50,10 @@ export function AISettings({ settings, onChange }: AISettingsProps) {
             <div className="text-xs text-text-secondary">Automatically save the SRS document while AI is streaming.</div>
           </div>
           <button 
-            onClick={() => onChange({ autoSaveDraft: !settings.autoSaveDraft })}
-            className={`w-9 h-5 rounded-full transition-colors relative shrink-0 ${settings.autoSaveDraft ? 'bg-primary' : 'bg-[#E5E5E5]'}`}
+            onClick={() => onChange({ autoSaveDraft: !((settings as any).autoSaveDraft || (settings as any).ai?.autoSaveDraft) })}
+            className={`w-9 h-5 rounded-full transition-colors relative shrink-0 ${((settings as any).autoSaveDraft || (settings as any).ai?.autoSaveDraft) ? 'bg-primary' : 'bg-[#E5E5E5]'}`}
           >
-            <div className={`w-4 h-4 rounded-full bg-white absolute top-0.5 transition-all shadow-sm ${settings.autoSaveDraft ? 'left-[18px]' : 'left-0.5'}`} />
+            <div className={`w-4 h-4 rounded-full bg-white absolute top-0.5 transition-all shadow-sm ${((settings as any).autoSaveDraft || (settings as any).ai?.autoSaveDraft) ? 'left-[18px]' : 'left-0.5'}`} />
           </button>
         </div>
 
@@ -63,22 +63,22 @@ export function AISettings({ settings, onChange }: AISettingsProps) {
             <div className="text-xs text-text-secondary">Show AI suggestions preemptively in text editors.</div>
           </div>
           <button 
-            onClick={() => onChange({ autoGenerateSuggestions: !settings.autoGenerateSuggestions })}
-            className={`w-9 h-5 rounded-full transition-colors relative shrink-0 ${settings.autoGenerateSuggestions ? 'bg-primary' : 'bg-[#E5E5E5]'}`}
+            onClick={() => onChange({ autoGenerateSuggestions: !((settings as any).autoGenerateSuggestions || (settings as any).ai?.autoGenerateSuggestions) })}
+            className={`w-9 h-5 rounded-full transition-colors relative shrink-0 ${((settings as any).autoGenerateSuggestions || (settings as any).ai?.autoGenerateSuggestions) ? 'bg-primary' : 'bg-[#E5E5E5]'}`}
           >
-            <div className={`w-4 h-4 rounded-full bg-white absolute top-0.5 transition-all shadow-sm ${settings.autoGenerateSuggestions ? 'left-[18px]' : 'left-0.5'}`} />
+            <div className={`w-4 h-4 rounded-full bg-white absolute top-0.5 transition-all shadow-sm ${((settings as any).autoGenerateSuggestions || (settings as any).ai?.autoGenerateSuggestions) ? 'left-[18px]' : 'left-0.5'}`} />
           </button>
         </div>
 
         <div className="pt-6 border-t border-border">
           <div className="flex justify-between items-center mb-4">
             <label className="block text-sm font-medium text-text-primary">Confidence Threshold</label>
-            <span className="text-xs font-semibold px-2 py-0.5 bg-background border border-border rounded">{settings.aiConfidenceThreshold}%</span>
+            <span className="text-xs font-semibold px-2 py-0.5 bg-background border border-border rounded">{((settings as any).aiConfidenceThreshold || (settings as any).ai?.confidenceThreshold || 80)}%</span>
           </div>
           <input 
             type="range" 
             min="50" max="100" step="5"
-            value={settings.aiConfidenceThreshold}
+            value={((settings as any).aiConfidenceThreshold || (settings as any).ai?.confidenceThreshold || 80)}
             onChange={(e) => onChange({ aiConfidenceThreshold: parseInt(e.target.value) })}
             className="w-full accent-primary"
           />

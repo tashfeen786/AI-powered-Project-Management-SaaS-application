@@ -1,9 +1,9 @@
-import { ProjectDocument } from "@/features/documents/mock-data";
+import { DocumentResponse } from "@/types/api";
 import { DocumentCard } from "./DocumentCard";
 
 interface DocumentGridProps {
-  documents: ProjectDocument[];
-  onDocumentClick: (doc: ProjectDocument) => void;
+  documents: DocumentResponse[];
+  onDocumentClick: (doc: DocumentResponse) => void;
 }
 
 export function DocumentGrid({ documents, onDocumentClick }: DocumentGridProps) {

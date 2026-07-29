@@ -39,7 +39,7 @@ export default function SignupPage() {
     try {
       await AuthService.signup(data);
       // Auto-login after signup
-      await AuthService.login({ email: data.email, password: data.password });
+      await AuthService.login({ email: data.email, password: data.password, rememberMe: false });
       router.push("/dashboard");
     } catch (error) {
       console.error("Signup failed", error);

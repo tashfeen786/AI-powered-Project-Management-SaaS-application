@@ -1,10 +1,10 @@
 "use client";
 
-import { OrganizationSettings } from "@/features/settings/mock-data";
+import { SettingsData } from "@/types/api";
 
 interface NotificationSettingsProps {
-  settings: OrganizationSettings;
-  onChange: (updates: Partial<OrganizationSettings>) => void;
+  settings: SettingsData;
+  onChange: (updates: any) => void;
 }
 
 export function NotificationSettings({ settings, onChange }: NotificationSettingsProps) {
@@ -24,7 +24,7 @@ export function NotificationSettings({ settings, onChange }: NotificationSetting
       <div className="p-6">
         <div className="flex flex-col gap-6">
           {toggles.map((toggle) => {
-            const isChecked = settings[toggle.id as keyof OrganizationSettings] as boolean;
+            const isChecked = (settings as any)[toggle.id] || (settings as any).notifications?.[toggle.id];
             return (
               <div key={toggle.id} className="flex items-center justify-between">
                 <div>

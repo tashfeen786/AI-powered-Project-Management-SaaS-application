@@ -1,12 +1,12 @@
 "use client";
 
-import { ProjectDocument } from "@/features/documents/mock-data";
+import { DocumentResponse } from "@/types/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, FileText, Download, Trash2, Calendar, User } from "lucide-react";
 import { ProcessingStatusBadge } from "./ProcessingStatusBadge";
 
 interface DocumentPreviewProps {
-  document: ProjectDocument | null;
+  document: DocumentResponse | null;
   isOpen: boolean;
   onClose: () => void;
   onDeleteRequest: () => void;
@@ -50,7 +50,7 @@ export function DocumentPreview({ document, isOpen, onClose, onDeleteRequest }: 
                 <FileText className="w-16 h-16 text-border" />
               </div>
               
-              <h2 className="text-lg font-bold text-text-primary mb-4 break-all">{document.name}</h2>
+              <h2 className="text-lg font-bold text-text-primary mb-4 break-all">{document.filename || (document as any).name}</h2>
               
               <div className="mb-6">
                 <ProcessingStatusBadge status={document.status} />
@@ -59,25 +59,25 @@ export function DocumentPreview({ document, isOpen, onClose, onDeleteRequest }: 
               <div className="space-y-4 mb-8">
                 <div className="flex items-center justify-between py-2 border-b border-border">
                   <span className="text-sm text-text-secondary">Type</span>
-                  <span className="text-sm font-medium text-text-primary uppercase">{document.type}</span>
+                  <span className="text-sm font-medium text-text-primary uppercase">{document.content_type || (document as any).type}</span>
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-border">
                   <span className="text-sm text-text-secondary">Size</span>
-                  <span className="text-sm font-medium text-text-primary">{document.size}</span>
+                  <span className="text-sm font-medium text-text-primary">{document.file_size ? `${Math.round(document.file_size / 1024)} KB` : (document as any).size}</span>
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-border">
                   <div className="flex items-center gap-2">
                     <User className="w-4 h-4 text-text-secondary" />
                     <span className="text-sm text-text-secondary">Uploaded By</span>
                   </div>
-                  <span className="text-sm font-medium text-text-primary">{document.uploadedBy}</span>
+                  <span className="text-sm font-medium text-text-primary">{document.uploaded_by_id || (document as any).uploadedBy}</span>
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-border">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-text-secondary" />
                     <span className="text-sm text-text-secondary">Date</span>
                   </div>
-                  <span className="text-sm font-medium text-text-primary">{document.uploadDate}</span>
+                  <span className="text-sm font-medium text-text-primary">{new Date(document.created_at).toLocaleDateString() || (document as any).uploadDate}</span>
                 </div>
               </div>
               

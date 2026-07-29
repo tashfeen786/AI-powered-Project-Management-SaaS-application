@@ -1,10 +1,10 @@
 "use client";
 
-import { OrganizationSettings } from "@/features/settings/mock-data";
+import { SettingsData } from "@/types/api";
 
 interface GeneralSettingsProps {
-  settings: OrganizationSettings;
-  onChange: (updates: Partial<OrganizationSettings>) => void;
+  settings: SettingsData;
+  onChange: (updates: any) => void;
 }
 
 export function GeneralSettings({ settings, onChange }: GeneralSettingsProps) {
@@ -18,7 +18,7 @@ export function GeneralSettings({ settings, onChange }: GeneralSettingsProps) {
           <div>
             <label className="block text-sm font-medium text-text-primary mb-1.5">Timezone</label>
             <select
-              value={settings.timezone}
+              value={(settings as any).timezone || (settings as any).general?.timezone || "America/Los_Angeles"}
               onChange={(e) => onChange({ timezone: e.target.value })}
               className="w-full h-9 px-3 bg-background border border-border rounded-md text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
             >
@@ -31,7 +31,7 @@ export function GeneralSettings({ settings, onChange }: GeneralSettingsProps) {
           <div>
             <label className="block text-sm font-medium text-text-primary mb-1.5">Language</label>
             <select
-              value={settings.language}
+              value={(settings as any).language || (settings as any).general?.language || "English (US)"}
               onChange={(e) => onChange({ language: e.target.value })}
               className="w-full h-9 px-3 bg-background border border-border rounded-md text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
             >
@@ -44,7 +44,7 @@ export function GeneralSettings({ settings, onChange }: GeneralSettingsProps) {
           <div>
             <label className="block text-sm font-medium text-text-primary mb-1.5">Date Format</label>
             <select
-              value={settings.dateFormat}
+              value={(settings as any).dateFormat || (settings as any).general?.dateFormat || "MM/DD/YYYY"}
               onChange={(e) => onChange({ dateFormat: e.target.value })}
               className="w-full h-9 px-3 bg-background border border-border rounded-md text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
             >
@@ -56,7 +56,7 @@ export function GeneralSettings({ settings, onChange }: GeneralSettingsProps) {
           <div>
             <label className="block text-sm font-medium text-text-primary mb-1.5">Start of Week</label>
             <select
-              value={settings.startOfWeek}
+              value={(settings as any).startOfWeek || (settings as any).general?.startOfWeek || "Monday"}
               onChange={(e) => onChange({ startOfWeek: e.target.value })}
               className="w-full h-9 px-3 bg-background border border-border rounded-md text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
             >
