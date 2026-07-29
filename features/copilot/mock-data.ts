@@ -34,13 +34,7 @@ export interface CopilotMessage {
   attachments?: CopilotAttachment[];
 }
 
-export const mockConversations: CopilotConversation[] = [
-  { id: 'c1', title: 'Project Alpha Planning', updatedAt: 'Just now', isPinned: true },
-  { id: 'c2', title: 'Q3 Delivery Forecast', updatedAt: '2 hours ago', isPinned: true },
-  { id: 'c3', title: 'Sprint 12 Retrospective', updatedAt: 'Yesterday', isPinned: false },
-  { id: 'c4', title: 'Architecture Review', updatedAt: '2 days ago', isPinned: false },
-  { id: 'c5', title: 'Team Capacity Analysis', updatedAt: 'Last week', isPinned: false },
-];
+export const mockDataRemoved = [];
 
 export const mockMessages: Record<string, CopilotMessage[]> = {
   'c1': [

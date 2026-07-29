@@ -23,35 +23,6 @@ export interface OrganizationSettings {
   aiConfidenceThreshold: number;
 }
 
-export const mockSettings: OrganizationSettings = {
-  id: "org_9f8e7d6c5b4a3",
-  name: "Acme Corporation",
-  description: "Building the future of artificial intelligence SaaS platforms.",
-  industry: "Technology",
-  website: "https://acme.example.com",
-  timezone: "America/Los_Angeles",
-  language: "English (US)",
-  dateFormat: "MM/DD/YYYY",
-  workingDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-  startOfWeek: "Monday",
-  theme: "System",
-  compactMode: false,
-  emailNotifications: true,
-  browserNotifications: true,
-  aiJobNotifications: true,
-  teamInvitationNotifications: true,
-  weeklySummary: false,
-  aiProvider: "OpenAI",
-  aiModel: "gpt-4o",
-  autoSaveDraft: true,
-  autoGenerateSuggestions: true,
-  aiConfidenceThreshold: 80,
-};
+export const mockDataRemoved = {};
 
-export const mockBillingInfo = {
-  plan: "Pro Tier",
-  members: 14,
-  projects: 8,
-  storageUsed: "45 GB / 100 GB",
-  apiUsage: "450k / 1M tokens",
-};
+export const mockDataRemoved = {};
