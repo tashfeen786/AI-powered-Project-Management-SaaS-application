@@ -12,7 +12,7 @@ class TaskGeneration(BaseModel):
     # Store the raw JSON output from AI before it's approved and converted to actual tasks
     generated_tasks: Mapped[dict | None] = mapped_column(JSONB, default=dict)
     
-    planning_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("plannings.id"))
+    planning_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("sprint_plans.id"))
     planning: Mapped["Planning"] = relationship()
     
     project_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("projects.id"))
