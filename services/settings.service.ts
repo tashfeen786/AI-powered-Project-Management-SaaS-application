@@ -11,6 +11,10 @@ export const SettingsService = {
   },
 
   updateSettings: async (settings: any): Promise<any> => {
+    if (settings.id) {
+      const response: StandardResponse<any> = await apiClient.patch(`/organizations/${settings.id}`, settings);
+      return response.data ?? {};
+    }
     const response: StandardResponse<any> = await apiClient.patch("/settings", settings);
     return response.data ?? {};
   },
