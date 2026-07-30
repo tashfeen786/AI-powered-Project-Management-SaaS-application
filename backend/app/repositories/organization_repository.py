@@ -14,6 +14,10 @@ class OrganizationRepository:
         result = await self.db.execute(select(Organization).where(Organization.id == org_id, Organization.is_deleted == False))
         return result.scalar_one_or_none()
         
+    async def get_by_domain(self, domain: str) -> Organization | None:
+        result = await self.db.execute(select(Organization).where(Organization.domain == domain, Organization.is_deleted == False))
+        return result.scalar_one_or_none()
+        
     async def get_user_organizations(self, user_id: str | uuid.UUID) -> Sequence[Organization]:
         # Join UserOrganization with Organization
         stmt = (

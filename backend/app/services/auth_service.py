@@ -34,12 +34,19 @@ class AuthService:
         if user:
             raise HTTPException(status_code=409, detail="Email already registered")
             
-        # Create organization first
-        org = Organization(
-            name=user_in.organization_name,
-            domain=user_in.email.split('@')[1] if '@' in user_in.email else None
-        )
-        created_org = await self.org_repo.create(org)
+        # Check if organization domain exists, otherwise create it
+        domain = user_in.email.split('@')[1] if '@' in user_in.email else None
+        
+        created_org = None
+        if domain:
+            created_org = await self.org_repo.get_by_domain(domain)
+            
+        if not created_org:
+            org = Organization(
+                name=user_in.organization_name,
+                domain=domain
+            )
+            created_org = await self.org_repo.create(org)
         
         # Create user
         new_user = User(

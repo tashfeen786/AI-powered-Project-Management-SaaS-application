@@ -10,6 +10,6 @@ class BaseModel(Base):
     __abstract__ = True
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(UTC))
-    updated_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC))
+    created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(UTC).replace(tzinfo=None))
+    updated_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(UTC).replace(tzinfo=None), onupdate=lambda: datetime.now(UTC).replace(tzinfo=None))
     is_deleted: Mapped[bool] = mapped_column(default=False)
