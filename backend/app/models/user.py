@@ -16,4 +16,8 @@ class User(BaseModel):
     current_organization_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("organizations.id", use_alter=True))
     
     # The organizations this user belongs to
-    user_organizations: Mapped[List["UserOrganization"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    user_organizations: Mapped[List["UserOrganization"]] = relationship(
+        back_populates="user", 
+        cascade="all, delete-orphan",
+        foreign_keys="[UserOrganization.user_id]"
+    )
