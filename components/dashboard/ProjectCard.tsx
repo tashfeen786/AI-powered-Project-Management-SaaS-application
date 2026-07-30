@@ -38,7 +38,7 @@ export function ProjectCard({ project, index }: { project: Project; index: numbe
       
       <div className="mt-auto flex items-center justify-between">
         <div className="flex -space-x-2">
-          {project.members.map((member, i) => (
+          {(project.members || []).map((member, i) => (
             <div key={i} className="w-6 h-6 rounded-full bg-background border border-border flex items-center justify-center text-[10px] font-medium text-text-primary shrink-0 ring-2 ring-surface">
               {member}
             </div>

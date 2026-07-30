@@ -33,6 +33,10 @@ export default function SettingsPage() {
 
   const handleChange = (updates: Partial<SettingsData>) => {
     if (!localSettings) return;
+    if (updates._save) {
+      handleSave();
+      return;
+    }
     setLocalSettings({ ...localSettings, ...updates });
     setIsSaved(false);
   };

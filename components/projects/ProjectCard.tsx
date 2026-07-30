@@ -39,7 +39,7 @@ export function ProjectCard({ project, index }: { project: ProjectDetail; index:
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1" title="Total Tasks">
             <CheckSquare className="w-3.5 h-3.5" />
-            <span>{project.tasks.total}</span>
+            <span>{project.tasks?.total || 0}</span>
           </div>
           <div className="flex items-center gap-1" title="Created Date">
             <Calendar className="w-3.5 h-3.5" />
@@ -54,7 +54,7 @@ export function ProjectCard({ project, index }: { project: ProjectDetail; index:
       
       <div className="mt-auto flex items-center justify-between pt-4 border-t border-border">
         <div className="flex -space-x-2">
-          {project.members.map((member, i) => (
+          {(project.members || []).map((member, i) => (
             <div key={i} className="w-6 h-6 rounded-full bg-background border border-border flex items-center justify-center text-[10px] font-medium text-text-primary shrink-0 ring-2 ring-surface">
               {member}
             </div>

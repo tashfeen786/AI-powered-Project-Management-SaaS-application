@@ -10,9 +10,12 @@ interface OrganizationCardProps {
 
 export function OrganizationCard({ settings, onChange }: OrganizationCardProps) {
   return (
-    <div className="bg-surface border border-border rounded-lg overflow-hidden">
-      <div className="px-6 py-4 border-b border-border bg-background/50">
+    <form onSubmit={(e) => { e.preventDefault(); onChange({ _save: true }); }} className="bg-surface border border-border rounded-lg overflow-hidden">
+      <div className="px-6 py-4 border-b border-border bg-background/50 flex justify-between items-center">
         <h2 className="text-base font-semibold text-text-primary">Organization Profile</h2>
+        <button type="submit" className="h-8 px-4 bg-primary text-surface rounded-md text-sm font-medium hover:opacity-90">
+          Save Changes
+        </button>
       </div>
       <div className="p-6 space-y-6">
         <div className="flex items-center gap-6">
@@ -74,6 +77,6 @@ export function OrganizationCard({ settings, onChange }: OrganizationCardProps) 
           />
         </div>
       </div>
-    </div>
+    </form>
   );
 }
