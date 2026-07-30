@@ -5,7 +5,7 @@ from datetime import datetime
 import uuid
 
 class UserOrganization(BaseModel):
-    __tablename__ = "user_organizations"
+    __tablename__ = "organization_members"
 
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
     organization_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("organizations.id", ondelete="CASCADE"), index=True)

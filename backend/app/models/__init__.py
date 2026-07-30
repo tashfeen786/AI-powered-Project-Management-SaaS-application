@@ -15,6 +15,8 @@ from .ai_insight import AIInsight
 from .conversation import Conversation
 from .message import Message
 from .background_job import BackgroundJob
+from .notification import Notification
+from .settings import Setting
 
 # For Alembic to discover all models easily
 __all__ = [
@@ -34,5 +36,7 @@ __all__ = [
     "AIInsight",
     "Conversation",
     "Message",
-    "BackgroundJob"
+    "BackgroundJob",
+    "Notification",
+    "Setting"
 ]

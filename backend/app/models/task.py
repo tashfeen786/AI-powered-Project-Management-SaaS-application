@@ -31,7 +31,8 @@ class Task(BaseModel):
     reporter_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id", use_alter=True))
     reporter: Mapped["User"] = relationship(foreign_keys=[reporter_id])
     
-    sprint_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("projects.id")) # Self referencing for now, or null if no sprint table
+    sprint_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("sprints.id"))
+    sprint: Mapped["Sprint"] = relationship(back_populates="tasks")
     
     # Placeholder for Comments & Activity
     # comments: Mapped[List["Comment"]] = relationship(back_populates="task", cascade="all, delete-orphan")

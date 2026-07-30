@@ -4,7 +4,7 @@ from app.db.base import BaseModel
 import uuid
 
 class Planning(BaseModel):
-    __tablename__ = "plannings"
+    __tablename__ = "sprint_plans"
 
     version: Mapped[int] = mapped_column(Integer, default=1)
     status: Mapped[str] = mapped_column(String(50), default="Draft") # Draft, Review, Approved, Archived

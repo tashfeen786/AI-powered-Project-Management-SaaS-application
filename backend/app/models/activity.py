@@ -5,7 +5,7 @@ import uuid
 from sqlalchemy.dialects.postgresql import JSONB
 
 class Activity(BaseModel):
-    __tablename__ = "activities"
+    __tablename__ = "activity_logs"
 
     type: Mapped[str] = mapped_column(String(50)) # user_action, ai_generation, system_event
     description: Mapped[str] = mapped_column(Text)
