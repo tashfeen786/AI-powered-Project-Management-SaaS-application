@@ -6,7 +6,8 @@ import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { AuthService } from "@/services/auth.service";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 import { loginSchema, LoginValues } from "@/features/auth/schemas/login.schema";
 import { AuthCard } from "@/components/auth/AuthCard";
@@ -17,8 +18,11 @@ import { AuthDivider } from "@/components/auth/AuthDivider";
 import { SocialLoginButton } from "@/components/auth/SocialLoginButton";
 import { AuthFooter } from "@/components/auth/AuthFooter";
 
-export default function LoginPage() {
+function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const isRegistered = searchParams.get("registered") === "true";
   
   const { register, handleSubmit, formState: { errors } } = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -28,8 +32,6 @@ export default function LoginPage() {
       rememberMe: false,
     },
   });
-
-  const router = useRouter();
 
   const onSubmit = async (data: LoginValues) => {
     setIsLoading(true);
@@ -48,6 +50,12 @@ export default function LoginPage() {
     <AuthCard>
       <AuthHeader title="Welcome back" subtitle="Log in to your account" />
       
+      {isRegistered && (
+        <div className="mb-4 p-3 bg-green-500/10 border border-green-500/20 text-green-600 rounded-md text-sm font-medium text-center">
+          Account created successfully. Please log in.
+        </div>
+      )}
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <AuthInput
           id="email"
@@ -103,5 +111,13 @@ export default function LoginPage() {
         href="/signup" 
       />
     </AuthCard>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }
