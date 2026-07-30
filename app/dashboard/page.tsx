@@ -11,10 +11,12 @@ import { NotificationWidget } from "@/components/dashboard/NotificationWidget";
 import { SkeletonDashboard } from "@/components/dashboard/SkeletonDashboard";
 import { FolderKanban, RotateCw, CheckCircle2, ListTodo, Plus } from "lucide-react";
 import { useDashboard } from "@/features/dashboard/hooks/useDashboard";
+import { CreateProjectModal } from "@/components/projects/CreateProjectModal";
 
 
 export default function DashboardPage() {
   const { data, isLoading } = useDashboard();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
 
   return (
@@ -46,7 +48,10 @@ export default function DashboardPage() {
                   </div>
                   <h2 className="text-lg font-semibold text-text-primary mb-2">You don't have any projects yet.</h2>
                   <p className="text-text-secondary text-sm max-w-sm mb-6">Create your first project to begin tracking your work.</p>
-                  <button className="h-9 px-4 bg-primary text-surface rounded-md text-sm font-medium hover:opacity-90 transition-opacity duration-150 flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                  <button 
+                    onClick={() => setIsModalOpen(true)}
+                    className="h-9 px-4 bg-primary text-surface rounded-md text-sm font-medium hover:opacity-90 transition-opacity duration-150 flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                  >
                     <Plus className="w-4 h-4" />
                     Create First Project
                   </button>
@@ -73,6 +78,7 @@ export default function DashboardPage() {
           </>
         )}
       </div>
+      <CreateProjectModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </AppLayout>
   );
 }

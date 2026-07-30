@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { User, Settings, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { AuthService } from "@/services/auth.service";
 
 export function UserMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -50,7 +51,10 @@ export function UserMenu() {
               Settings
             </button>
             <div className="h-px bg-border my-1" />
-            <button className="w-full flex items-center px-3 py-2 text-sm text-danger hover:bg-danger/10 transition-colors duration-150">
+            <button 
+              onClick={() => AuthService.logout()}
+              className="w-full flex items-center px-3 py-2 text-sm text-danger hover:bg-danger/10 transition-colors duration-150"
+            >
               <LogOut className="w-4 h-4 mr-2" />
               Logout
             </button>

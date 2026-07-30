@@ -12,10 +12,10 @@ interface SidebarProps {
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const content = (
     <div className="flex-1 py-4 flex flex-col gap-1 px-3">
-      <SidebarItem icon={Home} label="Dashboard" isActive />
-      <SidebarItem icon={FolderKanban} label="Projects" />
-      <SidebarItem icon={Users} label="Team" />
-      <SidebarItem icon={Settings} label="Settings" />
+      <SidebarItem icon={Home} label="Dashboard" href="/dashboard" isActive />
+      <SidebarItem icon={FolderKanban} label="Projects" href="/projects" />
+      <SidebarItem icon={Users} label="Team" href="/team" />
+      <SidebarItem icon={Settings} label="Settings" href="/settings" />
     </div>
   );
 
