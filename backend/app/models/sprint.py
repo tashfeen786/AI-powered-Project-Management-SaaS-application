@@ -1,6 +1,7 @@
 from sqlalchemy import String, ForeignKey, Date
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import BaseModel
+from typing import List
 import uuid
 
 class Sprint(BaseModel):
@@ -14,3 +15,5 @@ class Sprint(BaseModel):
     
     project_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("projects.id"))
     organization_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("organizations.id"))
+    
+    tasks: Mapped[List["Task"]] = relationship(back_populates="sprint")
