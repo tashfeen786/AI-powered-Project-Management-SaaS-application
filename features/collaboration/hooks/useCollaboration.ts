@@ -31,9 +31,12 @@ export function useCollaboration(projectId?: string, onMessage?: (event: Collabo
   useEffect(() => {
     if (!token || typeof window === "undefined") return;
 
-    // Use organization scope WS connection as established by the backend
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl = `${protocol}//${window.location.host}/api/v1/ws/organization?token=${token}`;
+    // Parse the backend API URL to build the WS URL correctly
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+    // Replace http:// or https:// with ws:// or wss://
+    let wsBaseUrl = apiBaseUrl.replace(/^http/, "ws");
+    
+    const wsUrl = `${wsBaseUrl}/ws/organization?token=${token}`;
     
     const socket = new WebSocket(wsUrl);
 
