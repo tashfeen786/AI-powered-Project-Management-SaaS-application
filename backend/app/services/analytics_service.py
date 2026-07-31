@@ -88,7 +88,7 @@ class AnalyticsService:
         members = res.scalar() or 0
         
         # Avg Velocity
-        res = await self.db.execute(select(func.avg(Sprint.completed_points)).where(Sprint.organization_id == org_id, Sprint.status == "Completed"))
+        res = await self.db.execute(select(func.avg(Sprint.story_points)).where(Sprint.organization_id == org_id, Sprint.status == "Completed"))
         avg_vel = res.scalar() or 0.0
 
         return {
@@ -108,7 +108,7 @@ class AnalyticsService:
 
     async def _get_sprint_velocity(self, org_id: uuid.UUID) -> list:
         res = await self.db.execute(
-            select(Sprint.name, Sprint.completed_points, Sprint.total_points)
+            select(Sprint.name, Sprint.story_points, Sprint.velocity)
             .where(Sprint.organization_id == org_id, Sprint.status == "Completed")
             .order_by(desc(Sprint.end_date))
             .limit(5)
@@ -155,7 +155,7 @@ class AnalyticsService:
     async def _get_team_performance(self, org_id: uuid.UUID) -> list:
         # Get users and their task stats
         res = await self.db.execute(
-            select(User.id, User.full_name, User.avatar_url)
+            select(User.id, User.full_name)
             .join(UserOrganization, User.id == UserOrganization.user_id)
             .where(UserOrganization.organization_id == org_id)
         )
@@ -172,7 +172,7 @@ class AnalyticsService:
             perf.append({
                 "id": str(u.id),
                 "member": u.full_name,
-                "avatar": u.avatar_url or "",
+                "avatar": "",
                 "role": "Team Member",
                 "completedTasks": r_done[0] or 0,
                 "velocity": r_done[1] or 0,

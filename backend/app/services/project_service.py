@@ -8,6 +8,9 @@ from typing import Sequence, Tuple, Optional
 import uuid
 import random
 from app.services.activity_service import ActivityService
+import structlog
+
+logger = structlog.get_logger()
 
 class ProjectService:
     def __init__(self, db: AsyncSession):
@@ -17,10 +20,14 @@ class ProjectService:
         
     async def _check_permission(self, user_id: uuid.UUID, org_id: uuid.UUID, require_admin: bool = False):
         role = await self.org_repo.get_user_role(user_id, org_id)
+        logger.info("Project auth check", user_id=str(user_id), org_id=str(org_id), membership_found=bool(role), role=role.role if role else None, require_admin=require_admin)
         if not role:
+            logger.warning("Project auth check failed: User not in org", user_id=str(user_id))
             raise HTTPException(status_code=403, detail="User does not belong to this organization")
         if require_admin and role.role not in ["owner", "admin"]:
+            logger.warning("Project auth check failed: Need admin", user_id=str(user_id), role=role.role)
             raise HTTPException(status_code=403, detail="Not enough permissions")
+        logger.info("Project auth check passed", user_id=str(user_id))
 
     async def get_projects(
         self, 

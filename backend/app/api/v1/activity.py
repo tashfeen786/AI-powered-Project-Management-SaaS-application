@@ -38,7 +38,7 @@ async def get_global_activity(
         message="Global activity retrieved"
     )
 
-@router.get("/{project_id}/activity", response_model=StandardResponse)
+@router.get("/projects/{project_id}/activity", response_model=StandardResponse)
 async def get_activity(
     project_id: uuid.UUID,
     page: int = Query(1, ge=1),

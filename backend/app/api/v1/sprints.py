@@ -14,20 +14,31 @@ from fastapi import HTTPException
 
 router = APIRouter()
 
+import structlog
+
+logger = structlog.get_logger()
+
 async def verify_org_and_role(current_user: User, db: AsyncSession, permission: Permission):
-    if not current_user.current_organization_id:
+    org_id = current_user.current_organization_id
+    if not org_id:
+        logger.warning("Auth check failed: No active organization context", user_id=str(current_user.id))
         raise HTTPException(status_code=400, detail="No active organization context")
         
     org_repo = OrganizationRepository(db)
-    role = await org_repo.get_user_role(current_user.id, current_user.current_organization_id)
+    role = await org_repo.get_user_role(current_user.id, org_id)
+    
+    logger.info("Auth check", user_id=str(current_user.id), org_id=str(org_id), membership_found=bool(role), role=role.role if role else None, status=role.status if role else None, required_permission=permission.value)
     
     if not role or role.status != "accepted":
+        logger.warning("Auth check failed: Not an active member", user_id=str(current_user.id), status=role.status if role else None)
         raise HTTPException(status_code=403, detail="User is not an active member")
         
     if not RBACService.has_permission(role.role, permission):
+        logger.warning("Auth check failed: Missing permission", user_id=str(current_user.id), role=role.role, missing_permission=permission.value)
         raise HTTPException(status_code=403, detail=f"Missing permission: {permission.value}")
         
-    return current_user.current_organization_id
+    logger.info("Auth check passed", user_id=str(current_user.id), permission=permission.value)
+    return org_id
 
 @router.post("/projects/{project_id}/sprints/generate", response_model=StandardResponse[Any])
 async def generate_sprint_plan(

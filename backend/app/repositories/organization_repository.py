@@ -39,8 +39,8 @@ class OrganizationRepository:
         await self.db.refresh(organization)
         return organization
 
-    async def add_user_to_org(self, user_id: uuid.UUID, org_id: uuid.UUID, role: str = "member") -> UserOrganization:
-        user_org = UserOrganization(user_id=user_id, organization_id=org_id, role=role)
+    async def add_user_to_org(self, user_id: uuid.UUID, org_id: uuid.UUID, role: str = "member", status: str = "accepted") -> UserOrganization:
+        user_org = UserOrganization(user_id=user_id, organization_id=org_id, role=role, status=status)
         self.db.add(user_org)
         await self.db.commit()
         return user_org

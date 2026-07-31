@@ -9,6 +9,9 @@ from app.models.user_organization import UserOrganization
 from typing import Sequence
 from datetime import datetime, UTC
 import uuid
+import structlog
+
+logger = structlog.get_logger()
 
 class TeamService:
     def __init__(self, db: AsyncSession):
@@ -19,12 +22,18 @@ class TeamService:
         
     async def _check_permission(self, user_id: uuid.UUID, org_id: uuid.UUID, permission: Permission) -> UserOrganization:
         user_org = await self.team_repo.get_member_by_user_id(org_id, user_id)
+        
+        logger.info("Team auth check", user_id=str(user_id), org_id=str(org_id), membership_found=bool(user_org), role=user_org.role if user_org else None, status=user_org.status if user_org else None, required_permission=permission.value)
+        
         if not user_org or user_org.status != "accepted":
+            logger.warning("Team auth check failed: Not an active member", user_id=str(user_id), status=user_org.status if user_org else None)
             raise HTTPException(status_code=403, detail="User is not an active member of this organization")
             
         if not RBACService.has_permission(user_org.role, permission):
+            logger.warning("Team auth check failed: Missing permission", user_id=str(user_id), role=user_org.role, missing_permission=permission.value)
             raise HTTPException(status_code=403, detail=f"Missing permission: {permission.value}")
             
+        logger.info("Team auth check passed", user_id=str(user_id), permission=permission.value)
         return user_org
 
     async def get_team(self, user_id: uuid.UUID, org_id: uuid.UUID) -> Sequence[UserOrganization]:

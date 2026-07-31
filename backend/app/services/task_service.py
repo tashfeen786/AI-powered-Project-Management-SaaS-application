@@ -17,6 +17,9 @@ from app.models.mention import Mention
 from app.models.notification import Notification
 from app.models.user import User
 from sqlalchemy import select
+import structlog
+
+logger = structlog.get_logger()
 
 class TaskService:
     def __init__(self, db: AsyncSession):
@@ -27,8 +30,11 @@ class TaskService:
         
     async def _check_permission(self, user_id: uuid.UUID, org_id: uuid.UUID) -> str:
         role = await self.org_repo.get_user_role(user_id, org_id)
+        logger.info("Task auth check", user_id=str(user_id), org_id=str(org_id), membership_found=bool(role), role=role.role if role else None)
         if not role:
+            logger.warning("Task auth check failed: User not in org", user_id=str(user_id))
             raise HTTPException(status_code=403, detail="User does not belong to this organization")
+        logger.info("Task auth check passed", user_id=str(user_id))
         return role.role
 
     async def get_tasks(
@@ -47,9 +53,10 @@ class TaskService:
     ) -> Tuple[Sequence[Task], int]:
         await self._check_permission(user_id, org_id)
         
-        project = await self.project_repo.get_by_id(project_id, org_id)
-        if not project:
-            raise HTTPException(status_code=404, detail="Project not found")
+        if project_id is not None:
+            project = await self.project_repo.get_by_id(project_id, org_id)
+            if not project:
+                raise HTTPException(status_code=404, detail="Project not found")
             
         return await self.task_repo.get_by_project_id_paginated(
             project_id, org_id, page, limit, status, priority, assignee_id, sprint_id, search, sort
