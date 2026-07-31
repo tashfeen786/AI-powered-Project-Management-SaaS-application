@@ -1,0 +1,42 @@
+name: Production Deployment
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.PROD_SSH_KEY }}
+
+      - name: Add known hosts
+        run: ssh-keyscan -H ${{ secrets.PROD_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to Production via Docker Compose
+        run: |
+          ssh ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} << 'EOF'
+            cd /opt/ai-pm-saas
+            git pull origin main
+            
+            # Export secrets to .env.production
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > .env.production
+            echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> .env.production
+            echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env.production
+            echo "GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}" >> .env.production
+            echo "NEXT_PUBLIC_API_URL=https://api.yourdomain.com/api/v1" >> .env.production
+            
+            # Rebuild and restart containers
+            docker-compose -f docker-compose.prod.yml up -d --build
+            
+            # Run migrations
+            docker-compose -f docker-compose.prod.yml exec -T backend alembic upgrade head
+          EOF

@@ -10,7 +10,7 @@ interface WsMessage {
   payload?: any;
 }
 
-export function useCollaboration(projectId?: string) {
+export function useCollaboration(projectId?: string, onMessage?: (event: CollaborationEvent, payload: any) => void) {
   const { token, user } = useAuth();
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
@@ -43,6 +43,11 @@ export function useCollaboration(projectId?: string) {
           }
         } else if (data.event === "presence_update") {
           setOnlineUsers(data.payload.online_users || []);
+        }
+        
+        // Pass to custom handler
+        if (onMessage) {
+          onMessage(data.event, data.payload);
         }
       } catch (err) {
         console.error("Failed to parse WS message", err);

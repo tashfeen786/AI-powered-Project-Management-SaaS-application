@@ -9,6 +9,9 @@ from typing import Sequence, Tuple, Optional
 import uuid
 import time
 from app.services.activity_service import ActivityService
+from app.core.websocket_manager import manager
+from app.schemas.websocket import WsServerMessage
+from datetime import datetime, UTC
 
 class TaskService:
     def __init__(self, db: AsyncSession):
@@ -118,6 +121,17 @@ class TaskService:
             org_id=org_id
         )
         
+        await manager.broadcast_to_project(
+            task.project_id,
+            WsServerMessage(
+                event="task_updated",
+                project_id=task.project_id,
+                organization_id=org_id,
+                timestamp=datetime.now(UTC),
+                payload={"task_id": str(task.id)}
+            )
+        )
+        
         return updated
         
     async def move_task(self, user_id: uuid.UUID, org_id: uuid.UUID, task_id: uuid.UUID, move_in: TaskMove) -> Task:
@@ -173,4 +187,17 @@ class TaskService:
         await self.db.refresh(comment)
         
         # Reload task to include the new comment
-        return await self.get_task(user_id, org_id, task_id)
+        updated_task = await self.get_task(user_id, org_id, task_id)
+        
+        await manager.broadcast_to_project(
+            task.project_id,
+            WsServerMessage(
+                event="new_comment",
+                project_id=task.project_id,
+                organization_id=org_id,
+                timestamp=datetime.now(UTC),
+                payload={"task_id": str(task.id), "comment_id": str(comment.id)}
+            )
+        )
+        
+        return updated_task

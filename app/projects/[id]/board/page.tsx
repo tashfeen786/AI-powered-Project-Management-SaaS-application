@@ -11,7 +11,9 @@ import { useUpdateTask } from "@/features/tasks/hooks/useUpdateTask";
 import { TaskStatus } from "@/types/api";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCollaboration } from "@/features/collaboration/hooks/useCollaboration";
 
 // Minimal Toast Implementation for optimistic failure UI
 function Toast({ message, show }: { message: string, show: boolean }) {
@@ -32,6 +34,15 @@ export default function KanbanBoardPage({ params }: { params: Promise<{ id: stri
   const { mutate: updateTask } = useUpdateTask(projectId);
   const [toastMessage, setToastMessage] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const queryClient = useQueryClient();
+  
+  // Connect to WS and listen for updates
+  const { onlineUsers } = useCollaboration(projectId, (event, payload) => {
+    if (event === "task_updated" || event === "new_comment") {
+      // Someone else modified a task, refresh the board automatically
+      queryClient.invalidateQueries({ queryKey: ["tasks", projectId] });
+    }
+  });
 
   const handleUpdateTaskStatus = (taskId: string, status: TaskStatus) => {
     updateTask(
