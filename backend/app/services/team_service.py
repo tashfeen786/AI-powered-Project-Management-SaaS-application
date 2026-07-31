@@ -115,6 +115,19 @@ class TeamService:
         # TODO: Trigger Member Joined Activity Hook
         return updated
 
+    async def reject_invite(self, user_id: uuid.UUID, org_id: uuid.UUID, member_id: uuid.UUID, token: str) -> UserOrganization:
+        # In a real app, validate token
+        member = await self.team_repo.get_member_by_id(org_id, member_id)
+        if not member or member.user_id != user_id:
+            raise HTTPException(status_code=404, detail="Invite not found or unauthorized")
+            
+        if member.status != "pending":
+            raise HTTPException(status_code=400, detail="Invite is not pending")
+            
+        member.status = "rejected"
+        updated = await self.team_repo.update(member)
+        return updated
+
     async def resend_invite(self, inviter_id: uuid.UUID, org_id: uuid.UUID, member_id: uuid.UUID) -> None:
         await self._check_permission(inviter_id, org_id, Permission.INVITE_MEMBERS)
         

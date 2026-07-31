@@ -115,3 +115,15 @@ async def accept_invite(
     team_service = TeamService(db)
     member = await team_service.accept_invite(current_user.id, org_id, member_id, request.token)
     return success_response(data=TeamMemberResponse.model_validate(member), message="Invitation accepted")
+
+@router.post("/{member_id}/reject", response_model=StandardResponse[TeamMemberResponse])
+async def reject_invite(
+    member_id: uuid.UUID,
+    request: InviteAcceptRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+    org_id: uuid.UUID = Depends(get_org_id)
+):
+    team_service = TeamService(db)
+    member = await team_service.reject_invite(current_user.id, org_id, member_id, request.token)
+    return success_response(data=TeamMemberResponse.model_validate(member), message="Invitation rejected")

@@ -9,6 +9,7 @@ import { TaskTable } from "@/components/dashboard/TaskTable";
 import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
 import { NotificationWidget } from "@/components/dashboard/NotificationWidget";
 import { SkeletonDashboard } from "@/components/dashboard/SkeletonDashboard";
+import { PendingInvitationsList } from "@/components/dashboard/PendingInvitationsList";
 import { FolderKanban, RotateCw, CheckCircle2, ListTodo, Plus } from "lucide-react";
 import { useDashboard } from "@/features/dashboard/hooks/useDashboard";
 import { CreateProjectModal } from "@/components/projects/CreateProjectModal";
@@ -28,6 +29,8 @@ export default function DashboardPage() {
           <>
             <DashboardHeader />
             
+            <PendingInvitationsList />
+
             {/* Quick Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               <StatsCard title="Total Projects" value={data?.stats?.total || 0} icon={FolderKanban} delay={0.0} />

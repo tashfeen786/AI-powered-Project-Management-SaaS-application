@@ -9,7 +9,12 @@ import { ProjectStats } from "@/components/projects/ProjectStats";
 import { ProjectMembers } from "@/components/projects/ProjectMembers";
 import { QuickActions } from "@/components/projects/QuickActions";
 import { CurrentSprintCard } from "@/components/projects/CurrentSprintCard";
+import { InviteMemberDialog } from "@/components/team/InviteMemberDialog";
+import { GenerateRequirementModal } from "@/components/requirements/GenerateRequirementModal";
+import { SprintWizard } from "@/components/planning/SprintWizard";
+import { AIFeatures } from "@/components/projects/AIFeatures";
 import { useProject } from "@/features/projects/hooks/useProject";
+import { useInviteMember } from "@/features/team/hooks/useInviteMember";
 
 import { Loader2, ChevronLeft } from "lucide-react";
 import Link from "next/link";
@@ -17,6 +22,11 @@ import Link from "next/link";
 export default function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const { data: project, isLoading } = useProject(resolvedParams.id);
+  const { mutate: inviteMember, isPending: isInviting } = useInviteMember();
+  
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
+  const [isSRSModalOpen, setIsSRSModalOpen] = useState(false);
+  const [isSprintWizardOpen, setIsSprintWizardOpen] = useState(false);
 
   return (
     <AppLayout>
@@ -48,7 +58,17 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                   </div>
                 </div>
                 <div className="w-full xl:w-80 space-y-6 shrink-0">
-                  <QuickActions />
+                  <QuickActions 
+                    projectId={resolvedParams.id} 
+                    onInviteClick={() => setIsInviteOpen(true)} 
+                    onGenerateSRSClick={() => setIsSRSModalOpen(true)}
+                    onSprintWizardClick={() => setIsSprintWizardOpen(true)}
+                  />
+                  <AIFeatures
+                    projectId={resolvedParams.id} 
+                    onGenerateSRSClick={() => setIsSRSModalOpen(true)}
+                    onSprintWizardClick={() => setIsSprintWizardOpen(true)}
+                  />
                   <ProjectMembers members={[]} />
                 </div>
               </div>
@@ -58,6 +78,29 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
           <div className="flex justify-center items-center h-64 text-text-secondary">Project not found</div>
         )}
       </div>
+
+      <InviteMemberDialog 
+        isOpen={isInviteOpen} 
+        onClose={() => setIsInviteOpen(false)} 
+        onInvite={(email, role) => {
+          inviteMember({ email, role }, {
+            onSuccess: () => setIsInviteOpen(false)
+          });
+        }}
+        isInviting={isInviting}
+      />
+
+      <GenerateRequirementModal 
+        isOpen={isSRSModalOpen} 
+        onClose={() => setIsSRSModalOpen(false)} 
+        projectId={resolvedParams.id} 
+      />
+
+      <SprintWizard 
+        isOpen={isSprintWizardOpen} 
+        onClose={() => setIsSprintWizardOpen(false)} 
+        projectId={resolvedParams.id} 
+      />
     </AppLayout>
   );
 }
