@@ -70,6 +70,11 @@ export function MarkdownRenderer({ content }: MarkdownProps) {
     // Paragraphs
     html = html.replace(/^(?!<[a-z])(.*$)/gim, '<p class="mb-2">$1</p>');
     
+    // Actions [ACTION: ...]
+    html = html.replace(/\[ACTION:\s*([^\]]+)\]/g, 
+      '<button class="inline-flex items-center gap-1.5 px-3 py-1.5 mt-2 mb-1 bg-surface border border-primary/30 rounded-md text-xs font-medium text-primary hover:bg-primary/5 hover:border-primary transition-colors cursor-pointer" onclick="alert(\'Action: $1 (Development Mode)\')"><svg class="w-3 h-3 fill-primary/20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg>$1</button>'
+    );
+    
     return html;
   };
 
