@@ -272,7 +272,72 @@ export interface RequirementQueryParams extends PaginationParams {
 }
 
 // ============================================================
-// Planning
+// Sprint Planning
+// ============================================================
+export interface SprintResponse {
+  id: string;
+  project_id: string;
+  organization_id: string;
+  name: string;
+  goal: string | null;
+  status: string;
+  start_date: string | null;
+  end_date: string | null;
+  duration: number | null;
+  capacity: number | null;
+  team_members: string[] | null;
+  velocity: number | null;
+  story_points: number | null;
+  ai_generated_plan: string | null;
+  timeline_suggestion: string | null;
+  risks_suggestion: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SprintCreate {
+  project_id: string;
+  name: string;
+  goal?: string;
+  status?: string;
+  start_date?: string;
+  end_date?: string;
+  duration?: number;
+  capacity?: number;
+  team_members?: string[];
+  velocity?: number;
+  story_points?: number;
+  ai_generated_plan?: string;
+  timeline_suggestion?: string;
+  risks_suggestion?: string;
+}
+
+export interface SprintUpdate {
+  name?: string;
+  goal?: string;
+  status?: string;
+  start_date?: string;
+  end_date?: string;
+  duration?: number;
+  capacity?: number;
+  team_members?: string[];
+  velocity?: number;
+  story_points?: number;
+  ai_generated_plan?: string;
+  timeline_suggestion?: string;
+  risks_suggestion?: string;
+}
+
+export interface GenerateSprintPlanRequest {
+  project_id: string;
+  sprint_goal: string;
+  duration: number;
+  team_members: string[];
+  velocity: number;
+}
+
+// ============================================================
+// Planning (Legacy)
 // ============================================================
 export interface PlanningResponse {
   id: string;

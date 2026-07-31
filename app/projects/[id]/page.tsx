@@ -8,6 +8,7 @@ import { ProjectSummary } from "@/components/projects/ProjectSummary";
 import { ProjectStats } from "@/components/projects/ProjectStats";
 import { ProjectMembers } from "@/components/projects/ProjectMembers";
 import { QuickActions } from "@/components/projects/QuickActions";
+import { CurrentSprintCard } from "@/components/projects/CurrentSprintCard";
 import { useProject } from "@/features/projects/hooks/useProject";
 
 import { Loader2, ChevronLeft } from "lucide-react";
@@ -40,6 +41,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                 <div className="flex-1 space-y-6">
                   <ProjectSummary summary={project.description || "No description provided."} />
                   <ProjectStats tasks={{ total: 0, completed: 0, inProgress: 0, pending: 0 } as any} />
+                  <CurrentSprintCard projectId={resolvedParams.id} />
                   <div className="bg-surface border border-border rounded-lg p-5">
                     <h3 className="text-sm font-semibold text-text-primary mb-4">Recent Activity</h3>
                     <p className="text-sm text-text-secondary">No recent activity for this project yet.</p>
