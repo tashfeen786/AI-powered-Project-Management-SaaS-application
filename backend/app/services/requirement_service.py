@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
-from app.schemas.requirement import GenerateRequirementRequest, RequirementUpdate
+from app.schemas.requirement import GenerateRequirementRequest, RequirementUpdate, RequirementCreate
 from app.repositories.requirement_repository import RequirementRepository
 from app.repositories.project_repository import ProjectRepository
 from app.services.retrieval_service import RetrievalService
@@ -96,8 +96,37 @@ class RequirementService:
         created = await self.req_repo.create(req)
         return created
 
-    async def get_requirements(self, org_id: uuid.UUID, project_id: uuid.UUID, page: int = 1, limit: int = 10) -> Tuple[Sequence[Requirement], int]:
-        return await self.req_repo.get_by_project_paginated(org_id, project_id, page, limit)
+    async def get_requirements(
+        self, 
+        org_id: uuid.UUID, 
+        project_id: uuid.UUID, 
+        page: int = 1, 
+        limit: int = 10,
+        status: str | None = None,
+        priority: str | None = None,
+        search: str | None = None,
+        sort_by: str = "created_at",
+        sort_desc: bool = True
+    ) -> Tuple[Sequence[Requirement], int]:
+        return await self.req_repo.get_by_project_paginated(
+            org_id, project_id, page, limit, status, priority, search, sort_by, sort_desc
+        )
+
+    async def create_requirement(self, user_id: uuid.UUID, org_id: uuid.UUID, create_in: RequirementCreate) -> Requirement:
+        req = Requirement(
+            title=create_in.title,
+            description=create_in.description,
+            category=create_in.category,
+            priority=create_in.priority,
+            status=create_in.status,
+            acceptance_criteria=create_in.acceptance_criteria,
+            generated_content=create_in.generated_content,
+            project_id=create_in.project_id,
+            organization_id=org_id,
+            created_by_id=user_id,
+            version=1
+        )
+        return await self.req_repo.create(req)
 
     async def get_requirement(self, org_id: uuid.UUID, req_id: uuid.UUID) -> Requirement:
         req = await self.req_repo.get_by_id(req_id, org_id)
@@ -112,6 +141,14 @@ class RequirementService:
             req.title = update_in.title
         if update_in.status is not None:
             req.status = update_in.status
+        if update_in.description is not None:
+            req.description = update_in.description
+        if update_in.category is not None:
+            req.category = update_in.category
+        if update_in.priority is not None:
+            req.priority = update_in.priority
+        if update_in.acceptance_criteria is not None:
+            req.acceptance_criteria = update_in.acceptance_criteria
         if update_in.generated_content is not None:
             req.generated_content = update_in.generated_content
             

@@ -217,19 +217,58 @@ export interface ConversationDetailResponse extends ConversationResponse {
   messages: MessageResponse[];
 }
 
-// ============================================================
+export interface GenerateRequirementRequest {
+  title: string;
+  additional_context?: string;
+}
 // Requirements
 // ============================================================
 export interface RequirementResponse {
   id: string;
   project_id: string;
   organization_id: string;
-  generated_content: any;
+  title: string;
+  description: string | null;
+  category: string | null;
+  priority: string | null;
   status: string;
-  confidence: string | null;
+  acceptance_criteria: string | null;
+  version: number;
+  confidence_score: number;
+  generated_content: string | null;
+  source_documents: any[];
   created_by_id: string;
+  updated_by_id: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface RequirementCreate {
+  project_id: string;
+  title: string;
+  description?: string;
+  category?: string;
+  priority?: string;
+  status?: string;
+  acceptance_criteria?: string;
+  generated_content?: string;
+}
+
+export interface RequirementUpdate {
+  title?: string;
+  description?: string;
+  category?: string;
+  priority?: string;
+  status?: string;
+  acceptance_criteria?: string;
+  generated_content?: string;
+}
+
+export interface RequirementQueryParams extends PaginationParams {
+  status?: string;
+  priority?: string;
+  sort_by?: string;
+  sort_desc?: boolean;
 }
 
 // ============================================================

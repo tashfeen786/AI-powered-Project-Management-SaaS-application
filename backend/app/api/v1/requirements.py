@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 import uuid
 from app.db.session import get_db
-from app.schemas.requirement import RequirementResponse, RequirementUpdate, GenerateRequirementRequest
+from app.schemas.requirement import RequirementResponse, RequirementUpdate, GenerateRequirementRequest, RequirementCreate
 from app.services.requirement_service import RequirementService
 from app.services.rbac_service import RBACService, Permission
 from app.dependencies.auth import get_current_active_user
@@ -47,13 +47,20 @@ async def list_requirements(
     project_id: uuid.UUID,
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1, le=50),
+    status: str | None = Query(None),
+    priority: str | None = Query(None),
+    search: str | None = Query(None),
+    sort_by: str = Query("created_at"),
+    sort_desc: bool = Query(True),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
     org_id = await verify_org_and_role(current_user, db, Permission.VIEW_PROJECTS)
     req_service = RequirementService(db)
     
-    items, total = await req_service.get_requirements(org_id, project_id, page, limit)
+    items, total = await req_service.get_requirements(
+        org_id, project_id, page, limit, status, priority, search, sort_by, sort_desc
+    )
     
     return paginated_response(
         items=[RequirementResponse.model_validate(item).model_dump() for item in items],
@@ -62,6 +69,18 @@ async def list_requirements(
         limit=limit,
         message="Requirements retrieved"
     )
+
+@router.post("/requirements", response_model=StandardResponse[RequirementResponse])
+async def create_requirement(
+    req_in: RequirementCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    org_id = await verify_org_and_role(current_user, db, Permission.EDIT_PROJECTS)
+    req_service = RequirementService(db)
+    
+    req = await req_service.create_requirement(current_user.id, org_id, req_in)
+    return success_response(data=RequirementResponse.model_validate(req), message="Requirement created")
 
 @router.get("/requirements/{id}", response_model=StandardResponse[RequirementResponse])
 async def get_requirement(

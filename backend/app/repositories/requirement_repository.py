@@ -13,7 +13,12 @@ class RequirementRepository:
         org_id: uuid.UUID,
         project_id: uuid.UUID,
         page: int = 1,
-        limit: int = 10
+        limit: int = 10,
+        status: str | None = None,
+        priority: str | None = None,
+        search: str | None = None,
+        sort_by: str = "created_at",
+        sort_desc: bool = True
     ) -> Tuple[Sequence[Requirement], int]:
         
         query = select(Requirement).where(
@@ -22,10 +27,33 @@ class RequirementRepository:
             Requirement.is_deleted == False
         )
         
+        if status:
+            query = query.where(Requirement.status == status)
+        if priority:
+            query = query.where(Requirement.priority == priority)
+        if search:
+            query = query.where(
+                (Requirement.title.ilike(f"%{search}%")) |
+                (Requirement.description.ilike(f"%{search}%")) |
+                (Requirement.category.ilike(f"%{search}%"))
+            )
+            
         count_query = select(func.count()).select_from(query.subquery())
         total = (await self.db.execute(count_query)).scalar_one()
         
-        query = query.order_by(desc(Requirement.version), desc(Requirement.created_at))
+        # Determine sort column
+        sort_col = Requirement.created_at
+        if sort_by == "title":
+            sort_col = Requirement.title
+        elif sort_by == "priority":
+            sort_col = Requirement.priority
+        elif sort_by == "status":
+            sort_col = Requirement.status
+            
+        if sort_desc:
+            query = query.order_by(desc(sort_col))
+        else:
+            query = query.order_by(sort_col)
         offset = (page - 1) * limit
         query = query.offset(offset).limit(limit)
         

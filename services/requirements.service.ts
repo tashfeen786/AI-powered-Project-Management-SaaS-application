@@ -1,16 +1,16 @@
 import { apiClient } from "./api";
-import { RequirementResponse, PaginatedData, StandardResponse } from "@/types/api";
+import { RequirementResponse, PaginatedData, StandardResponse, RequirementCreate, RequirementUpdate, GenerateRequirementRequest, RequirementQueryParams } from "@/types/api";
 
 export const RequirementsService = {
-  generateSrs: async (projectId: string, additionalContext?: string): Promise<RequirementResponse> => {
+  generateRequirement: async (projectId: string, request: GenerateRequirementRequest): Promise<RequirementResponse> => {
     const response: StandardResponse<RequirementResponse> = await apiClient.post(
       `/projects/${projectId}/requirements/generate`,
-      { additional_context: additionalContext }
+      request
     );
     return response.data!;
   },
 
-  getRequirements: async (projectId: string, params?: { page?: number; limit?: number }): Promise<PaginatedData<RequirementResponse>> => {
+  getRequirements: async (projectId: string, params?: RequirementQueryParams): Promise<PaginatedData<RequirementResponse>> => {
     const response: StandardResponse<PaginatedData<RequirementResponse>> = await apiClient.get(
       `/projects/${projectId}/requirements`,
       params
@@ -23,7 +23,12 @@ export const RequirementsService = {
     return response.data!;
   },
 
-  updateRequirement: async (requirementId: string, data: { generated_content?: any; status?: string }): Promise<RequirementResponse> => {
+  createRequirement: async (data: RequirementCreate): Promise<RequirementResponse> => {
+    const response: StandardResponse<RequirementResponse> = await apiClient.post("/requirements", data);
+    return response.data!;
+  },
+
+  updateRequirement: async (requirementId: string, data: RequirementUpdate): Promise<RequirementResponse> => {
     const response: StandardResponse<RequirementResponse> = await apiClient.patch(`/requirements/${requirementId}`, data);
     return response.data!;
   },
