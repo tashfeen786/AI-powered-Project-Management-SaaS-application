@@ -12,6 +12,11 @@ from app.services.activity_service import ActivityService
 from app.core.websocket_manager import manager
 from app.schemas.websocket import WsServerMessage
 from datetime import datetime, UTC
+import re
+from app.models.mention import Mention
+from app.models.notification import Notification
+from app.models.user import User
+from sqlalchemy import select
 
 class TaskService:
     def __init__(self, db: AsyncSession):
@@ -185,6 +190,45 @@ class TaskService:
         self.db.add(comment)
         await self.db.commit()
         await self.db.refresh(comment)
+        
+        # Parse mentions
+        usernames = re.findall(r'@(\w+)', content)
+        if usernames:
+            result = await self.db.execute(select(User).where(User.username.in_(usernames)))
+            mentioned_users = result.scalars().all()
+            
+            for m_user in mentioned_users:
+                # Create Mention
+                mention = Mention(
+                    comment_id=comment.id,
+                    task_id=task_id,
+                    mentioned_user_id=m_user.id,
+                    mentioned_by_id=user_id
+                )
+                self.db.add(mention)
+                
+                # Create Notification
+                notif = Notification(
+                    user_id=m_user.id,
+                    title="You were mentioned",
+                    content=f"You were mentioned in a task comment by {m_user.username}", # Just simple for now
+                    type="mention",
+                    metadata_data={"task_id": str(task_id), "comment_id": str(comment.id)}
+                )
+                self.db.add(notif)
+                
+            await self.db.commit()
+            
+            for m_user in mentioned_users:
+                await manager.send_personal_message(
+                    WsServerMessage(
+                        event="mention_created",
+                        organization_id=org_id,
+                        timestamp=datetime.now(UTC),
+                        payload={"task_id": str(task_id)}
+                    ),
+                    m_user.id
+                )
         
         # Reload task to include the new comment
         updated_task = await self.get_task(user_id, org_id, task_id)

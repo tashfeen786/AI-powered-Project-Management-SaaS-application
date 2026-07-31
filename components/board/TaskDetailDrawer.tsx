@@ -119,7 +119,7 @@ export function TaskDetailDrawer({ task, isOpen, onClose, onDelete, onEdit }: Ta
                   <MessageSquare className="w-4 h-4 text-text-secondary" />
                   Comments
                 </h3>
-                <TaskComments comments={task.comments || []} projectId={task.project_id} />
+                <TaskComments comments={task.comments || []} projectId={task.project_id} taskId={task.id} />
               </div>
 
               {/* Activity */}

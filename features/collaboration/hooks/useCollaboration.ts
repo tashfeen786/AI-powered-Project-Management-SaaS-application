@@ -1,7 +1,19 @@
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
-export type CollaborationEvent = "typing_status" | "task_updated" | "new_comment" | "presence_update";
+export type CollaborationEvent = 
+  | "typing_status" 
+  | "task_updated" 
+  | "new_comment" 
+  | "presence_update"
+  | "reaction_added"
+  | "reaction_removed"
+  | "attachment_uploaded"
+  | "watcher_added"
+  | "watcher_removed"
+  | "mention_created"
+  | "notification_created"
+  | "notification_read";
 
 interface WsMessage {
   event: CollaborationEvent;

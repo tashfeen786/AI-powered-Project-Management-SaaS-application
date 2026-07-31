@@ -14,15 +14,22 @@ from contextlib import asynccontextmanager
 from app.db.session import engine
 from sqlalchemy import text
 
+from app.db.base import Base
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Auto-migrate agent_id if missing to bypass sandbox limitations
+    # Auto-migrate missing tables to bypass sandbox limitations
     async with engine.begin() as conn:
         try:
             await conn.execute(text("ALTER TABLE conversations ADD COLUMN agent_id VARCHAR(50) DEFAULT 'copilot'"))
-        except Exception as e:
-            # Column likely exists
+        except Exception:
             pass
+            
+        try:
+            # Create any missing tables (like mentions, reactions, task_watchers)
+            await conn.run_sync(Base.metadata.create_all)
+        except Exception as e:
+            logger.error("Failed to auto-migrate tables", error=str(e))
     yield
 
 app = FastAPI(

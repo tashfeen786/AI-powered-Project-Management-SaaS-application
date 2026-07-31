@@ -38,8 +38,16 @@ export default function KanbanBoardPage({ params }: { params: Promise<{ id: stri
   
   // Connect to WS and listen for updates
   const { onlineUsers } = useCollaboration(projectId, (event, payload) => {
-    if (event === "task_updated" || event === "new_comment") {
-      // Someone else modified a task, refresh the board automatically
+    const refreshEvents = [
+      "task_updated", 
+      "new_comment", 
+      "reaction_added", 
+      "reaction_removed", 
+      "attachment_uploaded",
+      "watcher_added",
+      "watcher_removed"
+    ];
+    if (refreshEvents.includes(event)) {
       queryClient.invalidateQueries({ queryKey: ["tasks", projectId] });
     }
   });

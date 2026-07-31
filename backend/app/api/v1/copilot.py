@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List
+from typing import List, Optional
+from pydantic import BaseModel
 import uuid
 from app.db.session import get_db
 from app.schemas.copilot import ConversationResponse, ConversationDetailResponse, MessageResponse, CreateConversationRequest, ChatRequest

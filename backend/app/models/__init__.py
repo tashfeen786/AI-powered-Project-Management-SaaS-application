@@ -19,6 +19,9 @@ from .notification import Notification
 from .settings import Setting
 from .comment import Comment
 from .attachment import Attachment
+from .mention import Mention
+from .reaction import Reaction
+from .task_watcher import TaskWatcher
 
 # For Alembic to discover all models easily
 __all__ = [
@@ -42,5 +45,8 @@ __all__ = [
     "Notification",
     "Setting",
     "Comment",
-    "Attachment"
+    "Attachment",
+    "Mention",
+    "Reaction",
+    "TaskWatcher"
 ]
