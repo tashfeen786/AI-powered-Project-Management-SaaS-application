@@ -13,6 +13,8 @@ class Document(BaseModel):
     file_size: Mapped[int] = mapped_column(Integer)
     checksum: Mapped[str] = mapped_column(String(255))
     processing_status: Mapped[str] = mapped_column(String(50), default="Uploaded") # Uploaded, Queued, Processing, Processed, Failed
+    folder_path: Mapped[str] = mapped_column(String(255), default="root")
+    version: Mapped[int] = mapped_column(Integer, default=1)
     parser_version: Mapped[str | None] = mapped_column(String(50))
     
     project_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("projects.id"))

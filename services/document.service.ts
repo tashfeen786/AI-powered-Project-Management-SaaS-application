@@ -15,9 +15,10 @@ export const DocumentService = {
     return response.data!;
   },
 
-  uploadDocument: async (projectId: string, file: File): Promise<DocumentResponse> => {
+  uploadDocument: async (projectId: string, file: File, folderPath: string = "root"): Promise<DocumentResponse> => {
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("folder_path", folderPath);
 
     const response: StandardResponse<DocumentResponse> = await apiClient.post(
       `/projects/${projectId}/documents`,
@@ -30,6 +31,11 @@ export const DocumentService = {
     const response: StandardResponse<DocumentResponse> = await apiClient.patch(`/documents/${documentId}`, {
       filename,
     });
+    return response.data!;
+  },
+
+  updateDocument: async (documentId: string, updates: { filename?: string; folder_path?: string }): Promise<DocumentResponse> => {
+    const response: StandardResponse<DocumentResponse> = await apiClient.patch(`/documents/${documentId}`, updates);
     return response.data!;
   },
 

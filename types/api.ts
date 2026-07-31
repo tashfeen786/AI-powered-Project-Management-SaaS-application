@@ -159,6 +159,11 @@ export interface TaskUpdate {
   sprint_id?: string;
 }
 
+export interface DocumentUpdate {
+  filename?: string;
+  folder_path?: string;
+}
+
 // ============================================================
 // Document
 // ============================================================
@@ -170,6 +175,8 @@ export interface DocumentResponse {
   content_type: string;
   size_bytes: number;
   status: DocStatus;
+  folder_path: string;
+  version: number;
   project_id: string;
   organization_id: string;
   uploaded_by_id: string;
@@ -419,7 +426,15 @@ export interface SettingsData {
 // Activity
 // ============================================================
 export interface ActivityLog {
-  [key: string]: any;
+  id: string;
+  type: string;
+  description: string;
+  metadata_data: Record<string, any> | null;
+  project_id: string | null;
+  task_id: string | null;
+  actor_id: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 // ============================================================

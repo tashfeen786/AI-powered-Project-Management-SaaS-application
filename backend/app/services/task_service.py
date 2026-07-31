@@ -8,6 +8,7 @@ from app.models.task import Task
 from typing import Sequence, Tuple, Optional
 import uuid
 import time
+from app.services.activity_service import ActivityService
 
 class TaskService:
     def __init__(self, db: AsyncSession):
@@ -81,7 +82,17 @@ class TaskService:
         )
         
         created = await self.task_repo.create(task)
-        # TODO: Trigger Task Created Activity Hook
+        
+        act_service = ActivityService(self.db)
+        await act_service.log_activity(
+            project_id=task.project_id,
+            actor_id=user_id,
+            type="task_created",
+            description=f"Created task '{task.title}'",
+            task_id=task.id,
+            org_id=org_id
+        )
+        
         return created
 
     async def update_task(self, user_id: uuid.UUID, org_id: uuid.UUID, task_id: uuid.UUID, task_in: TaskUpdate) -> Task:
@@ -96,7 +107,17 @@ class TaskService:
             setattr(task, field, value)
             
         updated = await self.task_repo.update(task)
-        # TODO: Trigger Task Updated Activity Hook
+        
+        act_service = ActivityService(self.db)
+        await act_service.log_activity(
+            project_id=task.project_id,
+            actor_id=user_id,
+            type="task_updated",
+            description=f"Updated task '{task.title}'",
+            task_id=task.id,
+            org_id=org_id
+        )
+        
         return updated
         
     async def move_task(self, user_id: uuid.UUID, org_id: uuid.UUID, task_id: uuid.UUID, move_in: TaskMove) -> Task:

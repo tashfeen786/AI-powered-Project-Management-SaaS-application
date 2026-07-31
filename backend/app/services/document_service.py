@@ -12,6 +12,7 @@ from app.utils.file_utils import compute_checksum
 import uuid
 import structlog
 from typing import Sequence, Tuple
+from app.services.activity_service import ActivityService
 
 logger = structlog.get_logger()
 
@@ -24,7 +25,7 @@ class DocumentService:
         self.doc_repo = DocumentRepository(db)
         self.project_repo = ProjectRepository(db)
         
-    async def upload_document(self, user_id: uuid.UUID, org_id: uuid.UUID, project_id: uuid.UUID, file: UploadFile) -> Document:
+    async def upload_document(self, user_id: uuid.UUID, org_id: uuid.UUID, project_id: uuid.UUID, file: UploadFile, folder_path: str = "root") -> Document:
         # Validate Project
         project = await self.project_repo.get_by_id(project_id, org_id)
         if not project:
@@ -69,11 +70,21 @@ class DocumentService:
             processing_status="Uploaded",
             project_id=project_id,
             organization_id=org_id,
-            uploaded_by_id=user_id
+            uploaded_by_id=user_id,
+            folder_path=folder_path
         )
         
         created = await self.doc_repo.create(doc)
         logger.info("Document Uploaded", doc_id=str(created.id), project_id=str(project_id))
+        
+        act_service = ActivityService(self.db)
+        await act_service.log_activity(
+            project_id=project_id,
+            actor_id=user_id,
+            type="document_uploaded",
+            description=f"Uploaded document '{file.filename}'",
+            org_id=org_id
+        )
         
         # Queue Processing immediately
         await self.process_document(created.id, org_id, file_bytes)
@@ -154,17 +165,19 @@ class DocumentService:
         await StorageService.delete_file(org_id, doc.project_id, doc.filename)
         logger.info("Document Deleted", doc_id=str(doc.id))
         
-    async def rename_document(self, org_id: uuid.UUID, doc_id: uuid.UUID, new_name: str) -> Document:
-        if not new_name.strip():
-            raise HTTPException(status_code=400, detail="Filename cannot be empty")
-            
+    async def update_document(self, org_id: uuid.UUID, doc_id: uuid.UUID, new_name: str = None, new_folder: str = None) -> Document:
         doc = await self.get_document(org_id, doc_id)
         
-        # Preserve original extension visually
-        if not new_name.endswith(doc.extension):
-            new_name += doc.extension
+        if new_name is not None:
+            if not new_name.strip():
+                raise HTTPException(status_code=400, detail="Filename cannot be empty")
+            if not new_name.endswith(doc.extension):
+                new_name += doc.extension
+            doc.original_filename = new_name
             
-        doc.original_filename = new_name
+        if new_folder is not None:
+            doc.folder_path = new_folder
+            
         updated = await self.doc_repo.update(doc)
-        logger.info("Document Renamed", doc_id=str(doc.id), new_name=new_name)
+        logger.info("Document Updated", doc_id=str(doc.id), new_name=new_name, new_folder=new_folder)
         return updated

@@ -5,6 +5,7 @@ import uuid
 
 class DocumentUpdate(BaseModel):
     filename: Optional[str] = None
+    folder_path: Optional[str] = None
 
 class DocumentResponse(BaseModel):
     id: uuid.UUID
@@ -18,6 +19,8 @@ class DocumentResponse(BaseModel):
     file_size: int
     checksum: str
     processing_status: str
+    folder_path: str = "root"
+    version: int = 1
     parser_version: Optional[str] = None
     created_at: datetime
     updated_at: datetime

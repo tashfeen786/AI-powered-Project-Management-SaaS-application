@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, UploadFile, File
+from fastapi import APIRouter, Depends, Query, UploadFile, File, Form, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 import uuid
@@ -10,7 +10,7 @@ from app.dependencies.auth import get_current_active_user
 from app.models.user import User
 from app.utils.response import StandardResponse, success_response, paginated_response
 from app.repositories.organization_repository import OrganizationRepository
-from fastapi import HTTPException
+
 
 router = APIRouter()
 
@@ -55,13 +55,14 @@ async def list_project_documents(
 async def upload_document(
     project_id: uuid.UUID,
     file: UploadFile = File(...),
+    folder_path: str = Form("root"),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
     org_id = await verify_org_and_role(current_user, db, Permission.MANAGE_DOCUMENTS)
     doc_service = DocumentService(db)
     
-    doc = await doc_service.upload_document(current_user.id, org_id, project_id, file)
+    doc = await doc_service.upload_document(current_user.id, org_id, project_id, file, folder_path)
     return success_response(data=DocumentResponse.model_validate(doc), message="Document uploaded and processing started")
 
 @router.get("/documents/{id}", response_model=StandardResponse[DocumentResponse])
@@ -86,8 +87,8 @@ async def rename_document(
     org_id = await verify_org_and_role(current_user, db, Permission.MANAGE_DOCUMENTS)
     doc_service = DocumentService(db)
     
-    if update_in.filename:
-        doc = await doc_service.rename_document(org_id, id, update_in.filename)
+    if update_in.filename or update_in.folder_path:
+        doc = await doc_service.update_document(org_id, id, update_in.filename, update_in.folder_path)
     else:
         doc = await doc_service.get_document(org_id, id)
         
