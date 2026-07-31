@@ -14,7 +14,7 @@ interface InviteMemberDialogProps {
 
 export function InviteMemberDialog({ isOpen, onClose, onInvite, isInviting }: InviteMemberDialogProps) {
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<TeamRole>("developer");
+  const [role, setRole] = useState<TeamRole>("member");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,10 +68,10 @@ export function InviteMemberDialog({ isOpen, onClose, onInvite, isInviting }: In
                   onChange={(e) => setRole(e.target.value as TeamRole)}
                   className="w-full h-9 px-3 bg-background border border-border rounded-md text-sm text-text-primary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 >
-                  <option value="developer">Developer</option>
-                  <option value="project_manager">Project Manager</option>
-                  <option value="designer">Designer</option>
-                  <option value="qa">QA</option>
+                  <option value="owner">Owner</option>
+                  <option value="admin">Admin</option>
+                  <option value="member">Member</option>
+                  <option value="viewer">Viewer</option>
                 </select>
               </div>
 

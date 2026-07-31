@@ -1,11 +1,11 @@
-import { Task } from "@/features/tasks/mock-data";
+import { TaskResponse } from "@/types/api";
 import { PriorityBadge } from "./PriorityBadge";
 import { AssigneeAvatar } from "./AssigneeAvatar";
 import { MessageSquare, Paperclip, Calendar } from "lucide-react";
 
 interface TaskCardProps {
-  task: Task;
-  onClick: (task: Task) => void;
+  task: TaskResponse;
+  onClick: (task: TaskResponse) => void;
   onDragStart: (e: React.DragEvent, taskId: string) => void;
 }
 
@@ -24,13 +24,13 @@ export function TaskCard({ task, onClick, onDragStart }: TaskCardProps) {
       <div className="flex items-center gap-2 mb-4">
         <PriorityBadge priority={task.priority} />
         <span className="bg-background text-text-secondary border border-border px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider">
-          {task.storyPoints} SP
+          {task.story_points || 0} SP
         </span>
       </div>
       
       <div className="flex items-center justify-between text-text-secondary mt-auto pt-1">
         <div className="flex items-center gap-3">
-          {task.comments.length > 0 && (
+          {task.comments && task.comments.length > 0 && (
             <div className="flex items-center gap-1 text-[11px] font-medium">
               <MessageSquare className="w-3.5 h-3.5" />
               {task.comments.length}
@@ -38,10 +38,10 @@ export function TaskCard({ task, onClick, onDragStart }: TaskCardProps) {
           )}
           <div className="flex items-center gap-1 text-[11px] font-medium" title="Due Date">
             <Calendar className="w-3.5 h-3.5" />
-            {task.dueDate}
+            {task.due_date ? task.due_date : "No date"}
           </div>
         </div>
-        <AssigneeAvatar initials={task.assigneeAvatar} name={task.assignee} />
+        <AssigneeAvatar initials={task.assignee_id ? "US" : "UN"} name={task.assignee_id ? "User" : "Unassigned"} />
       </div>
     </div>
   );

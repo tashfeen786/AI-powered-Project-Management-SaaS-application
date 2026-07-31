@@ -5,6 +5,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { BoardHeader } from "@/components/board/BoardHeader";
 import { KanbanBoard } from "@/components/board/KanbanBoard";
 import { BoardSkeleton } from "@/components/board/BoardSkeleton";
+import { CreateTaskModal } from "@/components/board/CreateTaskModal";
 import { useTasks } from "@/features/tasks/hooks/useTasks";
 import { useUpdateTask } from "@/features/tasks/hooks/useUpdateTask";
 import { TaskStatus } from "@/types/api";
@@ -30,6 +31,7 @@ export default function KanbanBoardPage({ params }: { params: Promise<{ id: stri
   const { data: tasks, isLoading } = useTasks(projectId);
   const { mutate: updateTask } = useUpdateTask(projectId);
   const [toastMessage, setToastMessage] = useState("");
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const handleUpdateTaskStatus = (taskId: string, status: TaskStatus) => {
     updateTask(
@@ -69,7 +71,7 @@ export default function KanbanBoardPage({ params }: { params: Promise<{ id: stri
           </div>
         </div>
         
-        <BoardHeader />
+        <BoardHeader onCreateClick={() => setIsCreateModalOpen(true)} />
         
         <div className="flex-1 min-h-0 relative">
           {isLoading ? (
@@ -92,6 +94,11 @@ export default function KanbanBoardPage({ params }: { params: Promise<{ id: stri
         </div>
         
         <Toast message={toastMessage} show={!!toastMessage} />
+        <CreateTaskModal 
+          isOpen={isCreateModalOpen} 
+          onClose={() => setIsCreateModalOpen(false)} 
+          projectId={projectId} 
+        />
       </div>
     </AppLayout>
   );

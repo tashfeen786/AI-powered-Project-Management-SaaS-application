@@ -1,6 +1,6 @@
-import { Activity } from "@/features/tasks/mock-data";
 
-export function TaskActivity({ activity }: { activity: Activity[] }) {
+
+export function TaskActivity({ activity }: { activity: any[] }) {
   if (!activity || activity.length === 0) return <div className="text-sm text-text-secondary">No recent activity.</div>;
 
   return (
@@ -11,9 +11,9 @@ export function TaskActivity({ activity }: { activity: Activity[] }) {
         <div key={item.id} className="relative">
           <div className="absolute -left-[23px] top-1.5 w-2 h-2 rounded-full bg-primary ring-4 ring-surface"></div>
           <p className="text-sm text-text-primary">
-            <span className="font-semibold">{item.user}</span> {item.action}
+            <span className="font-semibold">{"User"}</span> {item.type} - {item.description}
           </p>
-          <span className="text-xs text-text-secondary">{item.timestamp}</span>
+          <span className="text-xs text-text-secondary">{new Date(item.created_at).toLocaleString()}</span>
         </div>
       ))}
     </div>

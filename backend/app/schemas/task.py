@@ -6,7 +6,7 @@ import uuid
 class TaskBase(BaseModel):
     title: str = Field(..., min_length=1, max_length=255)
     description: Optional[str] = None
-    status: str = "To Do"
+    status: str = "Todo"
     priority: str = "Medium"
     story_points: Optional[int] = 0
     estimated_hours: Optional[float] = 0.0
@@ -38,6 +38,41 @@ class TaskMove(BaseModel):
 class TaskAssign(BaseModel):
     assignee_id: Optional[uuid.UUID] = None
 
+class CommentCreate(BaseModel):
+    content: str = Field(..., min_length=1)
+
+class TaskCommentResponse(BaseModel):
+    id: uuid.UUID
+    content: str
+    author_id: uuid.UUID
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class TaskAttachmentResponse(BaseModel):
+    id: uuid.UUID
+    filename: str
+    file_url: str
+    file_size: int
+    content_type: str
+    uploaded_by_id: uuid.UUID
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class TaskActivityResponse(BaseModel):
+    id: uuid.UUID
+    type: str
+    description: str
+    metadata_data: Optional[Dict[str, Any]] = None
+    actor_id: Optional[uuid.UUID] = None
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
 class TaskResponse(TaskBase):
     id: uuid.UUID
     project_id: uuid.UUID
@@ -45,6 +80,9 @@ class TaskResponse(TaskBase):
     assignee_id: Optional[uuid.UUID]
     reporter_id: Optional[uuid.UUID]
     order_index: float
+    comments: List[TaskCommentResponse] = []
+    attachments: List[TaskAttachmentResponse] = []
+    activities: List[TaskActivityResponse] = []
     created_at: datetime
     updated_at: datetime
     

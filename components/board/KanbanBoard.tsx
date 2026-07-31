@@ -1,20 +1,36 @@
 "use client";
 
 import { useState } from "react";
-import { Task, TaskStatus } from "@/features/tasks/mock-data";
+import { useDeleteTask } from "@/features/tasks/hooks/useDeleteTask";
+import { TaskResponse, TaskStatus } from "@/types/api";
 import { KanbanColumn } from "./KanbanColumn";
 import { TaskDetailDrawer } from "./TaskDetailDrawer";
+import { EditTaskModal } from "./EditTaskModal";
 
 interface KanbanBoardProps {
-  tasks: Task[];
+  tasks: TaskResponse[];
   onUpdateTaskStatus: (taskId: string, newStatus: TaskStatus) => void;
 }
 
 export function KanbanBoard({ tasks, onUpdateTaskStatus }: KanbanBoardProps) {
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [selectedTask, setSelectedTask] = useState<TaskResponse | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<TaskStatus | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  
+  const projectId = tasks[0]?.project_id || ""; // Safe fallback
+  const { mutate: deleteTask } = useDeleteTask(projectId);
 
-  const columns: TaskStatus[] = ["To Do", "In Progress", "Review", "Done"];
+  const handleDelete = (taskId: string) => {
+    deleteTask(taskId, {
+      onSuccess: () => {
+        if (selectedTask?.id === taskId) {
+          setSelectedTask(null);
+        }
+      }
+    });
+  };
+
+  const columns: TaskStatus[] = ["Backlog", "Todo", "In Progress", "Review", "Done"];
 
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
     e.dataTransfer.setData("taskId", taskId);
@@ -62,7 +78,16 @@ export function KanbanBoard({ tasks, onUpdateTaskStatus }: KanbanBoardProps) {
         task={selectedTask} 
         isOpen={!!selectedTask} 
         onClose={() => setSelectedTask(null)} 
+        onDelete={handleDelete}
+        onEdit={() => setIsEditModalOpen(true)}
       />
+      {selectedTask && (
+        <EditTaskModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          task={selectedTask}
+        />
+      )}
     </>
   );
 }

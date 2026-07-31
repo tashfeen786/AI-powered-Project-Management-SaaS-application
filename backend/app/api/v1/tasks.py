@@ -123,3 +123,17 @@ async def delete_task(
     task_service = TaskService(db)
     await task_service.delete_task(current_user.id, org_id, id)
     return success_response(message="Task deleted")
+
+from app.schemas.task import CommentCreate
+
+@router.post("/tasks/{id}/comments", response_model=StandardResponse[TaskResponse])
+async def add_task_comment(
+    id: uuid.UUID,
+    comment_in: CommentCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+    org_id: uuid.UUID = Depends(get_org_id)
+):
+    task_service = TaskService(db)
+    task = await task_service.add_comment(current_user.id, org_id, id, comment_in.content)
+    return success_response(data=TaskResponse.model_validate(task), message="Comment added")

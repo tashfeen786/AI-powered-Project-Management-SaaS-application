@@ -9,7 +9,7 @@ class Task(BaseModel):
 
     title: Mapped[str] = mapped_column(String(255), index=True)
     description: Mapped[str | None] = mapped_column(Text)
-    status: Mapped[str] = mapped_column(String(50), default="To Do", index=True) # To Do, In Progress, Review, Done
+    status: Mapped[str] = mapped_column(String(50), default="Todo", index=True) # Backlog, Todo, In Progress, Review, Done
     priority: Mapped[str] = mapped_column(String(50), default="Medium") # Low, Medium, High, Critical
     
     story_points: Mapped[int | None] = mapped_column(Integer, default=0)
@@ -34,6 +34,6 @@ class Task(BaseModel):
     sprint_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("sprints.id"))
     sprint: Mapped["Sprint"] = relationship(back_populates="tasks")
     
-    # Placeholder for Comments & Activity
-    # comments: Mapped[List["Comment"]] = relationship(back_populates="task", cascade="all, delete-orphan")
-    # activities: Mapped[List["Activity"]] = relationship(back_populates="task", cascade="all, delete-orphan")
+    comments: Mapped[list["Comment"]] = relationship(back_populates="task", cascade="all, delete-orphan")
+    attachments: Mapped[list["Attachment"]] = relationship(back_populates="task", cascade="all, delete-orphan")
+    activities: Mapped[list["Activity"]] = relationship(back_populates="task", cascade="all, delete-orphan")

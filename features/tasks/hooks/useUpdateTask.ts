@@ -1,14 +1,18 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TaskService } from "@/services/task.service";
-import { TaskStatus, TaskResponse, PaginatedData } from "@/types/api";
+import { TaskUpdate, TaskResponse, PaginatedData } from "@/types/api";
+
+interface UpdateTaskArgs extends TaskUpdate {
+  taskId: string;
+}
 
 export function useUpdateTask(projectId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ taskId, status }: { taskId: string; status: TaskStatus }) => 
-      TaskService.updateTaskStatus(taskId, status),
-    onMutate: async ({ taskId, status }) => {
+    mutationFn: ({ taskId, ...data }: UpdateTaskArgs) => 
+      TaskService.updateTask(taskId, data),
+    onMutate: async ({ taskId, ...data }) => {
       await queryClient.cancelQueries({ queryKey: ["tasks", projectId] });
       const previousData = queryClient.getQueryData<PaginatedData<TaskResponse>>(["tasks", projectId]);
       
@@ -17,7 +21,7 @@ export function useUpdateTask(projectId: string) {
           ["tasks", projectId],
           {
             ...previousData,
-            items: previousData.items.map(t => t.id === taskId ? { ...t, status } : t),
+            items: previousData.items.map(t => t.id === taskId ? { ...t, ...data } : t),
           }
         );
       }

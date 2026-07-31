@@ -1,6 +1,6 @@
 "use client";
 
-import { Task } from "@/features/tasks/mock-data";
+import { TaskResponse } from "@/types/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, AlignLeft, Activity, MessageSquare } from "lucide-react";
 import { PriorityBadge } from "./PriorityBadge";
@@ -10,12 +10,14 @@ import { TaskComments } from "./TaskComments";
 import { TaskActivity } from "./TaskActivity";
 
 interface TaskDetailDrawerProps {
-  task: Task | null;
+  task: TaskResponse | null;
   isOpen: boolean;
   onClose: () => void;
+  onDelete?: (taskId: string) => void;
+  onEdit?: () => void;
 }
 
-export function TaskDetailDrawer({ task, isOpen, onClose }: TaskDetailDrawerProps) {
+export function TaskDetailDrawer({ task, isOpen, onClose, onDelete, onEdit }: TaskDetailDrawerProps) {
   return (
     <AnimatePresence>
       {isOpen && task && (
@@ -39,12 +41,30 @@ export function TaskDetailDrawer({ task, isOpen, onClose }: TaskDetailDrawerProp
               <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-text-secondary">
                 {task.id.toUpperCase()}
               </div>
-              <button 
-                onClick={onClose}
-                className="p-1.5 text-text-secondary hover:text-text-primary hover:bg-surface rounded transition-colors focus:outline-none"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-2">
+                {onEdit && (
+                  <button 
+                    onClick={onEdit}
+                    className="p-1.5 text-primary hover:bg-primary/10 rounded transition-colors focus:outline-none text-xs font-semibold"
+                  >
+                    Edit
+                  </button>
+                )}
+                {onDelete && (
+                  <button 
+                    onClick={() => onDelete(task.id)}
+                    className="p-1.5 text-danger hover:bg-danger/10 rounded transition-colors focus:outline-none text-xs font-semibold"
+                  >
+                    Delete
+                  </button>
+                )}
+                <button 
+                  onClick={onClose}
+                  className="p-1.5 text-text-secondary hover:text-text-primary hover:bg-surface rounded transition-colors focus:outline-none"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             {/* Content */}
@@ -64,21 +84,21 @@ export function TaskDetailDrawer({ task, isOpen, onClose }: TaskDetailDrawerProp
                 <div>
                   <div className="text-xs font-semibold text-text-secondary mb-1 uppercase tracking-wider">Assignee</div>
                   <div className="flex items-center gap-2">
-                    <AssigneeAvatar initials={task.assigneeAvatar} name={task.assignee} />
-                    <span className="text-sm font-medium text-text-primary">{task.assignee}</span>
+                    <AssigneeAvatar initials={task.assignee_id ? "US" : "UN"} name={task.assignee_id ? "User" : "Unassigned"} />
+                    <span className="text-sm font-medium text-text-primary">{task.assignee_id ? "User" : "Unassigned"}</span>
                   </div>
                 </div>
                 <div>
                   <div className="text-xs font-semibold text-text-secondary mb-1 uppercase tracking-wider">Sprint</div>
-                  <span className="text-sm font-medium text-text-primary">{task.sprint}</span>
+                  <span className="text-sm font-medium text-text-primary">{task.sprint_id ? "Current Sprint" : "Backlog"}</span>
                 </div>
                 <div>
                   <div className="text-xs font-semibold text-text-secondary mb-1 uppercase tracking-wider">Estimate</div>
-                  <span className="text-sm font-medium text-text-primary">{task.storyPoints} SP ({task.estimatedHours}h)</span>
+                  <span className="text-sm font-medium text-text-primary">{task.story_points || 0} SP ({task.estimated_hours || 0}h)</span>
                 </div>
                 <div>
                   <div className="text-xs font-semibold text-text-secondary mb-1 uppercase tracking-wider">Due Date</div>
-                  <span className="text-sm font-medium text-text-primary">{task.dueDate}</span>
+                  <span className="text-sm font-medium text-text-primary">{task.due_date || "No date"}</span>
                 </div>
               </div>
 
@@ -108,7 +128,7 @@ export function TaskDetailDrawer({ task, isOpen, onClose }: TaskDetailDrawerProp
                   <Activity className="w-4 h-4 text-text-secondary" />
                   Activity
                 </h3>
-                <TaskActivity activity={task.activity} />
+                <TaskActivity activity={task.activities || []} />
               </div>
             </div>
             

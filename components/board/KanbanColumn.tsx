@@ -1,12 +1,12 @@
-import { Task, TaskStatus } from "@/features/tasks/mock-data";
+import { TaskResponse, TaskStatus } from "@/types/api";
 import { TaskCard } from "./TaskCard";
 import { EmptyColumn } from "./EmptyColumn";
 import { cn } from "@/lib/utils";
 
 interface KanbanColumnProps {
   title: TaskStatus;
-  tasks: Task[];
-  onTaskClick: (task: Task) => void;
+  tasks: TaskResponse[];
+  onTaskClick: (task: TaskResponse) => void;
   onDragStart: (e: React.DragEvent, taskId: string) => void;
   onDragOver: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent, status: TaskStatus) => void;

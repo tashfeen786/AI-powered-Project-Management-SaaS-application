@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Comment } from "@/features/tasks/mock-data";
+
 import { Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export function TaskComments({ comments }: { comments: Comment[] }) {
+export function TaskComments({ comments }: { comments: any[] }) {
   const [text, setText] = useState("");
 
   return (
@@ -38,15 +38,15 @@ export function TaskComments({ comments }: { comments: Comment[] }) {
         {comments.map(c => (
           <div key={c.id} className="flex gap-3">
             <div className="w-8 h-8 rounded-full bg-background border border-border flex items-center justify-center text-xs font-bold text-text-primary shrink-0">
-              {c.avatar}
+              {c.author_id ? "U" : "U"}
             </div>
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-sm font-semibold text-text-primary">{c.user}</span>
-                <span className="text-xs text-text-secondary">{c.timestamp}</span>
+                <span className="text-sm font-semibold text-text-primary">{"User"}</span>
+                <span className="text-xs text-text-secondary">{new Date(c.created_at).toLocaleDateString()}</span>
               </div>
               <p className="text-sm text-text-secondary leading-relaxed bg-surface border border-border rounded-lg px-3 py-2 rounded-tl-sm">
-                {c.text}
+                {c.content}
               </p>
             </div>
           </div>

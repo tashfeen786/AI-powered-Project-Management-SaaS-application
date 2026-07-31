@@ -23,7 +23,6 @@ export function ConversationItem({ conversation, isActive, onClick }: Conversati
         <span className="text-sm font-medium text-text-primary line-clamp-1">{conversation.title || "New Chat"}</span>
         <span className="text-[10px] text-text-secondary whitespace-nowrap ml-2">{(conversation as any).updatedAt}</span>
       </div>
-      </button>
     </div>
   );
 }

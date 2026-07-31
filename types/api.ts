@@ -105,7 +105,7 @@ export interface ProjectUpdate {
 // ============================================================
 // Task
 // ============================================================
-export type TaskStatus = "To Do" | "In Progress" | "Review" | "Done";
+export type TaskStatus = "Backlog" | "Todo" | "In Progress" | "Review" | "Done";
 export type TaskPriority = "High" | "Medium" | "Low";
 
 export interface TaskResponse {
@@ -125,6 +125,9 @@ export interface TaskResponse {
   assignee_id: string | null;
   reporter_id: string | null;
   order_index: number;
+  comments: any[];
+  attachments: any[];
+  activities: any[];
   created_at: string;
   updated_at: string;
 }

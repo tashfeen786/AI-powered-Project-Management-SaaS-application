@@ -136,3 +136,20 @@ class TaskService:
             
         await self.task_repo.delete(task)
         # TODO: Trigger Task Deleted Activity Hook
+
+    async def add_comment(self, user_id: uuid.UUID, org_id: uuid.UUID, task_id: uuid.UUID, content: str):
+        role = await self._check_permission(user_id, org_id)
+        task = await self.get_task(user_id, org_id, task_id)
+        
+        from app.models.comment import Comment
+        comment = Comment(
+            content=content,
+            task_id=task_id,
+            author_id=user_id
+        )
+        self.db.add(comment)
+        await self.db.commit()
+        await self.db.refresh(comment)
+        
+        # Reload task to include the new comment
+        return await self.get_task(user_id, org_id, task_id)

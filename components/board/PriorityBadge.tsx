@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { TaskPriority } from "@/features/tasks/mock-data";
+import { TaskPriority } from "@/types/api";
 
 export function PriorityBadge({ priority }: { priority: TaskPriority }) {
   const styles = {

@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, desc, asc, or_
 from app.models.task import Task
 import uuid
+from sqlalchemy.orm import selectinload
 from typing import Sequence, Tuple, Optional
 
 class TaskRepository:
@@ -22,7 +23,11 @@ class TaskRepository:
         sort: str = "manual"
     ) -> Tuple[Sequence[Task], int]:
         
-        query = select(Task).where(
+        query = select(Task).options(
+            selectinload(Task.comments),
+            selectinload(Task.attachments),
+            selectinload(Task.activities)
+        ).where(
             Task.project_id == project_id, 
             Task.organization_id == org_id,
             Task.is_deleted == False
@@ -68,11 +73,16 @@ class TaskRepository:
         return items, total
 
     async def get_by_id(self, task_id: uuid.UUID, org_id: uuid.UUID) -> Task | None:
-        result = await self.db.execute(select(Task).where(
+        result = await self.db.execute(select(Task).options(
+            selectinload(Task.comments),
+            selectinload(Task.attachments),
+            selectinload(Task.activities)
+        ).where(
             Task.id == task_id, 
             Task.organization_id == org_id,
             Task.is_deleted == False
         ))
+
         return result.scalar_one_or_none()
         
     async def create(self, task: Task) -> Task:

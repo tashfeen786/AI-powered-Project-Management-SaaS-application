@@ -14,5 +14,8 @@ class Activity(BaseModel):
     project_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("projects.id"))
     project: Mapped["Project"] = relationship(back_populates="activities")
     
+    task_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("tasks.id"))
+    task: Mapped["Task"] = relationship(back_populates="activities")
+    
     actor_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"))
     actor: Mapped["User"] = relationship()

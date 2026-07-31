@@ -17,6 +17,8 @@ from .message import Message
 from .background_job import BackgroundJob
 from .notification import Notification
 from .settings import Setting
+from .comment import Comment
+from .attachment import Attachment
 
 # For Alembic to discover all models easily
 __all__ = [
@@ -38,5 +40,7 @@ __all__ = [
     "Message",
     "BackgroundJob",
     "Notification",
-    "Setting"
+    "Setting",
+    "Comment",
+    "Attachment"
 ]
