@@ -1,6 +1,16 @@
 import { StandardResponse } from "@/types/api";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+// Determine API URL based on environment or browser context
+const getApiUrl = () => {
+  if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL;
+  if (typeof window !== "undefined") {
+    // If accessed via a local network IP, point to that IP's port 8000
+    return `${window.location.protocol}//${window.location.hostname}:8000/api/v1`;
+  }
+  return "http://localhost:8000/api/v1";
+};
+
+const API_URL = getApiUrl();
 
 interface RequestOptions extends RequestInit {
   requireAuth?: boolean;

@@ -31,10 +31,15 @@ export function useCollaboration(projectId?: string, onMessage?: (event: Collabo
   useEffect(() => {
     if (!token || typeof window === "undefined") return;
 
-    // Parse the backend API URL to build the WS URL correctly
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
-    // Replace http:// or https:// with ws:// or wss://
-    let wsBaseUrl = apiBaseUrl.replace(/^http/, "ws");
+    // Build the WebSocket URL dynamically based on current host or configured env
+    let wsBaseUrl = "";
+    if (process.env.NEXT_PUBLIC_API_URL) {
+      wsBaseUrl = process.env.NEXT_PUBLIC_API_URL.replace(/^http/, "ws");
+    } else {
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const host = window.location.hostname; // Supports both localhost and LAN IP
+      wsBaseUrl = `${protocol}//${host}:8000/api/v1`;
+    }
     
     const wsUrl = `${wsBaseUrl}/ws/organization?token=${token}`;
     
