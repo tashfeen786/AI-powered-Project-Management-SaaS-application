@@ -84,9 +84,9 @@ function LoginForm() {
                 {...register("rememberMe")}
                 disabled={isLoading}
               />
-              Remember me
+              <span className="select-none">Remember me</span>
             </label>
-            <Link href="/forgot-password" className="text-xs text-primary hover:underline font-medium">
+            <Link href="/forgot-password" className="text-xs font-medium text-primary hover:opacity-80 transition-opacity">
               Forgot password?
             </Link>
           </div>

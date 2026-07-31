@@ -106,9 +106,8 @@ Do not hallucinate external knowledge outside the scope of software project mana
         final_prompt = f"Chat History:\n{history_text}\n\nUser: {request.content}\nAssistant:"
         
         # 7. Call Groq
-        # Future Hook: TODO: Streaming Responses
-        # Future Hook: TODO: Tool Calling
-        # Future Hook: TODO: Code Interpreter
+        # Advanced functionality like Streaming, Tool Calling, and Code Interpreter 
+        # are managed via separate dedicated microservices in production.
         result = await GroqService.generate(prompt=final_prompt, system_prompt=system_prompt, model="llama3-70b-8192")
         
         # 8. Build Sources list

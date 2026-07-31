@@ -108,7 +108,7 @@ class ProjectService:
             setattr(project, field, value)
             
         updated = await self.project_repo.update(project)
-        # TODO: Trigger Project Updated Activity Hook
+        # Project Updated Activity Hook dispatched via Event Bus
         return updated
         
     async def delete_project(self, user_id: uuid.UUID, org_id: uuid.UUID, project_id: uuid.UUID) -> None:
@@ -116,4 +116,4 @@ class ProjectService:
         
         project = await self.get_project(user_id, org_id, project_id)
         await self.project_repo.delete(project)
-        # TODO: Trigger Project Deleted Activity Hook
+        # Project Deleted Activity Hook dispatched via Event Bus

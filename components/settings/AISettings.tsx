@@ -26,8 +26,8 @@ export function AISettings({ settings, onChange }: AISettingsProps) {
               className="w-full h-9 px-3 bg-background border border-border rounded-md text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
             >
               <option value="OpenAI">OpenAI</option>
-              <option value="Anthropic" disabled>Anthropic (Coming Soon)</option>
-              <option value="Google" disabled>Google Gemini (Coming Soon)</option>
+              <option value="Anthropic">Anthropic Claude</option>
+              <option value="Google">Google Gemini</option>
             </select>
           </div>
           <div>

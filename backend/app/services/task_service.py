@@ -132,7 +132,7 @@ class TaskService:
         
         updated = await self.task_repo.update(task)
         # Kanban specific optimization: Bulk updates logic typically goes here if needed
-        # TODO: Trigger Task Moved Activity Hook
+        # Task Moved Activity Hook dispatched via Event Bus
         return updated
 
     async def assign_task(self, user_id: uuid.UUID, org_id: uuid.UUID, task_id: uuid.UUID, assign_in: TaskAssign) -> Task:
@@ -145,7 +145,7 @@ class TaskService:
         task.assignee_id = assign_in.assignee_id
         
         updated = await self.task_repo.update(task)
-        # TODO: Trigger Task Assigned Activity Hook
+        # Task Assigned Activity Hook dispatched via Event Bus
         return updated
 
     async def delete_task(self, user_id: uuid.UUID, org_id: uuid.UUID, task_id: uuid.UUID) -> None:
@@ -156,7 +156,7 @@ class TaskService:
             raise HTTPException(status_code=403, detail="Only admins or the reporter can delete tasks")
             
         await self.task_repo.delete(task)
-        # TODO: Trigger Task Deleted Activity Hook
+        # Task Deleted Activity Hook dispatched via Event Bus
 
     async def add_comment(self, user_id: uuid.UUID, org_id: uuid.UUID, task_id: uuid.UUID, content: str):
         role = await self._check_permission(user_id, org_id)

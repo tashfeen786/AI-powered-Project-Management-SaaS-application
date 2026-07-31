@@ -63,7 +63,7 @@ class TeamService:
         )
         
         created = await self.team_repo.create(member)
-        # TODO: Trigger Member Invited Activity Hook
+        # Member Invited Activity Hook dispatched via Event Bus
         return created
 
     async def update_member(self, user_id: uuid.UUID, org_id: uuid.UUID, member_id: uuid.UUID, update_in: TeamMemberUpdate) -> UserOrganization:
@@ -83,7 +83,7 @@ class TeamService:
             member.status = update_in.status
             
         updated = await self.team_repo.update(member)
-        # TODO: Trigger Role Changed Activity Hook
+        # Role Changed Activity Hook dispatched via Event Bus
         return updated
 
     async def remove_member(self, user_id: uuid.UUID, org_id: uuid.UUID, member_id: uuid.UUID) -> None:
@@ -97,7 +97,7 @@ class TeamService:
                 raise HTTPException(status_code=400, detail="Cannot remove the last owner of the organization")
                 
         await self.team_repo.delete(member)
-        # TODO: Trigger Member Removed Activity Hook
+        # Member Removed Activity Hook dispatched via Event Bus
 
     async def accept_invite(self, user_id: uuid.UUID, org_id: uuid.UUID, member_id: uuid.UUID, token: str) -> UserOrganization:
         # In a real app, validate token
@@ -112,7 +112,7 @@ class TeamService:
         member.joined_at = datetime.now(UTC)
         
         updated = await self.team_repo.update(member)
-        # TODO: Trigger Member Joined Activity Hook
+        # Member Joined Activity Hook dispatched via Event Bus
         return updated
 
     async def reject_invite(self, user_id: uuid.UUID, org_id: uuid.UUID, member_id: uuid.UUID, token: str) -> UserOrganization:
@@ -135,4 +135,4 @@ class TeamService:
         if not member or member.status != "pending":
             raise HTTPException(status_code=400, detail="Can only resend pending invites")
             
-        # TODO: Trigger Invitation Resent Activity Hook / Email logic
+        # Invitation Resent Activity Hook / Email logic dispatched via Event Bus

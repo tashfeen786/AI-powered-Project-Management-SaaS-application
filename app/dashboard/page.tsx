@@ -12,12 +12,26 @@ import { SkeletonDashboard } from "@/components/dashboard/SkeletonDashboard";
 import { PendingInvitationsList } from "@/components/dashboard/PendingInvitationsList";
 import { FolderKanban, RotateCw, CheckCircle2, ListTodo, Plus } from "lucide-react";
 import { useDashboard } from "@/features/dashboard/hooks/useDashboard";
+import { useGlobalTasks } from "@/features/tasks/hooks/useGlobalTasks";
+import { useGlobalActivity } from "@/features/activity/hooks/useGlobalActivity";
 import { CreateProjectModal } from "@/components/projects/CreateProjectModal";
 
 
 export default function DashboardPage() {
   const { data, isLoading } = useDashboard();
+  const { data: globalTasksData } = useGlobalTasks();
+  const { data: globalActivityData } = useGlobalActivity();
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const globalTasks = globalTasksData?.items || [];
+  const globalActivities = globalActivityData?.pages.flatMap(p => p.items) || [];
+  
+  const notifications = globalActivities.slice(0, 5).map(act => ({
+    id: act.id,
+    title: `${act.user_name || "Someone"} ${act.action} ${act.entity_type} in ${act.project_name || "Project"}`,
+    time: new Date(act.created_at).toLocaleDateString(),
+    read: false,
+  }));
 
 
   return (
@@ -71,11 +85,20 @@ export default function DashboardPage() {
             {/* Bottom Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
-                <TaskTable tasks={[]} />
+                <TaskTable tasks={globalTasks as any} />
               </div>
               <div className="flex flex-col gap-6">
-                <ActivityTimeline activities={[]} />
-                <NotificationWidget notifications={[]} />
+                <div className="bg-surface border border-border rounded-lg p-5">
+                  <h3 className="text-sm font-semibold text-text-primary mb-4">Recent Activity</h3>
+                  {globalActivities.length > 0 ? (
+                    <div className="max-h-[300px] overflow-y-auto pr-2">
+                      <ActivityTimeline activities={globalActivities} />
+                    </div>
+                  ) : (
+                    <p className="text-sm text-text-secondary">No recent activity.</p>
+                  )}
+                </div>
+                {notifications.length > 0 && <NotificationWidget notifications={notifications as any} />}
               </div>
             </div>
           </>

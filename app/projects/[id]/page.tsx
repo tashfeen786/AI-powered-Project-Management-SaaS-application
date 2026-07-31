@@ -13,20 +13,38 @@ import { InviteMemberDialog } from "@/components/team/InviteMemberDialog";
 import { GenerateRequirementModal } from "@/components/requirements/GenerateRequirementModal";
 import { SprintWizard } from "@/components/planning/SprintWizard";
 import { AIFeatures } from "@/components/projects/AIFeatures";
+import { ActivityTimeline } from "@/components/activity/ActivityTimeline";
 import { useProject } from "@/features/projects/hooks/useProject";
 import { useInviteMember } from "@/features/team/hooks/useInviteMember";
+import { useTasks } from "@/features/tasks/hooks/useTasks";
+import { useActivity } from "@/features/activity/hooks/useActivity";
+import { useMembers } from "@/features/team/hooks/useMembers";
 
 import { Loader2, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 
 export default function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
-  const { data: project, isLoading } = useProject(resolvedParams.id);
+  const projectId = resolvedParams.id;
+  const { data: project, isLoading: isProjectLoading } = useProject(projectId);
   const { mutate: inviteMember, isPending: isInviting } = useInviteMember();
+  const { data: tasksData } = useTasks(projectId);
+  const { data: activityData } = useActivity(projectId);
+  const { data: members } = useMembers();
   
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [isSRSModalOpen, setIsSRSModalOpen] = useState(false);
   const [isSprintWizardOpen, setIsSprintWizardOpen] = useState(false);
+
+  const tasks = tasksData?.items || [];
+  const taskStats = {
+    total: tasks.length,
+    completed: tasks.filter((t: any) => t.status === "Done").length,
+    inProgress: tasks.filter((t: any) => t.status === "In Progress" || t.status === "Review").length,
+    pending: tasks.filter((t: any) => t.status === "Todo" || t.status === "Backlog").length,
+  };
+  
+  const activities = activityData?.pages.flatMap(p => p.items) || [];
 
   return (
     <AppLayout>
@@ -39,7 +57,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
           Back to Projects
         </Link>
         
-        {isLoading ? (
+        {isProjectLoading ? (
           <div className="flex justify-center items-center h-64">
             <Loader2 className="w-6 h-6 animate-spin text-text-secondary" />
           </div>
@@ -50,11 +68,17 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
               <div className="flex flex-col xl:flex-row gap-6 mt-6">
                 <div className="flex-1 space-y-6">
                   <ProjectSummary summary={project.description || "No description provided."} />
-                  <ProjectStats tasks={{ total: 0, completed: 0, inProgress: 0, pending: 0 } as any} />
-                  <CurrentSprintCard projectId={resolvedParams.id} />
+                  <ProjectStats tasks={taskStats as any} />
+                  <CurrentSprintCard projectId={projectId} />
                   <div className="bg-surface border border-border rounded-lg p-5">
                     <h3 className="text-sm font-semibold text-text-primary mb-4">Recent Activity</h3>
-                    <p className="text-sm text-text-secondary">No recent activity for this project yet.</p>
+                    {activities.length > 0 ? (
+                      <div className="max-h-[400px] overflow-y-auto pr-2">
+                        <ActivityTimeline activities={activities} />
+                      </div>
+                    ) : (
+                      <p className="text-sm text-text-secondary">No recent activity for this project yet.</p>
+                    )}
                   </div>
                 </div>
                 <div className="w-full xl:w-80 space-y-6 shrink-0">
@@ -69,7 +93,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                     onGenerateSRSClick={() => setIsSRSModalOpen(true)}
                     onSprintWizardClick={() => setIsSprintWizardOpen(true)}
                   />
-                  <ProjectMembers members={[]} />
+                  <ProjectMembers members={members || []} />
                 </div>
               </div>
             </ProjectTabs>

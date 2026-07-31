@@ -18,6 +18,14 @@ export const TaskService = {
     return response.data ?? { items: [], total: 0, page: 1, limit: 100 };
   },
 
+  getGlobalTasks: async (params?: TaskQueryParams): Promise<PaginatedData<TaskResponse>> => {
+    const response: StandardResponse<PaginatedData<TaskResponse>> = await apiClient.get(
+      `/tasks`,
+      params
+    );
+    return response.data ?? { items: [], total: 0, page: 1, limit: 100 };
+  },
+
   getTask: async (taskId: string): Promise<TaskResponse> => {
     const response: StandardResponse<TaskResponse> = await apiClient.get(`/tasks/${taskId}`);
     return response.data!;

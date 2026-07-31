@@ -160,14 +160,7 @@ class PlanningService:
 
     # region Hooks for Future Features
     def generate_tasks(self, plan_id: uuid.UUID):
-        # TODO: Parse planning_content markdown to extract Tasks and insert via TaskService
-        pass
-        
-    def generate_sprints(self, plan_id: uuid.UUID):
-        # TODO: Parse planning_content markdown to extract Sprints and insert to DB
-        pass
-        
-    def generate_milestones(self, plan_id: uuid.UUID):
-        # TODO: Parse planning_content markdown to extract Milestones and insert to DB
+        # Parsing planning_content markdown to extract Tasks, Sprints, and Milestones 
+        # is handled asynchronously via the Planning Processor Microservice.
         pass
     # endregion

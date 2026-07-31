@@ -17,6 +17,42 @@ def get_org_id(current_user: User = Depends(get_current_active_user)) -> uuid.UU
         raise HTTPException(status_code=400, detail="No active organization context")
     return current_user.current_organization_id
 
+@router.get("/tasks", response_model=StandardResponse)
+async def list_organization_tasks(
+    page: int = Query(1, ge=1),
+    limit: int = Query(100, ge=1, le=500),
+    status: Optional[str] = None,
+    priority: Optional[str] = None,
+    assignee_id: Optional[uuid.UUID] = None,
+    search: Optional[str] = None,
+    sort: str = "manual",
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+    org_id: uuid.UUID = Depends(get_org_id)
+):
+    task_service = TaskService(db)
+    items, total = await task_service.get_tasks(
+        user_id=current_user.id,
+        org_id=org_id,
+        project_id=None,
+        page=page,
+        limit=limit,
+        status=status,
+        priority=priority,
+        assignee_id=assignee_id,
+        sprint_id=None,
+        search=search,
+        sort=sort
+    )
+    
+    return paginated_response(
+        items=[TaskResponse.model_validate(t).model_dump() for t in items],
+        total=total,
+        page=page,
+        limit=limit,
+        message="Tasks retrieved"
+    )
+
 @router.get("/projects/{project_id}/tasks", response_model=StandardResponse)
 async def list_project_tasks(
     project_id: uuid.UUID,

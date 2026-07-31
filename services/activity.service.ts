@@ -9,4 +9,12 @@ export const ActivityService = {
     );
     return response.data ?? { items: [], total: 0, page: 1, limit: 20 };
   },
+  
+  getGlobalActivity: async (params?: { page?: number; limit?: number; filter_type?: string }): Promise<PaginatedData<ActivityLog>> => {
+    const response: StandardResponse<PaginatedData<ActivityLog>> = await apiClient.get(
+      `/activity`,
+      params
+    );
+    return response.data ?? { items: [], total: 0, page: 1, limit: 20 };
+  },
 };

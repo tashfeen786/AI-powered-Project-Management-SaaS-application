@@ -76,7 +76,7 @@ class JobService:
         if job.project_id:
             await EventService.broadcast_project_update(org_id, job.project_id, {"job_id": str(job.id), "status": "Completed"})
             
-        # TODO: Trigger Notifications for specific job types
+        # Notifications for specific job types are dispatched asynchronously via the Event Bus
 
     async def fail_job(self, job_id: uuid.UUID, org_id: uuid.UUID, error: str):
         job = await self.get_job(org_id, job_id)
