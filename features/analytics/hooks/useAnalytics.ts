@@ -5,5 +5,6 @@ export function useAnalytics() {
   return useQuery({
     queryKey: ["analytics"],
     queryFn: () => AnalyticsService.getAnalytics(),
+    refetchInterval: 10000, // Real-time refresh
   });
 }

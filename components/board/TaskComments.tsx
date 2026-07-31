@@ -1,15 +1,84 @@
 "use client";
 
-import { useState } from "react";
-
-import { Send } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Send, Paperclip, Smile, Eye, Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCollaboration } from "@/features/collaboration/hooks/useCollaboration";
 
-export function TaskComments({ comments }: { comments: any[] }) {
+export function TaskComments({ comments, projectId }: { comments: any[], projectId?: string }) {
   const [text, setText] = useState("");
+  const { emitTyping, typingUsers } = useCollaboration(projectId);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const activeTypers = Object.entries(typingUsers).filter(([_, isTyping]) => isTyping).map(([id]) => id);
+
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setText(e.target.value);
+    
+    // Emit typing start
+    emitTyping(true);
+    
+    // Clear existing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    
+    // Set timeout to emit typing stop after 2 seconds of inactivity
+    typingTimeoutRef.current = setTimeout(() => {
+      emitTyping(false);
+    }, 2000);
+  };
+
+  const handleSend = () => {
+    if (!text.trim()) return;
+    // Emit the comment creation API call here in real app
+    // Then clear text and stop typing
+    setText("");
+    emitTyping(false);
+  };
+
+  // Helper to highlight mentions like @username
+  const renderCommentText = (content: string) => {
+    return content.split(/(@\w+)/g).map((part, i) => {
+      if (part.startsWith("@")) {
+        return <span key={i} className="text-primary font-medium bg-primary/10 px-1 py-0.5 rounded text-xs">{part}</span>;
+      }
+      return <span key={i}>{part}</span>;
+    });
+  };
 
   return (
     <div className="flex flex-col gap-4">
+      
+      {/* Collaboration Controls */}
+      <div className="flex items-center justify-between px-1 text-xs text-text-secondary mb-2 border-b border-border/50 pb-2">
+        <div className="flex items-center gap-4">
+          <button className="flex items-center gap-1.5 hover:text-text-primary transition-colors">
+            <Eye className="w-3.5 h-3.5" />
+            Watch Task
+          </button>
+          <button className="flex items-center gap-1.5 hover:text-text-primary transition-colors">
+            <Bell className="w-3.5 h-3.5" />
+            Notifications
+          </button>
+        </div>
+        <div className="flex -space-x-1">
+           {/* Mock online avatars */}
+           <div className="w-5 h-5 rounded-full border border-background bg-blue-500 flex items-center justify-center text-[8px] text-white font-bold z-20" title="Online: You">ME</div>
+           <div className="w-5 h-5 rounded-full border border-background bg-green-500 flex items-center justify-center text-[8px] text-white font-bold z-10" title="Online: User B">B</div>
+        </div>
+      </div>
+
+      {/* Typing Indicator Area */}
+      <div className="h-4 px-1 flex items-center">
+        {activeTypers.length > 0 && (
+          <span className="text-xs text-text-secondary italic animate-pulse">
+            Someone is typing...
+          </span>
+        )}
+      </div>
+
       <div className="flex items-start gap-3">
         <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0 mt-1">
           ME
@@ -17,12 +86,24 @@ export function TaskComments({ comments }: { comments: any[] }) {
         <div className="flex-1 relative">
           <textarea
             value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Add a comment..."
-            rows={2}
-            className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-1 focus:ring-primary resize-none"
+            onChange={handleTextChange}
+            placeholder="Type a comment or use @ to mention someone..."
+            rows={3}
+            className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-1 focus:ring-primary resize-none pb-10"
           />
+          
+          <div className="absolute left-2 bottom-2 flex items-center gap-1">
+            <input type="file" ref={fileInputRef} className="hidden" />
+            <button onClick={() => fileInputRef.current?.click()} className="p-1.5 text-text-secondary hover:text-text-primary hover:bg-background rounded transition-colors" title="Attach file">
+              <Paperclip className="w-4 h-4" />
+            </button>
+            <button className="p-1.5 text-text-secondary hover:text-text-primary hover:bg-background rounded transition-colors" title="Add emoji">
+              <Smile className="w-4 h-4" />
+            </button>
+          </div>
+
           <button 
+            onClick={handleSend}
             disabled={!text.trim()}
             className={cn(
               "absolute right-2 bottom-2 p-1.5 rounded transition-colors",
@@ -36,18 +117,27 @@ export function TaskComments({ comments }: { comments: any[] }) {
 
       <div className="space-y-4 mt-2">
         {comments.map(c => (
-          <div key={c.id} className="flex gap-3">
+          <div key={c.id} className="flex gap-3 group">
             <div className="w-8 h-8 rounded-full bg-background border border-border flex items-center justify-center text-xs font-bold text-text-primary shrink-0">
               {c.author_id ? "U" : "U"}
             </div>
-            <div>
+            <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-sm font-semibold text-text-primary">{"User"}</span>
                 <span className="text-xs text-text-secondary">{new Date(c.created_at).toLocaleDateString()}</span>
               </div>
-              <p className="text-sm text-text-secondary leading-relaxed bg-surface border border-border rounded-lg px-3 py-2 rounded-tl-sm">
-                {c.content}
-              </p>
+              <div className="text-sm text-text-secondary leading-relaxed bg-surface border border-border rounded-lg px-3 py-2 rounded-tl-sm relative">
+                {renderCommentText(c.content)}
+                
+                {/* Mock Emoji Reaction */}
+                <div className="absolute -bottom-2 -right-2 bg-background border border-border rounded-full px-1.5 py-0.5 text-[10px] shadow-sm flex items-center gap-1 cursor-pointer hover:bg-surface transition-colors">
+                  <span role="img" aria-label="thumbs up">👍</span> 1
+                </div>
+              </div>
+              <div className="mt-2 flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                 <button className="text-[11px] font-medium text-text-secondary hover:text-primary transition-colors">Reply</button>
+                 <button className="text-[11px] font-medium text-text-secondary hover:text-primary transition-colors">React</button>
+              </div>
             </div>
           </div>
         ))}

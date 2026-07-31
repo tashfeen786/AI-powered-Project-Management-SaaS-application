@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Home, FolderKanban, Users, Settings } from "lucide-react";
+import { X, Home, FolderKanban, Users, Settings, BarChart2 } from "lucide-react";
 import { SidebarItem } from "./SidebarItem";
 
 interface SidebarProps {
@@ -14,6 +14,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     <div className="flex-1 py-4 flex flex-col gap-1 px-3">
       <SidebarItem icon={Home} label="Dashboard" href="/dashboard" isActive />
       <SidebarItem icon={FolderKanban} label="Projects" href="/projects" />
+      <SidebarItem icon={BarChart2} label="Analytics" href="/analytics" />
       <SidebarItem icon={Users} label="Team" href="/team" />
       <SidebarItem icon={Settings} label="Settings" href="/settings" />
     </div>
