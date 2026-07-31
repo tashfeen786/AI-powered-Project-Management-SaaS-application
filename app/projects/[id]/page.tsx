@@ -35,7 +35,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
         ) : project ? (
           <>
             <ProjectHeader project={project as any} />
-            <ProjectTabs>
+            <ProjectTabs projectId={resolvedParams.id}>
               <div className="flex flex-col xl:flex-row gap-6 mt-6">
                 <div className="flex-1 space-y-6">
                   <ProjectSummary summary={project.description || "No description provided."} />

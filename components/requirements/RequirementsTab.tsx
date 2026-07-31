@@ -6,6 +6,7 @@ import { useRequirements, useDeleteRequirement } from "@/features/requirements/h
 import { RequirementList } from "./RequirementList";
 import { RequirementModal } from "./RequirementModal";
 import { GenerateRequirementModal } from "./GenerateRequirementModal";
+import { DeleteRequirementModal } from "./DeleteRequirementModal";
 import { RequirementResponse } from "@/types/api";
 
 export function RequirementsTab({ projectId }: { projectId: string }) {
@@ -15,6 +16,7 @@ export function RequirementsTab({ projectId }: { projectId: string }) {
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedReq, setSelectedReq] = useState<RequirementResponse | null>(null);
 
   const { data, isLoading, isError, refetch } = useRequirements(projectId, {
@@ -24,7 +26,7 @@ export function RequirementsTab({ projectId }: { projectId: string }) {
     limit: 50
   });
 
-  const { mutate: deleteReq } = useDeleteRequirement();
+  const { mutate: deleteReq, isPending: isDeleting } = useDeleteRequirement();
 
   const handleEdit = (req: RequirementResponse) => {
     setSelectedReq(req);
@@ -37,8 +39,15 @@ export function RequirementsTab({ projectId }: { projectId: string }) {
   };
 
   const handleDelete = (req: RequirementResponse) => {
-    if (confirm("Are you sure you want to delete this requirement?")) {
-      deleteReq({ id: req.id, projectId });
+    setSelectedReq(req);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (selectedReq) {
+      deleteReq({ id: selectedReq.id, projectId }, {
+        onSuccess: () => setIsDeleteModalOpen(false)
+      });
     }
   };
 
@@ -146,6 +155,14 @@ export function RequirementsTab({ projectId }: { projectId: string }) {
         isOpen={isGenerateModalOpen}
         onClose={() => setIsGenerateModalOpen(false)}
         projectId={projectId}
+      />
+
+      <DeleteRequirementModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={confirmDelete}
+        requirement={selectedReq}
+        isDeleting={isDeleting}
       />
     </div>
   );

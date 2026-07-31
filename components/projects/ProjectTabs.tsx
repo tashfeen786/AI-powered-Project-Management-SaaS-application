@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { RequirementsTab } from "../requirements/RequirementsTab";
 
 const tabs = ["Overview", "Requirements", "Planning", "Board", "Documents", "Activity"];
 
-export function ProjectTabs({ children }: { children: React.ReactNode }) {
+export function ProjectTabs({ children, projectId }: { children: React.ReactNode, projectId: string }) {
   const [activeTab, setActiveTab] = useState("Overview");
 
   return (
@@ -44,6 +45,8 @@ export function ProjectTabs({ children }: { children: React.ReactNode }) {
         >
           {activeTab === "Overview" ? (
             children
+          ) : activeTab === "Requirements" ? (
+            <RequirementsTab projectId={projectId} />
           ) : (
             <div className="p-12 text-center border border-border border-dashed rounded-lg bg-surface mt-4">
               <h3 className="text-lg font-medium text-text-primary mb-2">Coming Soon</h3>
