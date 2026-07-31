@@ -47,13 +47,14 @@ async def create_conversation(
 @router.get("/conversations", response_model=StandardResponse[List[ConversationResponse]])
 async def list_conversations(
     project_id: Optional[uuid.UUID] = Query(None),
+    agent_id: Optional[str] = Query(None),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
     org_id = await verify_org_and_role(current_user, db, Permission.USE_AI)
     copilot = CopilotService(db)
     
-    convs = await copilot.get_conversations(current_user.id, org_id, project_id)
+    convs = await copilot.get_conversations(current_user.id, org_id, project_id, agent_id)
     return success_response(
         data=[ConversationResponse.model_validate(c) for c in convs], 
         message="Conversations retrieved"

@@ -6,6 +6,7 @@ import uuid
 class CreateConversationRequest(BaseModel):
     project_id: Optional[uuid.UUID] = None
     title: Optional[str] = "New Conversation"
+    agent_id: Optional[str] = "copilot"
 
 class ChatRequest(BaseModel):
     conversation_id: uuid.UUID
@@ -32,6 +33,7 @@ class ConversationResponse(BaseModel):
     project_id: Optional[uuid.UUID]
     created_by_id: uuid.UUID
     title: str
+    agent_id: str
     created_at: datetime
     updated_at: datetime
     

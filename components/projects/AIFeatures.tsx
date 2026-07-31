@@ -11,6 +11,7 @@ export function AIFeatures({ projectId, onGenerateSRSClick, onSprintWizardClick 
   const router = useRouter();
 
   const features = [
+    { title: "AI Agents", icon: Bot, onClick: () => router.push(`/projects/${projectId}/agents`) },
     { title: "Requirement Generator", icon: Sparkles, onClick: onGenerateSRSClick },
     { title: "Task Breakdown", icon: CheckSquare, onClick: () => router.push(`/projects/${projectId}/board?ai=task-breakdown`) },
     { title: "Sprint Generator", icon: Calendar, onClick: onSprintWizardClick },

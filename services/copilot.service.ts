@@ -7,15 +7,18 @@ import {
 } from "@/types/api";
 
 export const CopilotService = {
-  createConversation: async (projectId?: string): Promise<ConversationResponse> => {
+  createConversation: async (projectId?: string, agentId: string = "copilot"): Promise<ConversationResponse> => {
     const response: StandardResponse<ConversationResponse> = await apiClient.post("/copilot/conversations", {
       project_id: projectId || null,
+      agent_id: agentId,
     });
     return response.data!;
   },
 
-  getConversations: async (projectId?: string): Promise<ConversationResponse[]> => {
-    const params = projectId ? { project_id: projectId } : undefined;
+  getConversations: async (projectId?: string, agentId?: string): Promise<ConversationResponse[]> => {
+    const params: any = {};
+    if (projectId) params.project_id = projectId;
+    if (agentId) params.agent_id = agentId;
     const response: StandardResponse<ConversationResponse[]> = await apiClient.get("/copilot/conversations", params);
     return response.data ?? [];
   },

@@ -22,7 +22,7 @@ class GroqService:
         return _groq_client
 
     @staticmethod
-    async def generate(prompt: str, system_prompt: str = "You are a helpful AI project management assistant.", model: str = "llama3-70b-8192") -> dict:
+    async def generate(prompt: str, system_prompt: str = "You are a helpful AI project management assistant.", model: str = "llama3-70b-8192", tools: list = None) -> dict:
         """
         Calls Groq API to generate a response.
         Supports Llama 3, DeepSeek, Gemma (configurable via model param).
@@ -32,15 +32,19 @@ class GroqService:
         logger.info("Calling Groq", model=model, prompt_length=len(prompt))
         
         try:
-            completion = await client.chat.completions.create(
-                model=model,
-                messages=[
+            kwargs = {
+                "model": model,
+                "messages": [
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": prompt}
                 ],
-                temperature=0.3, # Low temp for factual RAG responses
-                max_tokens=2048,
-            )
+                "temperature": 0.3,
+                "max_tokens": 2048,
+            }
+            if tools:
+                kwargs["tools"] = tools
+                
+            completion = await client.chat.completions.create(**kwargs)
             
             response_text = completion.choices[0].message.content
             tokens_used = completion.usage.total_tokens
@@ -56,21 +60,25 @@ class GroqService:
             raise e
 
     @staticmethod
-    async def generate_stream(prompt: str, system_prompt: str = "You are a helpful AI project management assistant.", model: str = "llama3-70b-8192"):
+    async def generate_stream(prompt: str, system_prompt: str = "You are a helpful AI project management assistant.", model: str = "llama3-70b-8192", tools: list = None):
         client = GroqService._get_client()
         logger.info("Calling Groq Stream", model=model)
         
         try:
-            stream = await client.chat.completions.create(
-                model=model,
-                messages=[
+            kwargs = {
+                "model": model,
+                "messages": [
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": prompt}
                 ],
-                temperature=0.3,
-                max_tokens=2048,
-                stream=True
-            )
+                "temperature": 0.3,
+                "max_tokens": 2048,
+                "stream": True
+            }
+            if tools:
+                kwargs["tools"] = tools
+                
+            stream = await client.chat.completions.create(**kwargs)
             
             async for chunk in stream:
                 if chunk.choices[0].delta.content is not None:
