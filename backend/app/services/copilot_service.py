@@ -33,8 +33,8 @@ class CopilotService:
         )
         return await self.conv_repo.create(conv)
 
-    async def get_conversations(self, user_id: uuid.UUID, org_id: uuid.UUID) -> Sequence[Conversation]:
-        return await self.conv_repo.get_by_user(user_id, org_id)
+    async def get_conversations(self, user_id: uuid.UUID, org_id: uuid.UUID, project_id: uuid.UUID = None) -> Sequence[Conversation]:
+        return await self.conv_repo.get_by_user(user_id, org_id, project_id)
 
     async def get_conversation(self, conv_id: uuid.UUID, org_id: uuid.UUID, user_id: uuid.UUID) -> Conversation:
         conv = await self.conv_repo.get_by_id(conv_id, org_id, user_id)
@@ -135,3 +135,80 @@ Do not hallucinate external knowledge outside the scope of software project mana
             await self.conv_repo.update(conv)
             
         return saved_msg
+
+    async def send_message_stream(self, user_id: uuid.UUID, org_id: uuid.UUID, request: ChatRequest):
+        logger.info("Copilot Chat Stream Started", conversation_id=str(request.conversation_id))
+        
+        conv = await self.get_conversation(request.conversation_id, org_id, user_id)
+        
+        user_msg = Message(
+            conversation_id=conv.id,
+            role="user",
+            content=request.content
+        )
+        await self.msg_repo.create(user_msg)
+        
+        history = await self.memory_service.get_conversation_history(conv.id)
+        
+        vector_context = []
+        if conv.project_id:
+            vector_context = await self.retrieval_service.retrieve_context(
+                query=request.content, 
+                project_id=conv.project_id, 
+                org_id=org_id, 
+                limit=3
+            )
+            
+        meta_context = {}
+        if conv.project_id:
+            meta_context = await self.context_service.gather_project_context(conv.project_id, org_id)
+            
+        system_prompt = f"""
+You are the primary AI Copilot for this Project Management Platform.
+You must answer the user's question using ONLY the provided project context, retrieved documents, and conversational memory.
+If the information is unavailable, explicitly state: "I couldn't find this information inside your project."
+Do not hallucinate external knowledge outside the scope of software project management.
+
+--- Project Metadata State ---
+{meta_context}
+------------------------------
+
+--- Retrieved Documents Context ---
+{chr(10).join([c['text'] for c in vector_context])}
+-----------------------------------
+"""
+        
+        history_text = "\n".join([f"{m['role'].capitalize()}: {m['content']}" for m in history])
+        final_prompt = f"Chat History:\n{history_text}\n\nUser: {request.content}\nAssistant:"
+        
+        sources = []
+        if conv.project_id:
+            sources.append({"type": "Project", "title": meta_context.get("project_name", "Project Data")})
+        for c in vector_context:
+            sources.append({
+                "type": "document", 
+                "title": c.get("metadata", {}).get("filename", "Document Chunk"),
+                "document_id": c.get("document_id")
+            })
+            
+        full_text = ""
+        async for chunk in GroqService.generate_stream(prompt=final_prompt, system_prompt=system_prompt, model="llama3-70b-8192"):
+            full_text += chunk
+            yield chunk, None
+            
+        ai_msg = Message(
+            conversation_id=conv.id,
+            role="assistant",
+            content=full_text,
+            sources=sources
+        )
+        saved_msg = await self.msg_repo.create(ai_msg)
+        
+        if len(history) <= 2 and conv.title == "New Conversation":
+            title_prompt = f"Summarize this query into a short 3-4 word title: {request.content}"
+            t_res = await GroqService.generate(prompt=title_prompt, system_prompt="Output only the title.", model="llama3-8b-8192")
+            conv.title = t_res["text"].replace('"', '').strip()
+            await self.conv_repo.update(conv)
+            
+        from app.schemas.copilot import MessageResponse
+        yield None, MessageResponse.model_validate(saved_msg).model_dump()

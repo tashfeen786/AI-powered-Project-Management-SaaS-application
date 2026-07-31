@@ -54,3 +54,28 @@ class GroqService:
         except Exception as e:
             logger.error("Groq Generation Failed", error=str(e))
             raise e
+
+    @staticmethod
+    async def generate_stream(prompt: str, system_prompt: str = "You are a helpful AI project management assistant.", model: str = "llama3-70b-8192"):
+        client = GroqService._get_client()
+        logger.info("Calling Groq Stream", model=model)
+        
+        try:
+            stream = await client.chat.completions.create(
+                model=model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.3,
+                max_tokens=2048,
+                stream=True
+            )
+            
+            async for chunk in stream:
+                if chunk.choices[0].delta.content is not None:
+                    yield chunk.choices[0].delta.content
+                    
+        except Exception as e:
+            logger.error("Groq Stream Failed", error=str(e))
+            raise e

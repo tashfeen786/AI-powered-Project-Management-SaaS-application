@@ -8,12 +8,15 @@ class ConversationRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def get_by_user(self, user_id: uuid.UUID, org_id: uuid.UUID) -> Sequence[Conversation]:
+    async def get_by_user(self, user_id: uuid.UUID, org_id: uuid.UUID, project_id: uuid.UUID = None) -> Sequence[Conversation]:
         query = select(Conversation).where(
-            Conversation.created_by_id == user_id, 
+            Conversation.created_by_id == user_id,
             Conversation.organization_id == org_id,
             Conversation.is_deleted == False
-        ).order_by(desc(Conversation.created_at))
+        )
+        if project_id:
+            query = query.where(Conversation.project_id == project_id)
+        query = query.order_by(Conversation.updated_at.desc())
         
         result = await self.db.execute(query)
         return result.scalars().all()

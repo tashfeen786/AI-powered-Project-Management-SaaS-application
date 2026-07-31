@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { CopilotService } from "@/services/copilot.service";
 
-export function useCopilot() {
+export function useCopilot(projectId?: string) {
   return useQuery({
-    queryKey: ["copilotConversations"],
-    queryFn: () => CopilotService.getConversations(),
+    queryKey: ["copilotConversations", projectId],
+    queryFn: () => CopilotService.getConversations(projectId),
   });
 }

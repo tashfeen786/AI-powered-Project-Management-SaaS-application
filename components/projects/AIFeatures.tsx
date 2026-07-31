@@ -15,10 +15,10 @@ export function AIFeatures({ projectId, onGenerateSRSClick, onSprintWizardClick 
     { title: "Task Breakdown", icon: CheckSquare, onClick: () => router.push(`/projects/${projectId}/board?ai=task-breakdown`) },
     { title: "Sprint Generator", icon: Calendar, onClick: onSprintWizardClick },
     { title: "Risk Analysis", icon: ShieldAlert, onClick: () => router.push(`/projects/${projectId}/planning?ai=risk-analysis`) },
-    { title: "Project Summary", icon: FileText, onClick: () => router.push(`/copilot?prompt=Summarize+project+status&project=${projectId}`) },
-    { title: "Meeting Notes", icon: Users, onClick: () => router.push(`/copilot?prompt=Create+meeting+summary&project=${projectId}`) },
-    { title: "Document Chat", icon: MessageSquare, onClick: () => router.push(`/projects/${projectId}/documents?ai=chat`) },
-    { title: "Project Chat", icon: Bot, onClick: () => router.push(`/copilot?project=${projectId}`) },
+    { title: "Project Summary", icon: FileText, onClick: () => router.push(`/projects/${projectId}/copilot?prompt=Summarize+project+status`) },
+    { title: "Meeting Notes", icon: Users, onClick: () => router.push(`/projects/${projectId}/copilot?prompt=Create+meeting+summary`) },
+    { title: "Document Chat", icon: MessageSquare, onClick: () => router.push(`/projects/${projectId}/copilot?ai=chat`) },
+    { title: "Project Chat", icon: Bot, onClick: () => router.push(`/projects/${projectId}/copilot`) },
   ];
 
   return (

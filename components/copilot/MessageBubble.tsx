@@ -7,9 +7,19 @@ import { motion } from "framer-motion";
 import { SourceReference } from "./SourceReference";
 import { AIActionCard } from "./AIActionCard";
 import { AttachmentCard } from "./AttachmentCard";
+import { MarkdownRenderer } from "./MarkdownRenderer";
+import { Copy } from "lucide-react";
+import { useState } from "react";
 
 export function MessageBubble({ message }: { message: MessageResponse }) {
   const isAi = message.role === 'assistant';
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(message.content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <motion.div 
@@ -24,12 +34,25 @@ export function MessageBubble({ message }: { message: MessageResponse }) {
       <div className={cn("flex flex-col gap-2 max-w-[85%]", isAi ? "items-start" : "items-end")}>
         
         {/* Main Content Bubble */}
-        <div className={cn("px-4 py-3 text-sm leading-relaxed", 
-          isAi ? "bg-[#F5F3FF] border border-[#E5E5E5] text-text-primary rounded-2xl rounded-tl-sm whitespace-pre-wrap" : 
+        <div className={cn("relative group px-4 py-3 text-sm leading-relaxed", 
+          isAi ? "bg-[#F5F3FF] border border-[#E5E5E5] text-text-primary rounded-2xl rounded-tl-sm" : 
           "bg-primary text-surface rounded-2xl rounded-tr-sm shadow-sm whitespace-pre-wrap"
         )}>
-          {/* Note: In a real app, a Markdown renderer would wrap message.content here */}
-          {message.content}
+          {isAi ? (
+            <MarkdownRenderer content={message.content} />
+          ) : (
+            message.content
+          )}
+          
+          {isAi && (
+            <button
+              onClick={handleCopy}
+              className="absolute top-2 right-2 p-1.5 bg-surface border border-border rounded opacity-0 group-hover:opacity-100 transition-opacity hover:bg-background"
+              title="Copy to clipboard"
+            >
+              <Copy className={cn("w-3.5 h-3.5", copied ? "text-success" : "text-text-secondary")} />
+            </button>
+          )}
         </div>
 
         {/* Attachments (if any) */}

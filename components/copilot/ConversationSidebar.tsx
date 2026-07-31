@@ -12,9 +12,17 @@ interface ConversationSidebarProps {
   onNewChat: () => void;
 }
 
+import { useState } from "react";
+
 export function ConversationSidebar({ conversations, activeId, onSelect, onNewChat }: ConversationSidebarProps) {
-  const pinned = conversations.filter((c: any) => c.isPinned);
-  const recent = conversations.filter((c: any) => !c.isPinned);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filtered = conversations.filter(c => 
+    c.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const pinned = filtered.filter((c: any) => c.isPinned);
+  const recent = filtered.filter((c: any) => !c.isPinned);
 
   return (
     <div className="w-full md:w-[280px] h-full flex flex-col bg-surface border-r border-border shrink-0">
@@ -26,7 +34,7 @@ export function ConversationSidebar({ conversations, activeId, onSelect, onNewCh
           <Plus className="w-4 h-4" />
           New Chat
         </button>
-        <ConversationSearch />
+        <ConversationSearch value={searchQuery} onChange={setSearchQuery} />
       </div>
       
       <div className="flex-1 overflow-y-auto p-3 space-y-6">

@@ -7,6 +7,7 @@ class Conversation(BaseModel):
     __tablename__ = "conversations"
 
     title: Mapped[str] = mapped_column(String(255), default="New Conversation")
+    agent_id: Mapped[str | None] = mapped_column(String(50), default="copilot")
     
     project_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("projects.id"))
     project: Mapped["Project"] = relationship()
