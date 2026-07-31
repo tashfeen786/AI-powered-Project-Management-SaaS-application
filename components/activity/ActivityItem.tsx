@@ -9,31 +9,31 @@ export function ActivityItem({ activity }: { activity: ActivityLog }) {
 
   return (
     <div className="flex gap-4 relative group">
-      <ActivityAvatar initials={mapped.userInitials || "U"} name={mapped.userName || "User"} isSystem={isSystem} />
+      <ActivityAvatar initials={mapped.actor_id ? "U" : "S"} name={mapped.actor_id ? "User" : "System"} isSystem={!mapped.actor_id} />
       
       <div className="flex-1 bg-surface border border-border rounded-lg p-4 hover:border-primary/50 hover:shadow-sm transition-all duration-150">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-semibold text-text-primary">{mapped.userName || activity.user_id}</span>
-            <ActivityTypeBadge type={mapped.type || activity.action} />
+            <span className="text-sm font-semibold text-text-primary">{mapped.actor_id || "System"}</span>
+            <ActivityTypeBadge type={mapped.type || activity.type} />
           </div>
-          <span className="text-xs text-text-secondary whitespace-nowrap">{mapped.timestamp || new Date(activity.created_at).toLocaleString()}</span>
+          <span className="text-xs text-text-secondary whitespace-nowrap">{new Date(activity.created_at).toLocaleString()}</span>
         </div>
         
         <p className="text-sm text-text-secondary leading-relaxed">
-          {mapped.description || activity.details?.message || ""}
+          {activity.description}
         </p>
         
-        {(mapped.taskRef || mapped.documentRef || activity.entity_id) && (
+        {(activity.task_id || activity.project_id) && (
           <div className="mt-3 pt-3 border-t border-border flex items-center gap-2">
-            {(mapped.taskRef || (activity.entity_type === 'task' ? activity.entity_id : null)) && (
+            {activity.task_id && (
               <span className="text-xs font-medium bg-background border border-border text-text-primary px-2 py-1 rounded">
-                Task: {mapped.taskRef || activity.entity_id}
+                Task: {activity.task_id.split('-')[0]}
               </span>
             )}
-            {(mapped.documentRef || (activity.entity_type === 'document' ? activity.entity_id : null)) && (
+            {activity.project_id && !activity.task_id && (
               <span className="text-xs font-medium bg-background border border-border text-text-primary px-2 py-1 rounded truncate max-w-[200px]">
-                Doc: {mapped.documentRef || activity.entity_id}
+                Project Event
               </span>
             )}
           </div>

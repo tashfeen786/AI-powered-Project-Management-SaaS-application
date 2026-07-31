@@ -15,6 +15,7 @@ import { DocumentResponse } from "@/types/api";
 import { useDocuments } from "@/features/documents/hooks/useDocuments";
 import { useUploadDocument } from "@/features/documents/hooks/useUploadDocument";
 import { useDeleteDocument } from "@/features/documents/hooks/useDeleteDocument";
+import { useUpdateDocument } from "@/features/documents/hooks/useUpdateDocument";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
@@ -23,9 +24,14 @@ export default function DocumentsWorkspacePage({ params }: { params: Promise<{ i
   const resolvedParams = use(params);
   const projectId = resolvedParams.id;
   
-  const { data: documents, isLoading } = useDocuments(projectId);
+  const [page, setPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [folderPath, setFolderPath] = useState("root");
+
+  const { data: documents, isLoading } = useDocuments(projectId, { page, limit: 50, search: searchQuery });
   const { mutate: uploadDocument } = useUploadDocument(projectId);
   const { mutate: deleteDocument, isPending: isDeleting } = useDeleteDocument(projectId);
+  const { mutate: updateDocument } = useUpdateDocument(projectId);
 
   const [showUpload, setShowUpload] = useState(false);
   const [activeUpload, setActiveUpload] = useState<{ file: File; progress: number } | null>(null);
@@ -39,8 +45,19 @@ export default function DocumentsWorkspacePage({ params }: { params: Promise<{ i
 
   const handleFileUpload = (file: File) => {
     // Basic validation
-    const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/csv', 'text/plain'];
-    if (!allowedTypes.includes(file.type) && !file.name.endsWith('.xlsx')) {
+    const allowedTypes = [
+      'application/pdf', 
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 
+      'text/csv', 
+      'text/plain',
+      'text/markdown',
+      'image/png',
+      'image/jpeg',
+      'image/jpg',
+      'image/gif',
+      'image/webp'
+    ];
+    if (!allowedTypes.includes(file.type) && !file.name.endsWith('.xlsx') && !file.name.endsWith('.md')) {
       alert("Unsupported file type.");
       return;
     }
@@ -57,7 +74,7 @@ export default function DocumentsWorkspacePage({ params }: { params: Promise<{ i
     }, 200);
 
     // Call the mutation
-    uploadDocument(file, {
+    uploadDocument({ file, folderPath }, {
       onSuccess: () => {
         clearInterval(interval);
         setActiveUpload(prev => prev ? { ...prev, progress: 100 } : null);
@@ -71,12 +88,27 @@ export default function DocumentsWorkspacePage({ params }: { params: Promise<{ i
     });
   };
 
+  const uniqueFolders = Array.from(new Set(documents?.items?.map((d: any) => d.folder_path || 'root') || ['root']));
+  const filteredDocuments = documents?.items?.filter((d: any) => (d.folder_path || 'root') === folderPath) || [];
+
   const handleDeleteConfirm = () => {
     if (!selectedDoc) return;
     deleteDocument(selectedDoc.id, {
       onSuccess: () => {
         setIsDeleteDialogOpen(false);
         setSelectedDoc(null);
+      }
+    });
+  };
+
+  const handleRenameRequest = (newName: string) => {
+    if (!selectedDoc) return;
+    updateDocument({ 
+      documentId: selectedDoc.id, 
+      updates: { filename: newName } 
+    }, {
+      onSuccess: (updatedDoc) => {
+        setSelectedDoc(updatedDoc);
       }
     });
   };
@@ -108,7 +140,13 @@ export default function DocumentsWorkspacePage({ params }: { params: Promise<{ i
         </div>
 
         <DocumentsHeader onUploadClick={handleUploadClick} />
-        <DocumentToolbar />
+        <DocumentToolbar 
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          folderPath={folderPath}
+          onFolderChange={setFolderPath}
+          folders={uniqueFolders}
+        />
         
         {/* Conditional Upload Area */}
         <AnimatePresence>
@@ -141,10 +179,10 @@ export default function DocumentsWorkspacePage({ params }: { params: Promise<{ i
         <div className="mt-2">
           {isLoading ? (
             <DocumentsSkeleton />
-          ) : !documents?.items || documents.items.length === 0 ? (
+          ) : filteredDocuments.length === 0 ? (
             <EmptyDocuments onUploadClick={() => setShowUpload(true)} />
           ) : (
-            <DocumentGrid documents={documents.items as any} onDocumentClick={setSelectedDoc as any} />
+            <DocumentGrid documents={filteredDocuments as any} onDocumentClick={setSelectedDoc as any} />
           )}
         </div>
 
@@ -156,6 +194,7 @@ export default function DocumentsWorkspacePage({ params }: { params: Promise<{ i
         isOpen={!!selectedDoc && !isDeleteDialogOpen} 
         onClose={() => setSelectedDoc(null)} 
         onDeleteRequest={() => setIsDeleteDialogOpen(true)}
+        onRenameRequest={handleRenameRequest}
       />
 
       <DeleteDocumentDialog 

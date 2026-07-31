@@ -7,6 +7,7 @@ from app.models.project import Project
 from typing import Sequence, Tuple, Optional
 import uuid
 import random
+from app.services.activity_service import ActivityService
 
 class ProjectService:
     def __init__(self, db: AsyncSession):
@@ -79,7 +80,16 @@ class ProjectService:
         )
         
         created = await self.project_repo.create(project)
-        # TODO: Trigger Project Created Activity Hook
+        
+        act_service = ActivityService(self.db)
+        await act_service.log_activity(
+            project_id=created.id,
+            actor_id=user_id,
+            type="project_created",
+            description=f"Created project '{project.name}'",
+            org_id=org_id
+        )
+        
         return created
 
     async def update_project(self, user_id: uuid.UUID, org_id: uuid.UUID, project_id: uuid.UUID, project_in: ProjectUpdate) -> Project:

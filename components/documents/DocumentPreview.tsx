@@ -2,17 +2,33 @@
 
 import { DocumentResponse } from "@/types/api";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, FileText, Download, Trash2, Calendar, User } from "lucide-react";
+import { X, FileText, Download, Trash2, Calendar, User, Edit2, Check } from "lucide-react";
 import { ProcessingStatusBadge } from "./ProcessingStatusBadge";
+import { useState } from "react";
 
 interface DocumentPreviewProps {
   document: DocumentResponse | null;
   isOpen: boolean;
   onClose: () => void;
   onDeleteRequest: () => void;
+  onRenameRequest: (newName: string) => void;
 }
 
-export function DocumentPreview({ document, isOpen, onClose, onDeleteRequest }: DocumentPreviewProps) {
+export function DocumentPreview({ document, isOpen, onClose, onDeleteRequest, onRenameRequest }: DocumentPreviewProps) {
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [newName, setNewName] = useState("");
+
+  // Update newName when document changes
+  if (document && newName === "" && !isRenaming) {
+    setNewName(document.filename || (document as any).name);
+  }
+
+  const handleRenameSubmit = () => {
+    if (newName.trim() && document) {
+      onRenameRequest(newName);
+      setIsRenaming(false);
+    }
+  };
   return (
     <AnimatePresence>
       {isOpen && document && (
@@ -50,7 +66,42 @@ export function DocumentPreview({ document, isOpen, onClose, onDeleteRequest }: 
                 <FileText className="w-16 h-16 text-border" />
               </div>
               
-              <h2 className="text-lg font-bold text-text-primary mb-4 break-all">{document.filename || (document as any).name}</h2>
+              <div className="flex items-center gap-2 mb-4">
+                {isRenaming ? (
+                  <div className="flex items-center gap-2 w-full">
+                    <input 
+                      type="text" 
+                      value={newName} 
+                      onChange={e => setNewName(e.target.value)}
+                      className="flex-1 bg-background border border-border rounded px-2 py-1 text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                      autoFocus
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') handleRenameSubmit();
+                        if (e.key === 'Escape') {
+                          setIsRenaming(false);
+                          setNewName(document.filename || (document as any).name);
+                        }
+                      }}
+                    />
+                    <button onClick={handleRenameSubmit} className="p-1.5 text-success hover:bg-success/10 rounded">
+                      <Check className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => {
+                      setIsRenaming(false);
+                      setNewName(document.filename || (document as any).name);
+                    }} className="p-1.5 text-text-secondary hover:bg-surface rounded">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <h2 className="text-lg font-bold text-text-primary break-all">{document.filename || (document as any).name}</h2>
+                    <button onClick={() => setIsRenaming(true)} className="p-1.5 text-text-secondary hover:text-primary hover:bg-primary/10 rounded transition-colors shrink-0">
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                  </>
+                )}
+              </div>
               
               <div className="mb-6">
                 <ProcessingStatusBadge status={document.status} />
@@ -60,6 +111,14 @@ export function DocumentPreview({ document, isOpen, onClose, onDeleteRequest }: 
                 <div className="flex items-center justify-between py-2 border-b border-border">
                   <span className="text-sm text-text-secondary">Type</span>
                   <span className="text-sm font-medium text-text-primary uppercase">{document.content_type || (document as any).type}</span>
+                </div>
+                <div className="flex items-center justify-between py-2 border-b border-border">
+                  <span className="text-sm text-text-secondary">Folder</span>
+                  <span className="text-sm font-medium text-text-primary">{document.folder_path || "root"}</span>
+                </div>
+                <div className="flex items-center justify-between py-2 border-b border-border">
+                  <span className="text-sm text-text-secondary">Version</span>
+                  <span className="text-sm font-medium text-text-primary">v{document.version || 1}</span>
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-border">
                   <span className="text-sm text-text-secondary">Size</span>

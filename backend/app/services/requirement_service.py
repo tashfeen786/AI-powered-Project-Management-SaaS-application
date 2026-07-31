@@ -11,6 +11,7 @@ from typing import Sequence, Tuple
 from datetime import datetime, UTC
 import uuid
 import structlog
+from app.services.activity_service import ActivityService
 
 logger = structlog.get_logger()
 
@@ -94,6 +95,16 @@ class RequirementService:
         )
         
         created = await self.req_repo.create(req)
+        
+        act_service = ActivityService(self.db)
+        await act_service.log_activity(
+            project_id=project_id,
+            actor_id=user_id,
+            type="requirement_generated",
+            description=f"AI Generated SRS: '{request.title}'",
+            org_id=org_id
+        )
+        
         return created
 
     async def get_requirements(
@@ -126,7 +137,18 @@ class RequirementService:
             created_by_id=user_id,
             version=1
         )
-        return await self.req_repo.create(req)
+        created = await self.req_repo.create(req)
+        
+        act_service = ActivityService(self.db)
+        await act_service.log_activity(
+            project_id=create_in.project_id,
+            actor_id=user_id,
+            type="requirement_created",
+            description=f"Created requirement '{create_in.title}'",
+            org_id=org_id
+        )
+        
+        return created
 
     async def get_requirement(self, org_id: uuid.UUID, req_id: uuid.UUID) -> Requirement:
         req = await self.req_repo.get_by_id(req_id, org_id)

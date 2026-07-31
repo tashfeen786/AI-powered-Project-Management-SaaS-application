@@ -16,7 +16,7 @@ from app.services.activity_service import ActivityService
 
 logger = structlog.get_logger()
 
-ALLOWED_EXTENSIONS = {".pdf", ".docx", ".txt", ".md"}
+ALLOWED_EXTENSIONS = {".pdf", ".docx", ".txt", ".md", ".png", ".jpg", ".jpeg", ".gif", ".webp"}
 MAX_FILE_SIZE = 15 * 1024 * 1024 # 15 MB
 
 class DocumentService:

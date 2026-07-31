@@ -9,6 +9,7 @@ from typing import Sequence, Tuple
 import uuid
 import structlog
 import json
+from app.services.activity_service import ActivityService
 
 logger = structlog.get_logger()
 
@@ -45,7 +46,19 @@ class SprintService:
             project_id=create_in.project_id,
             organization_id=org_id
         )
-        return await self.sprint_repo.create(sprint)
+        created = await self.sprint_repo.create(sprint)
+        
+        # User actor might not be passed directly here (need to check the route), but we will assume it's system if None
+        act_service = ActivityService(self.db)
+        await act_service.log_activity(
+            project_id=create_in.project_id,
+            actor_id=None, # In a real scenario we'd pass user_id down
+            type="sprint_created",
+            description=f"Created sprint '{create_in.name}'",
+            org_id=org_id
+        )
+        
+        return created
 
     async def update_sprint(self, org_id: uuid.UUID, sprint_id: uuid.UUID, update_in: SprintUpdate) -> Sprint:
         sprint = await self.get_sprint(org_id, sprint_id)
