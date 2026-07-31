@@ -9,7 +9,7 @@ import { AIActionCard } from "./AIActionCard";
 import { AttachmentCard } from "./AttachmentCard";
 
 export function MessageBubble({ message }: { message: MessageResponse }) {
-  const isAi = message.role === 'ai' || message.role === 'assistant';
+  const isAi = message.role === 'assistant';
 
   return (
     <motion.div 

@@ -63,7 +63,7 @@ export function DocumentPreview({ document, isOpen, onClose, onDeleteRequest }: 
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-border">
                   <span className="text-sm text-text-secondary">Size</span>
-                  <span className="text-sm font-medium text-text-primary">{document.file_size ? `${Math.round(document.file_size / 1024)} KB` : (document as any).size}</span>
+                  <span className="text-sm font-medium text-text-primary">{document.size_bytes ? `${Math.round(document.size_bytes / 1024)} KB` : (document as any).size}</span>
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-border">
                   <div className="flex items-center gap-2">

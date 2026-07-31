@@ -21,7 +21,7 @@ export function TeamMobileCard({ member, onUpdateRole, onRemoveMember }: TeamMob
             <div className="text-xs text-text-secondary">{member.email}</div>
           </div>
         </div>
-        <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${member.status === 'active' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'}`}>
+        <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${member.status === 'accepted' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'}`}>
           {member.status}
         </span>
       </div>

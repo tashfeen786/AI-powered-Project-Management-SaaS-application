@@ -21,7 +21,7 @@ export function useUpdateTask(projectId: string) {
           ["tasks", projectId],
           {
             ...previousData,
-            items: previousData.items.map(t => t.id === taskId ? { ...t, ...data } : t),
+            items: previousData.items.map(t => t.id === taskId ? { ...t, ...data } as TaskResponse : t),
           }
         );
       }

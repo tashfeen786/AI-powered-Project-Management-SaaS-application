@@ -28,7 +28,7 @@ export default function RequirementsWorkspacePage({ params }: { params: Promise<
     if (initialMessages) setMessages(initialMessages as any);
     if (initialDraft) {
       setDraft({ 
-        ...(initialDraft.generated_content || {}), 
+        ...((initialDraft.generated_content as any) || {}), 
         aiStatus: initialDraft.status === 'approved' ? 'Ready' : 'Draft',
         lastSaved: initialDraft.updated_at
       });
@@ -48,7 +48,7 @@ export default function RequirementsWorkspacePage({ params }: { params: Promise<
       setDraft((prev: any) => prev ? { ...prev, aiStatus: 'Updating Draft' } : prev);
       
       const updatedDraft = await RequirementsService.updateRequirement(initialDraft!.id, {
-        generated_content: { ...draft, _lastMessage: text }
+        generated_content: { ...draft, _lastMessage: text } as any
       });
       
       setDraft({

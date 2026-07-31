@@ -45,7 +45,7 @@ export function TeamTable({ members, onUpdateRole, onRemoveMember }: TeamTablePr
               </td>
               <td className="py-3 px-4 text-sm text-text-secondary">{new Date(member.created_at).toLocaleDateString()}</td>
               <td className="py-3 px-4">
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${member.status === 'active' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'}`}>
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${member.status === 'accepted' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'}`}>
                   {member.status}
                 </span>
               </td>

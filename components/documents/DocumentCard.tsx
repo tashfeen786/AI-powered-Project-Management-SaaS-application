@@ -22,7 +22,7 @@ export function DocumentCard({ document, onClick }: DocumentCardProps) {
           <div className="flex items-center gap-2 mt-1">
             <span className="text-xs font-semibold text-text-secondary uppercase">{document.content_type || (document as any).type}</span>
             <span className="text-[10px] text-text-secondary">•</span>
-            <span className="text-xs text-text-secondary">{document.file_size ? `${Math.round(document.file_size / 1024)} KB` : (document as any).size}</span>
+            <span className="text-xs text-text-secondary">{document.size_bytes ? `${Math.round(document.size_bytes / 1024)} KB` : (document as any).size}</span>
           </div>
         </div>
         <button className="p-1 text-text-secondary hover:text-text-primary rounded focus:outline-none opacity-0 group-hover:opacity-100 transition-opacity">
