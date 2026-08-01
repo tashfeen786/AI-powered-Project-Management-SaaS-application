@@ -2,6 +2,7 @@
 
 import { use } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { ProjectTabs } from "@/components/projects/ProjectTabs";
 import { ActivityHeader } from "@/components/activity/ActivityHeader";
 import { ActivityToolbar } from "@/components/activity/ActivityToolbar";
 import { ActivityTimeline } from "@/components/activity/ActivityTimeline";
@@ -32,18 +33,8 @@ export default function ActivityWorkspacePage({ params }: { params: Promise<{ id
     <AppLayout>
       <div className="max-w-[1000px] mx-auto w-full px-2 sm:px-4 pb-12">
         
-        {/* Breadcrumb Navigation */}
         <div className="shrink-0 mb-6 pt-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Link 
-              href={`/projects/${projectId}`} 
-              className="inline-flex items-center text-xs font-medium text-text-secondary hover:text-text-primary transition-colors focus:outline-none focus:ring-1 focus:ring-primary rounded px-1 -ml-1"
-            >
-              <ChevronLeft className="w-3.5 h-3.5 mr-1" />
-              Back to Project
-            </Link>
-          </div>
-          <div className="text-[10px] text-text-secondary uppercase tracking-widest font-semibold flex items-center gap-1.5">
+          <div className="text-[10px] text-text-secondary uppercase tracking-widest font-semibold flex items-center gap-1.5 mb-2">
             <span>Dashboard</span>
             <span className="opacity-50">/</span>
             <span>Projects</span>
@@ -54,9 +45,10 @@ export default function ActivityWorkspacePage({ params }: { params: Promise<{ id
           </div>
         </div>
 
-        <ActivityHeader />
-        {/* Pass filter state down later if complex, but simple for now */}
-        <ActivityToolbar />
+        <ProjectTabs projectId={projectId}>
+          <ActivityHeader />
+          {/* Pass filter state down later if complex, but simple for now */}
+          <ActivityToolbar />
         
         <div className="mt-2 bg-surface border border-border rounded-lg p-4 sm:p-6 shadow-sm">
           {isLoading ? (
@@ -82,6 +74,7 @@ export default function ActivityWorkspacePage({ params }: { params: Promise<{ id
           )}
         </div>
 
+        </ProjectTabs>
       </div>
     </AppLayout>
   );

@@ -2,6 +2,7 @@
 
 import { use, useState, useRef } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { ProjectTabs } from "@/components/projects/ProjectTabs";
 import { DocumentsHeader } from "@/components/documents/DocumentsHeader";
 import { DocumentToolbar } from "@/components/documents/DocumentToolbar";
 import { UploadDropzone } from "@/components/documents/UploadDropzone";
@@ -119,16 +120,7 @@ export default function DocumentsWorkspacePage({ params }: { params: Promise<{ i
         
         {/* Breadcrumb Navigation */}
         <div className="shrink-0 mb-6 pt-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Link 
-              href={`/projects/${projectId}`} 
-              className="inline-flex items-center text-xs font-medium text-text-secondary hover:text-text-primary transition-colors focus:outline-none focus:ring-1 focus:ring-primary rounded px-1 -ml-1"
-            >
-              <ChevronLeft className="w-3.5 h-3.5 mr-1" />
-              Back to Project
-            </Link>
-          </div>
-          <div className="text-[10px] text-text-secondary uppercase tracking-widest font-semibold flex items-center gap-1.5">
+          <div className="text-[10px] text-text-secondary uppercase tracking-widest font-semibold flex items-center gap-1.5 mb-2">
             <span>Dashboard</span>
             <span className="opacity-50">/</span>
             <span>Projects</span>
@@ -139,14 +131,15 @@ export default function DocumentsWorkspacePage({ params }: { params: Promise<{ i
           </div>
         </div>
 
-        <DocumentsHeader onUploadClick={handleUploadClick} />
-        <DocumentToolbar 
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          folderPath={folderPath}
-          onFolderChange={setFolderPath}
-          folders={uniqueFolders}
-        />
+        <ProjectTabs projectId={projectId}>
+          <DocumentsHeader onUploadClick={handleUploadClick} />
+          <DocumentToolbar 
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            folderPath={folderPath}
+            onFolderChange={setFolderPath}
+            folders={uniqueFolders}
+          />
         
         {/* Conditional Upload Area */}
         <AnimatePresence>
@@ -185,6 +178,7 @@ export default function DocumentsWorkspacePage({ params }: { params: Promise<{ i
             <DocumentGrid documents={filteredDocuments as any} onDocumentClick={setSelectedDoc as any} />
           )}
         </div>
+        </ProjectTabs>
 
       </div>
 

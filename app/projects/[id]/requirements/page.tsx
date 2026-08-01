@@ -2,6 +2,7 @@
 
 import { use, useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { ProjectTabs } from "@/components/projects/ProjectTabs";
 import { WorkspaceHeader } from "@/components/requirements/WorkspaceHeader";
 import { ConversationPanel } from "@/components/requirements/ConversationPanel";
 import { DraftPanel } from "@/components/requirements/DraftPanel";
@@ -105,40 +106,45 @@ export default function RequirementsWorkspacePage({ params }: { params: Promise<
       <div className="h-[calc(100vh-112px)] flex flex-col max-w-[1600px] mx-auto w-full px-2 sm:px-4">
         
         {/* Header */}
-        <div className="shrink-0 mb-4">
+        <div className="shrink-0 mb-4 pt-4">
           <div className="text-[10px] text-text-secondary uppercase tracking-widest font-semibold mb-2 flex items-center gap-1.5">
             <span>Dashboard</span>
             <span className="opacity-50">/</span>
             <span>Projects</span>
             <span className="opacity-50">/</span>
+            <span>Project {resolvedParams.id}</span>
+            <span className="opacity-50">/</span>
             <span className="text-primary">Requirements</span>
           </div>
+        </div>
+
+        <ProjectTabs projectId={resolvedParams.id}>
           <WorkspaceHeader aiStatus={draft.aiStatus} onApprove={handleApprove} />
-        </div>
-        
-        {/* Main Split Layout */}
-        <div className="flex-1 min-h-0 flex flex-col md:flex-row gap-4 pb-4">
           
-          {/* Left Panel: Conversation (45%) */}
-          <div className="flex-1 md:w-[45%] md:flex-none flex flex-col min-h-0">
-            <ConversationPanel 
-              messages={messages} 
-              documents={draft?.documents || []} 
-              onSendMessage={handleSendMessage} 
-              isTyping={isAiTyping} 
-            />
+          {/* Main Split Layout */}
+          <div className="flex-1 min-h-[600px] flex flex-col md:flex-row gap-4 mt-6">
+            
+            {/* Left Panel: Conversation (45%) */}
+            <div className="flex-1 md:w-[45%] md:flex-none flex flex-col min-h-0">
+              <ConversationPanel 
+                messages={messages} 
+                documents={draft?.documents || []} 
+                onSendMessage={handleSendMessage} 
+                isTyping={isAiTyping} 
+              />
+            </div>
+            
+            {/* Right Panel: Live Draft (55%) */}
+            <div className="flex-1 md:w-[55%] md:flex-none flex flex-col min-h-0">
+              <DraftPanel 
+                draft={draft} 
+                isSaving={isSaving} 
+                onUpdateSection={handleUpdateSection} 
+              />
+            </div>
+            
           </div>
-          
-          {/* Right Panel: Live Draft (55%) */}
-          <div className="flex-1 md:w-[55%] md:flex-none flex flex-col min-h-0">
-            <DraftPanel 
-              draft={draft} 
-              isSaving={isSaving} 
-              onUpdateSection={handleUpdateSection} 
-            />
-          </div>
-          
-        </div>
+        </ProjectTabs>
       </div>
 
       <ApproveModal 

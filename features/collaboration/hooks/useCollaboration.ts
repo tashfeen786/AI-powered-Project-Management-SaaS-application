@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export type CollaborationEvent = 
@@ -27,11 +27,11 @@ export function useCollaboration(projectId?: string, onMessage?: (event: Collabo
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const [typingUsers, setTypingUsers] = useState<Record<string, boolean>>({});
+  const [reconnectAttempt, setReconnectAttempt] = useState(0);
 
   useEffect(() => {
     if (!token || typeof window === "undefined") return;
 
-    // Build the WebSocket URL dynamically based on current host or configured env
     let wsBaseUrl = "";
     if (process.env.NEXT_PUBLIC_API_URL) {
       wsBaseUrl = process.env.NEXT_PUBLIC_API_URL.replace(/^http/, "ws");
@@ -43,50 +43,77 @@ export function useCollaboration(projectId?: string, onMessage?: (event: Collabo
     
     const wsUrl = `${wsBaseUrl}/ws/organization?token=${token}`;
     
-    const socket = new WebSocket(wsUrl);
+    let reconnectTimeout: NodeJS.Timeout;
+    
+    const connect = () => {
+      console.log(`[WS] Attempting connection to: ${wsUrl}`);
+      const socket = new WebSocket(wsUrl);
 
-    socket.onopen = () => {
-      console.log("WebSocket connected for collaboration");
-      if (projectId) {
-        socket.send(JSON.stringify({ event: "join_project", project_id: projectId }));
-      }
-    };
+      socket.onopen = () => {
+        console.log("[WS] Connected successfully");
+        setReconnectAttempt(0);
+        if (projectId) {
+          console.log(`[WS] Joining project room: ${projectId}`);
+          socket.send(JSON.stringify({ event: "join_project", project_id: projectId }));
+        }
+      };
 
-    socket.onmessage = (event) => {
-      try {
-        const data: WsMessage = JSON.parse(event.data);
-        
-        if (data.event === "typing_status") {
-          const { user_id, is_typing } = data.payload;
-          if (user_id !== user?.id) {
-            setTypingUsers(prev => ({ ...prev, [user_id]: is_typing }));
+      socket.onmessage = (event) => {
+        try {
+          const data: WsMessage = JSON.parse(event.data);
+          console.log("[WS] Message received:", data.event);
+          
+          if (data.event === "typing_status") {
+            const { user_id, is_typing } = data.payload;
+            if (user_id !== user?.id) {
+              setTypingUsers(prev => ({ ...prev, [user_id]: is_typing }));
+            }
+          } else if (data.event === "presence_update") {
+            setOnlineUsers(data.payload.online_users || []);
           }
-        } else if (data.event === "presence_update") {
-          setOnlineUsers(data.payload.online_users || []);
+          
+          // Pass to custom handler
+          if (onMessage) {
+            onMessage(data.event, data.payload);
+          }
+        } catch (err) {
+          console.error("[WS] Failed to parse message:", err);
         }
+      };
+
+      socket.onerror = (err) => {
+        console.error("[WS] Error occurred. Socket readyState:", socket.readyState);
+      };
+
+      socket.onclose = (event) => {
+        console.log(`[WS] Connection closed. Code: ${event.code}, Reason: ${event.reason || 'None'}, Clean: ${event.wasClean}`);
         
-        // Pass to custom handler
-        if (onMessage) {
-          onMessage(data.event, data.payload);
+        // Reconnect with exponential backoff (max 30 seconds)
+        if (reconnectAttempt < 10) {
+          const delay = Math.min(1000 * Math.pow(2, reconnectAttempt), 30000);
+          console.log(`[WS] Scheduling reconnect attempt ${reconnectAttempt + 1} in ${delay}ms...`);
+          reconnectTimeout = setTimeout(() => {
+            setReconnectAttempt(prev => prev + 1);
+          }, delay);
+        } else {
+          console.error("[WS] Max reconnect attempts reached. Giving up.");
         }
-      } catch (err) {
-        console.error("Failed to parse WS message", err);
-      }
+      };
+
+      setWs(socket);
+      return socket;
     };
 
-    socket.onerror = (err) => {
-      console.error("WebSocket Error", err);
-    };
-
-    setWs(socket);
+    const socket = connect();
 
     return () => {
+      clearTimeout(reconnectTimeout);
       if (projectId && socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify({ event: "leave_project", project_id: projectId }));
       }
       socket.close();
     };
-  }, [token, projectId, user?.id]);
+  }, [token, projectId, user?.id, reconnectAttempt]);
 
   const emitTyping = useCallback((isTyping: boolean) => {
     if (ws && ws.readyState === WebSocket.OPEN && projectId) {
