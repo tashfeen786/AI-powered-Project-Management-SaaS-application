@@ -23,11 +23,15 @@ async def websocket_endpoint(websocket: WebSocket, token: str, db: AsyncSession 
 @router.websocket("/projects/{project_id}")
 async def websocket_project_endpoint(websocket: WebSocket, project_id: str, token: str, db: AsyncSession = Depends(get_db)):
     ws_service = WebSocketService(db)
-    # The frontend could send a 'join_project' immediately after connection, or we handle it inherently.
-    # Handling it natively through the service covers this seamlessly.
-    await ws_service.handle_connection(websocket, token)
+    try:
+        await ws_service.handle_connection(websocket, token)
+    except Exception as e:
+        logger.error("Unhandled WS error in project endpoint", error=str(e))
 
 @router.websocket("/organization")
 async def websocket_org_endpoint(websocket: WebSocket, token: str, db: AsyncSession = Depends(get_db)):
     ws_service = WebSocketService(db)
-    await ws_service.handle_connection(websocket, token)
+    try:
+        await ws_service.handle_connection(websocket, token)
+    except Exception as e:
+        logger.error("Unhandled WS error in org endpoint", error=str(e))
