@@ -88,8 +88,6 @@ export default function PlanningWorkspacePage({ params }: { params: Promise<{ id
       <div className="h-[calc(100vh-112px)] flex flex-col max-w-[1600px] mx-auto w-full px-2 sm:px-4">
         
         {/* Header */}
-        <div className="shrink-0 mb-4">
-          <div className="flex items-center gap-2 mb-2">
         <div className="shrink-0 mb-4 pt-4">
           <div className="text-[10px] text-text-secondary uppercase tracking-widest font-semibold mb-2 flex items-center gap-1.5">
             <span>Dashboard</span>

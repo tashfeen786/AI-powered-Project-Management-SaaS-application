@@ -4,10 +4,12 @@ import { useState, useRef, useEffect } from "react";
 import { User, Settings, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AuthService } from "@/services/auth.service";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export function UserMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -38,8 +40,8 @@ export function UserMenu() {
             className="absolute top-full right-0 mt-1 w-48 bg-surface border border-border rounded-md shadow-sm z-50 py-1"
           >
             <div className="px-3 py-2 border-b border-border mb-1">
-              <p className="text-sm font-medium text-text-primary">John Doe</p>
-              <p className="text-xs text-text-secondary truncate">john@example.com</p>
+              <p className="text-sm font-medium text-text-primary">{user?.full_name || "User"}</p>
+              <p className="text-xs text-text-secondary truncate">{user?.email || "user@example.com"}</p>
             </div>
             
             <button className="w-full flex items-center px-3 py-2 text-sm text-text-primary hover:bg-background transition-colors duration-150">
