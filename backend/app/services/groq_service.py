@@ -27,8 +27,15 @@ class GroqService:
         Calls Groq API to generate a response.
         Supports Llama 3, DeepSeek, Gemma (configurable via model param).
         """
+        if not settings.GROQ_API_KEY or settings.GROQ_API_KEY == "gsk_your_groq_api_key_here":
+            logger.info("Using MOCK AI Response (No Valid API Key)")
+            return {
+                "text": "This is a **MOCK AI RESPONSE** because the Groq API key is missing or invalid.\n\nHere is a list:\n- Item 1\n- Item 2\n\n```python\nprint('Hello World')\n```",
+                "tokens": 42,
+                "model": model
+            }
+            
         client = GroqService._get_client()
-        
         logger.info("Calling Groq", model=model, prompt_length=len(prompt))
         
         try:
@@ -61,6 +68,19 @@ class GroqService:
 
     @staticmethod
     async def generate_stream(prompt: str, system_prompt: str = "You are a helpful AI project management assistant.", model: str = "llama3-70b-8192", tools: list = None):
+        if not settings.GROQ_API_KEY or settings.GROQ_API_KEY == "gsk_your_groq_api_key_here":
+            logger.info("Using MOCK AI Stream Response (No Valid API Key)")
+            import asyncio
+            mock_text = "This is a **MOCK STREAMING RESPONSE** because the Groq API key is missing or invalid.\n\n"
+            mock_text += "Here is a list:\n- First element\n- Second element\n\n"
+            mock_text += "### Sample Code\n```javascript\nconsole.log('Success');\n```"
+            
+            # Simulate streaming chunks
+            for i in range(0, len(mock_text), 5):
+                await asyncio.sleep(0.05)
+                yield mock_text[i:i+5]
+            return
+
         client = GroqService._get_client()
         logger.info("Calling Groq Stream", model=model)
         
