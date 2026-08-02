@@ -1,0 +1,1 @@
+This is a test document containing some information about the project requirements. The project needs a user authentication system. Users should be able to sign up, log in, and log out. We also need a dashboard where users can see their projects.

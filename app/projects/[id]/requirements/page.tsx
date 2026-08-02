@@ -33,8 +33,16 @@ export default function RequirementsWorkspacePage({ params }: { params: Promise<
         aiStatus: initialDraft.status === 'approved' ? 'Ready' : 'Draft',
         lastSaved: initialDraft.updated_at
       });
+    } else if (initialDraft === null && !isDraftLoading) {
+      setDraft({
+         sections: [],
+         aiStatus: 'Draft',
+         confidence: 0,
+         missingInfo: [],
+         assumptions: []
+      });
     }
-  }, [initialMessages, initialDraft]);
+  }, [initialMessages, initialDraft, isDraftLoading]);
 
   const handleSendMessage = async (text: string) => {
     // Optimistic UI for user message

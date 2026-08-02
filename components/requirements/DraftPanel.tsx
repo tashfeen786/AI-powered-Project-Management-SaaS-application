@@ -21,15 +21,15 @@ export function DraftPanel({ draft, isSaving, onUpdateSection }: DraftPanelProps
           <h2 className="text-sm font-semibold text-primary">Live SRS Draft</h2>
           <DraftSaveIndicator isSaving={isSaving} />
         </div>
-        <ConfidenceBadge level={draft.confidence} />
+        <ConfidenceBadge level={draft?.confidence || 0} />
       </div>
       
       <div className="flex-1 overflow-y-auto p-6 bg-surface">
-        <MissingInfoPanel missingInfo={draft.missingInfo} />
-        <AssumptionsPanel assumptions={draft.assumptions} />
+        <MissingInfoPanel missingInfo={draft?.missingInfo || []} />
+        <AssumptionsPanel assumptions={draft?.assumptions || []} />
         
         <div className="mt-6">
-          {draft.sections.map(section => (
+          {(draft?.sections || []).map(section => (
             <DraftSection 
               key={section.id} 
               section={section} 
