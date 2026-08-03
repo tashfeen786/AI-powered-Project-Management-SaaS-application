@@ -91,7 +91,7 @@ class RequirementService:
             source_documents=sources,
             project_id=project_id,
             organization_id=org_id,
-            generated_by_id=user_id
+            created_by_id=user_id
         )
         
         created = await self.req_repo.create(req)
