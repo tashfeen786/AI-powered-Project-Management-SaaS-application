@@ -1,0 +1,9 @@
+Project Name: AI-powered Project Management SaaS application
+Version: 1.0.0
+Description: A modern, collaborative project management platform featuring AI-powered agents, real-time sync, and document-based RAG (Retrieval-Augmented Generation) copilot.
+Key Features:
+- Task boards with Kanban view and drag-and-drop.
+- Document management with automatic vector database indexing and semantic search.
+- AI Copilot for drafting requirements, generating sprint plans, and summarizing documents.
+- Real-time updates via WebSockets.
+- Interactive requirements management panel.

@@ -34,8 +34,29 @@ export default function PlanningWorkspacePage({ params }: { params: Promise<{ id
         aiStatus: initialDraft.status === 'approved' ? 'Ready' : 'Draft',
         lastSaved: initialDraft.updated_at
       });
+    } else if (isDraftLoading === false) {
+      setDraft({
+        projectId: resolvedParams.id,
+        aiStatus: 'Draft',
+        confidence: 'Low',
+        lastSaved: new Date().toISOString(),
+        milestones: [],
+        risks: [],
+        estimations: {
+          totalStoryPoints: 0,
+          totalTasks: 0,
+          estimatedHours: 0,
+          projectedDuration: "0 weeks",
+        },
+        team: {
+          developers: 0,
+          qa: 0,
+          designers: 0,
+          estimatedDuration: "0 weeks",
+        }
+      });
     }
-  }, [initialMessages, initialDraft]);
+  }, [initialMessages, initialDraft, isDraftLoading, resolvedParams.id]);
 
   const handleSendMessage = async (text: string) => {
     const userMsg = { id: Math.random().toString(), role: 'user', content: text, timestamp: new Date().toISOString() };
