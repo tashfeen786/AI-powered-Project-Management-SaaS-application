@@ -1,22 +1,19 @@
-import { Sparkles, Calendar, Layout, UserPlus } from "lucide-react";
-import Link from "next/link";
+import { FileUp, Settings, Plus, UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface QuickActionsProps {
   projectId: string;
   onInviteClick: () => void;
-  onGenerateSRSClick: () => void;
-  onSprintWizardClick: () => void;
 }
 
-export function QuickActions({ projectId, onInviteClick, onGenerateSRSClick, onSprintWizardClick }: QuickActionsProps) {
+export function QuickActions({ projectId, onInviteClick }: QuickActionsProps) {
   const router = useRouter();
 
   const actions = [
-    { title: "Generate SRS", icon: Sparkles, onClick: onGenerateSRSClick },
-    { title: "Sprint Planning", icon: Calendar, onClick: onSprintWizardClick },
-    { title: "Open Board", icon: Layout, onClick: () => router.push(`/projects/${projectId}/board`) },
-    { title: "Invite Team", icon: UserPlus, onClick: onInviteClick },
+    { title: "Create Task", icon: Plus, onClick: () => router.push(`/projects/${projectId}/board`) },
+    { title: "Upload Document", icon: FileUp, onClick: () => router.push(`/projects/${projectId}/documents`) },
+    { title: "Invite Team Member", icon: UserPlus, onClick: onInviteClick },
+    { title: "Project Settings", icon: Settings, onClick: () => router.push(`/projects/${projectId}/settings`) },
   ];
 
   return (
@@ -27,9 +24,9 @@ export function QuickActions({ projectId, onInviteClick, onGenerateSRSClick, onS
           <button 
             key={i} 
             onClick={action.onClick}
-            className="w-full flex items-center gap-3 p-2.5 rounded-md text-sm text-text-primary hover:bg-background transition-colors focus:outline-none focus:ring-1 focus:ring-primary border border-transparent hover:border-border"
+            className="w-full flex items-center gap-3 p-2.5 rounded-md text-sm text-text-primary hover:bg-background transition-colors focus:outline-none focus:ring-1 focus:ring-primary border border-transparent hover:border-border group"
           >
-            <div className="w-7 h-7 rounded bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <div className="w-7 h-7 rounded bg-background text-text-secondary flex items-center justify-center shrink-0 border border-border group-hover:text-primary group-hover:border-primary/30 transition-colors">
               <action.icon className="w-3.5 h-3.5" />
             </div>
             <span className="font-medium">{action.title}</span>

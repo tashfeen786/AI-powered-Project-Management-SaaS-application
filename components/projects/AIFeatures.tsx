@@ -1,4 +1,4 @@
-import { Sparkles, CheckSquare, Calendar, ShieldAlert, FileText, Users, MessageSquare, Bot } from "lucide-react";
+import { Sparkles, Calendar, Bot, MessageSquare } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface AIFeaturesProps {
@@ -11,31 +11,28 @@ export function AIFeatures({ projectId, onGenerateSRSClick, onSprintWizardClick 
   const router = useRouter();
 
   const features = [
+    { title: "AI Copilot", icon: MessageSquare, onClick: () => router.push(`/projects/${projectId}/copilot`) },
     { title: "AI Agents", icon: Bot, onClick: () => router.push(`/projects/${projectId}/agents`) },
-    { title: "Requirement Generator", icon: Sparkles, onClick: onGenerateSRSClick },
-    { title: "Task Breakdown", icon: CheckSquare, onClick: () => router.push(`/projects/${projectId}/board?ai=task-breakdown`) },
-    { title: "Sprint Generator", icon: Calendar, onClick: onSprintWizardClick },
-    { title: "Risk Analysis", icon: ShieldAlert, onClick: () => router.push(`/projects/${projectId}/planning?ai=risk-analysis`) },
-    { title: "Project Summary", icon: FileText, onClick: () => router.push(`/projects/${projectId}/copilot?prompt=Summarize+project+status`) },
-    { title: "Meeting Notes", icon: Users, onClick: () => router.push(`/projects/${projectId}/copilot?prompt=Create+meeting+summary`) },
-    { title: "Document Chat", icon: MessageSquare, onClick: () => router.push(`/projects/${projectId}/copilot?ai=chat`) },
-    { title: "Project Chat", icon: Bot, onClick: () => router.push(`/projects/${projectId}/copilot`) },
+    { title: "Generate SRS", icon: Sparkles, onClick: onGenerateSRSClick },
+    { title: "Generate Sprint Plan", icon: Calendar, onClick: onSprintWizardClick },
   ];
 
   return (
-    <div className="bg-surface border border-border rounded-lg p-5">
-      <div className="flex items-center gap-2 mb-4">
+    <div className="bg-primary/5 border border-primary/20 rounded-lg p-5 relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
+      
+      <div className="flex items-center gap-2 mb-4 relative">
         <Sparkles className="w-4 h-4 text-primary" />
-        <h3 className="text-sm font-semibold text-text-primary">AI Features</h3>
+        <h3 className="text-sm font-semibold text-primary">AI Features</h3>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-2">
+      <div className="flex flex-col gap-2 relative">
         {features.map((feature, i) => (
           <button 
             key={i} 
             onClick={feature.onClick}
-            className="w-full flex items-center gap-3 p-2.5 rounded-md text-sm text-text-primary hover:bg-background transition-colors focus:outline-none focus:ring-1 focus:ring-primary border border-transparent hover:border-border group"
+            className="w-full flex items-center gap-3 p-2.5 rounded-md text-sm text-text-primary hover:bg-primary/10 transition-colors focus:outline-none focus:ring-1 focus:ring-primary border border-transparent hover:border-primary/30 group"
           >
-            <div className="w-7 h-7 rounded bg-primary/10 text-primary flex items-center justify-center shrink-0 group-hover:bg-primary group-hover:text-surface transition-colors">
+            <div className="w-7 h-7 rounded bg-primary/20 text-primary flex items-center justify-center shrink-0 group-hover:bg-primary group-hover:text-surface transition-colors shadow-sm">
               <feature.icon className="w-3.5 h-3.5" />
             </div>
             <span className="font-medium">{feature.title}</span>

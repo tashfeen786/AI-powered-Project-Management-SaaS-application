@@ -85,8 +85,6 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                   <QuickActions 
                     projectId={resolvedParams.id} 
                     onInviteClick={() => setIsInviteOpen(true)} 
-                    onGenerateSRSClick={() => setIsSRSModalOpen(true)}
-                    onSprintWizardClick={() => setIsSprintWizardOpen(true)}
                   />
                   <AIFeatures
                     projectId={resolvedParams.id} 

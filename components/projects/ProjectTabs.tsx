@@ -11,7 +11,9 @@ const tabs = [
   { name: "Planning", path: "/planning" },
   { name: "Board", path: "/board" },
   { name: "Documents", path: "/documents" },
-  { name: "Activity", path: "/activity" }
+  { name: "Activity", path: "/activity" },
+  { name: "Copilot", path: "/copilot" },
+  { name: "Agents", path: "/agents" }
 ];
 
 export function ProjectTabs({ children, projectId }: { children?: React.ReactNode, projectId: string }) {
