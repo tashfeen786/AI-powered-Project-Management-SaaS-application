@@ -20,13 +20,3 @@ User Question:
 
 Answer:"""
         return prompt.strip()
-
-    @staticmethod
-    def build_srs_prompt(context_chunks: list) -> str:
-        # Placeholder for future feature
-        pass
-        
-    @staticmethod
-    def build_sprint_plan_prompt(context_chunks: list, backlog: list) -> str:
-        # Placeholder for future feature
-        pass

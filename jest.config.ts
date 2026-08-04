@@ -12,8 +12,8 @@ const config: any = {
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   moduleNameMapper: {
-    // Handle module aliases (this will be automatically configured for you soon)
-    '^@/(.*)$': '<rootDir>/src/$1',
+    // Resolve @/ aliases to project root (no src/ directory in this project)
+    '^@/(.*)$': '<rootDir>/$1',
   },
 };
 

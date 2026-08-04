@@ -1,15 +1,6 @@
-const fs = require('fs');
-const path = require('path');
-const glob = require('glob');
-
-// This script will remove all mock data arrays/objects from the mock-data.ts files
-// leaving only the interface/type declarations intact.
-
-const files = glob.sync('f:/AI-powered Project Management SaaS application/features/**/mock*.ts');
-files.forEach(file => {
-  let content = fs.readFileSync(file, 'utf8');
-  content = content.replace(/export const mock\w+\s*(:\s*[\w\[\]]+)?\s*=\s*\[[\s\S]*?\];/g, 'export const mockDataRemoved = [];');
-  content = content.replace(/export const mock\w+\s*(:\s*[\w\[\]]+)?\s*=\s*\{[\s\S]*?\};/g, 'export const mockDataRemoved = {};');
-  fs.writeFileSync(file, content);
-  console.log('Cleaned ' + file);
-});
+// REMOVED — This one-time cleanup script has already been executed.
+// It stripped mock data arrays from features/**/mock-data.ts files,
+// leaving only interface/type declarations.
+// The mock-data.ts files now serve purely as local type definition files
+// and will be renamed to types.ts in a future cleanup pass.
+export {};

@@ -25,9 +25,8 @@ class Settings(BaseSettings):
     # Redis (local)
     REDIS_URL: str = "redis://localhost:6379/0"
     
-    # AI Keys
+    # AI Keys — Groq is the sole LLM provider. OpenAI is not used.
     GROQ_API_KEY: Optional[str] = None
-    OPENAI_API_KEY: Optional[str] = None
 
     model_config = SettingsConfigDict(
         env_file=str(_env_file),
