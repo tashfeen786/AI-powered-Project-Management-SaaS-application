@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useGenerateRequirement } from "@/features/requirements/hooks/useRequirements";
 import { X, Loader2, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
@@ -7,11 +7,19 @@ interface GenerateRequirementModalProps {
   isOpen: boolean;
   onClose: () => void;
   projectId: string;
+  initialTitle?: string;
 }
 
-export function GenerateRequirementModal({ isOpen, onClose, projectId }: GenerateRequirementModalProps) {
-  const [title, setTitle] = useState("");
+export function GenerateRequirementModal({ isOpen, onClose, projectId, initialTitle }: GenerateRequirementModalProps) {
+  const [title, setTitle] = useState(initialTitle || "");
   const [context, setContext] = useState("");
+
+  // Update title when initialTitle changes (e.g. modal opens with different action)
+  useEffect(() => {
+    if (initialTitle && isOpen) {
+      setTitle(initialTitle);
+    }
+  }, [initialTitle, isOpen]);
 
   const { mutate: generateReq, isPending } = useGenerateRequirement();
 
