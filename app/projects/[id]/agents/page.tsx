@@ -66,30 +66,32 @@ export default function AgentsDashboardPage({ params }: { params: Promise<{ id: 
           Back to Project
         </Link>
         
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-text-primary mb-2">AI Agents</h1>
-          <p className="text-sm text-text-secondary">
-            Deploy specialized autonomous AI agents to manage different aspects of your project.
-          </p>
-        </div>
+        <ProjectTabs projectId={projectId}>
+          <div className="mb-8 mt-6">
+            <h1 className="text-2xl font-bold text-text-primary mb-2">AI Agents</h1>
+            <p className="text-sm text-text-secondary">
+              Deploy specialized autonomous AI agents to manage different aspects of your project.
+            </p>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {agents.map((agent) => (
-            <Link href={`/projects/${projectId}/agents/${agent.id}`} key={agent.id}>
-              <div className="group h-full bg-surface border border-border rounded-xl p-6 hover:border-primary/50 transition-colors cursor-pointer shadow-sm hover:shadow-md">
-                <div className={`w-12 h-12 rounded-lg flex items-center justify-center border mb-4 transition-colors ${agent.color}`}>
-                  <agent.icon className="w-6 h-6" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {agents.map((agent) => (
+              <Link href={`/projects/${projectId}/agents/${agent.id}`} key={agent.id}>
+                <div className="group h-full bg-surface border border-border rounded-xl p-6 hover:border-primary/50 transition-colors cursor-pointer shadow-sm hover:shadow-md">
+                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center border mb-4 transition-colors ${agent.color}`}>
+                    <agent.icon className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-text-primary mb-2 group-hover:text-primary transition-colors">
+                    {agent.name}
+                  </h3>
+                  <p className="text-sm text-text-secondary leading-relaxed">
+                    {agent.description}
+                  </p>
                 </div>
-                <h3 className="text-lg font-semibold text-text-primary mb-2 group-hover:text-primary transition-colors">
-                  {agent.name}
-                </h3>
-                <p className="text-sm text-text-secondary leading-relaxed">
-                  {agent.description}
-                </p>
-              </div>
-            </Link>
-          ))}
-        </div>
+              </Link>
+            ))}
+          </div>
+        </ProjectTabs>
       </div>
     </AppLayout>
   );
