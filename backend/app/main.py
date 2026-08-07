@@ -46,37 +46,48 @@ async def lifespan(app: FastAPI):
     from app.schemas.websocket import WsServerMessage
     import uuid
 
-    redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
-    redis_client = aioredis.from_url(redis_url)
-    pubsub = redis_client.pubsub()
-    await pubsub.subscribe("project_events")
-    
-    async def redis_listener():
-        try:
-            async for message in pubsub.listen():
-                if message["type"] == "message":
-                    try:
-                        data = json.loads(message["data"])
-                        project_id_str = data.get("project_id")
-                        event = data.get("event")
-                        payload = data.get("payload", {})
-                        
-                        if project_id_str and event:
-                            project_id = uuid.UUID(project_id_str)
-                            ws_msg = WsServerMessage(event=event, payload=payload)
-                            await manager.broadcast_to_project(project_id, ws_msg)
-                    except Exception as e:
-                        logger.error("Failed to process redis pubsub message", error=str(e))
-        except asyncio.CancelledError:
-            pass
-            
-    listener_task = asyncio.create_task(redis_listener())
+    try:
+        redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+        redis_client = aioredis.from_url(redis_url)
+        pubsub = redis_client.pubsub()
+        await pubsub.subscribe("project_events")
+        
+        async def redis_listener():
+            try:
+                async for message in pubsub.listen():
+                    if message["type"] == "message":
+                        try:
+                            data = json.loads(message["data"])
+                            project_id_str = data.get("project_id")
+                            event = data.get("event")
+                            payload = data.get("payload", {})
+                            
+                            if project_id_str and event:
+                                project_id = uuid.UUID(project_id_str)
+                                ws_msg = WsServerMessage(event=event, payload=payload)
+                                await manager.broadcast_to_project(project_id, ws_msg)
+                        except Exception as e:
+                            logger.error("Failed to process redis pubsub message", error=str(e))
+            except asyncio.CancelledError:
+                pass
+            except Exception as e:
+                logger.error("Redis listener error", error=str(e))
+                
+        listener_task = asyncio.create_task(redis_listener())
+    except Exception as e:
+        logger.error("Failed to connect to Redis for PubSub", error=str(e))
+        redis_client = None
+        pubsub = None
+        listener_task = None
 
     yield
     
-    listener_task.cancel()
-    await pubsub.close()
-    await redis_client.close()
+    if listener_task:
+        listener_task.cancel()
+    if pubsub:
+        await pubsub.close()
+    if redis_client:
+        await redis_client.close()
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
