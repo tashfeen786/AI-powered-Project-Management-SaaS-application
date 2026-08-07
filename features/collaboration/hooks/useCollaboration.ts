@@ -13,7 +13,14 @@ export type CollaborationEvent =
   | "watcher_removed"
   | "mention_created"
   | "notification_created"
-  | "notification_read";
+  | "notification_read"
+  | "pipeline_started"
+  | "requirements_parsed"
+  | "planning_generated"
+  | "tasks_generated"
+  | "assignments_completed"
+  | "pipeline_finished"
+  | "pipeline_failed";
 
 interface WsMessage {
   event: CollaborationEvent;

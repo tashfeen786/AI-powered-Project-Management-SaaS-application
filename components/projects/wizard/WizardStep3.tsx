@@ -1,17 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, CheckCircle2, Bot, Database, Layout, Users, ListTodo, Shield, FileText, Check } from "lucide-react";
 import { useCreateProject } from "@/features/projects/hooks/useCreateProject";
+import { useCollaboration } from "@/features/collaboration/hooks/useCollaboration";
+import { ProjectService } from "@/services/project.service";
 
 const steps = [
-  { id: 'analyze', title: 'Analyzing Requirements', icon: FileText },
-  { id: 'architecture', title: 'Designing Architecture & DB', icon: Database },
-  { id: 'breakdown', title: 'Generating Epics & Tasks', icon: ListTodo },
-  { id: 'planning', title: 'Planning Sprints & Timeline', icon: Layout },
-  { id: 'assignment', title: 'Smart Resource Assignment', icon: Users },
-  { id: 'risk', title: 'Risk & Quality Analysis', icon: Shield },
+  { id: 'pipeline_started', title: 'Analyzing Requirements', icon: FileText },
+  { id: 'requirements_parsed', title: 'Designing Architecture & DB', icon: Database },
+  { id: 'planning_generated', title: 'Generating Epics & Tasks', icon: ListTodo },
+  { id: 'tasks_generated', title: 'Smart Resource Assignment', icon: Users },
+  { id: 'assignments_completed', title: 'Risk & Quality Analysis', icon: Shield },
+  { id: 'pipeline_finished', title: 'Pipeline Complete', icon: CheckCircle2 },
 ];
 
 export function WizardStep3({ basicInfo, requirements, onPrev }: any) {
@@ -21,41 +23,58 @@ export function WizardStep3({ basicInfo, requirements, onPrev }: any) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [createdProjectId, setCreatedProjectId] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Set up WebSocket listener
+  useCollaboration(createdProjectId || undefined, (event, payload) => {
+    console.log("Wizard Received WS Event:", event, payload);
+    const stepIndex = steps.findIndex(s => s.id === event);
+    if (stepIndex !== -1) {
+      setCurrentStepIndex(stepIndex);
+      if (event === "pipeline_finished") {
+        setIsComplete(true);
+      }
+    } else if (event === "pipeline_failed") {
+      setErrorMsg(payload?.error || "AI Pipeline failed");
+    }
+  });
 
   useEffect(() => {
     // 1. First, create the project in the backend
     createProject(
       {
         name: basicInfo.name,
-        description: requirements, // we save raw requirements to description or a new field
+        description: requirements, // Raw requirements
         project_type: basicInfo.project_type,
         industry: basicInfo.industry,
         target_platform: basicInfo.target_platform,
         expected_users: basicInfo.expected_users,
         budget: basicInfo.budget,
         priority: basicInfo.priority,
-        // map other fields as necessary
+        tech_preferences: basicInfo.tech_preferences
       },
       {
-        onSuccess: (data) => {
-          setCreatedProjectId(data.data?.id || null);
-          startAIFlow(data.data?.id);
+        onSuccess: async (data: any) => {
+          const projectId = data.id || data.data?.id; // depending on interceptor
+          setCreatedProjectId(projectId);
+          // Wait briefly for WebSocket connection to establish
+          setTimeout(() => {
+            startAIFlow(projectId);
+          }, 1000);
+        },
+        onError: (err: any) => {
+          setErrorMsg(err.message || "Failed to create project");
         }
       }
     );
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const startAIFlow = async (projectId: string | undefined) => {
-    // Simulate the AI taking time to process each step
-    // In reality, this would listen to a WebSocket or poll a background job status
-    for (let i = 0; i < steps.length; i++) {
-      setCurrentStepIndex(i);
-      // Wait between 1.5s to 3s per step for dramatic effect
-      await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 1500));
+  const startAIFlow = async (projectId: string) => {
+    try {
+      await ProjectService.analyzeProject(projectId, requirements);
+    } catch (err: any) {
+      setErrorMsg(err.message || "Failed to start AI analysis");
     }
-    
-    setCurrentStepIndex(steps.length);
-    setIsComplete(true);
   };
 
   const handleFinish = () => {
@@ -75,18 +94,20 @@ export function WizardStep3({ basicInfo, requirements, onPrev }: any) {
         </div>
         
         <h2 className="text-3xl font-bold text-text-primary mb-2 text-center">
-          {isComplete ? "Project Generated Successfully" : "AI Architect is at work..."}
+          {errorMsg ? "Generation Failed" : isComplete ? "Project Generated Successfully" : "AI Architect is at work..."}
         </h2>
         <p className="text-text-secondary text-center max-w-lg mb-12">
-          {isComplete 
-            ? "Your project workspace has been fully initialized with requirements, architecture, tasks, and team assignments."
-            : "Please wait while our AI analyzes your inputs and generates a complete production-ready project plan."}
+          {errorMsg
+            ? <span className="text-red-500">{errorMsg}</span>
+            : isComplete 
+              ? "Your project workspace has been fully initialized with requirements, architecture, tasks, and team assignments."
+              : "Please wait while our AI analyzes your inputs and generates a complete production-ready project plan. This might take a couple of minutes."}
         </p>
 
         <div className="w-full max-w-md space-y-4">
           {steps.map((step, index) => {
             const Icon = step.icon;
-            const isActive = index === currentStepIndex;
+            const isActive = index === currentStepIndex && !isComplete && !errorMsg;
             const isDone = index < currentStepIndex || isComplete;
 
             return (
@@ -121,10 +142,10 @@ export function WizardStep3({ basicInfo, requirements, onPrev }: any) {
       <div className="p-4 border-t border-border bg-surface flex justify-center">
         <button 
           onClick={handleFinish}
-          disabled={!isComplete}
+          disabled={!isComplete && !errorMsg}
           className="h-11 px-8 bg-primary text-surface rounded-lg font-medium hover:opacity-90 transition-opacity flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isComplete ? "Go to Project Workspace" : "Generating Project..."}
+          {isComplete || errorMsg ? "Go to Project Workspace" : "Generating Project..."}
         </button>
       </div>
     </div>
