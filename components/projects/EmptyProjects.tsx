@@ -1,4 +1,5 @@
 import { FolderKanban, Plus } from "lucide-react";
+import Link from "next/link";
 
 export function EmptyProjects() {
   return (
@@ -10,10 +11,10 @@ export function EmptyProjects() {
       <p className="text-text-secondary text-sm max-w-sm mb-6">
         You haven't created any software projects. Get started by creating your first project workspace.
       </p>
-      <button className="h-9 px-4 bg-primary text-surface rounded-md text-sm font-medium hover:opacity-90 transition-opacity duration-150 flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+      <Link href="/projects/new" className="h-9 px-4 bg-primary text-surface rounded-md text-sm font-medium hover:opacity-90 transition-opacity duration-150 flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
         <Plus className="w-4 h-4" />
         Create your first project
-      </button>
+      </Link>
     </div>
   );
 }

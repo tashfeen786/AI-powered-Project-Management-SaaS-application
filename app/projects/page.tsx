@@ -7,11 +7,10 @@ import { ProjectGridSkeleton } from "@/components/projects/ProjectSkeleton";
 import { EmptyProjects } from "@/components/projects/EmptyProjects";
 import { useProjects } from "@/features/projects/hooks/useProjects";
 import { Plus, Search, Filter, ArrowUpDown } from "lucide-react";
-import { CreateProjectModal } from "@/components/projects/CreateProjectModal";
+import Link from "next/link";
 
 export default function ProjectsPage() {
   const { data, isLoading } = useProjects();
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
 
   return (
@@ -22,13 +21,13 @@ export default function ProjectsPage() {
             <h1 className="text-2xl font-bold text-text-primary mb-1">Projects</h1>
             <p className="text-text-secondary text-sm">Manage all your software projects.</p>
           </div>
-          <button 
-            onClick={() => setIsModalOpen(true)}
+          <Link 
+            href="/projects/new"
             className="h-9 px-4 bg-primary text-surface rounded-md text-sm font-medium hover:opacity-90 transition-opacity duration-150 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 w-full md:w-auto shrink-0"
           >
             <Plus className="w-4 h-4" />
             New Project
-          </button>
+          </Link>
         </div>
 
         {/* Search & Filters */}
@@ -61,7 +60,6 @@ export default function ProjectsPage() {
           <ProjectGrid projects={data.items as any} />
         )}
       </div>
-      <CreateProjectModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </AppLayout>
   );
 }
