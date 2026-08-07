@@ -134,3 +134,27 @@ async def delete_project(
     project_service = ProjectService(db)
     await project_service.delete_project(current_user.id, org_id, id)
     return success_response(message="Project deleted")
+
+from pydantic import BaseModel
+class AnalyzeProjectRequest(BaseModel):
+    requirements: str
+
+@router.post("/{id}/analyze", response_model=StandardResponse)
+async def analyze_project(
+    id: uuid.UUID,
+    request: AnalyzeProjectRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+    org_id: uuid.UUID = Depends(get_org_id)
+):
+    # Enqueue celery task
+    from app.tasks.orchestrator_tasks import run_ai_orchestrator
+    
+    run_ai_orchestrator.delay(
+        project_id=str(id),
+        org_id=str(org_id),
+        user_id=str(current_user.id),
+        requirements=request.requirements
+    )
+    
+    return success_response(message="AI analysis pipeline started")
