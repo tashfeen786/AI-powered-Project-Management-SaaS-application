@@ -11,6 +11,12 @@ class ProjectBase(BaseModel):
     progress: int = Field(0, ge=0, le=100)
     start_date: Optional[date] = None
     end_date: Optional[date] = None
+    project_type: Optional[str] = None
+    industry: Optional[str] = None
+    target_platform: Optional[str] = None
+    expected_users: Optional[str] = None
+    budget: Optional[str] = None
+    tech_preferences: Optional[str] = None
 
 class ProjectCreate(ProjectBase):
     pass

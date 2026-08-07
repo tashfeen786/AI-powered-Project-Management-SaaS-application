@@ -17,6 +17,13 @@ class Project(BaseModel):
     start_date: Mapped[str | None] = mapped_column(Date)
     end_date: Mapped[str | None] = mapped_column(Date)
     
+    project_type: Mapped[str | None] = mapped_column(String(100))
+    industry: Mapped[str | None] = mapped_column(String(100))
+    target_platform: Mapped[str | None] = mapped_column(String(100))
+    expected_users: Mapped[str | None] = mapped_column(String(100))
+    budget: Mapped[str | None] = mapped_column(String(100))
+    tech_preferences: Mapped[str | None] = mapped_column(Text)
+    
     organization_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("organizations.id"))
     organization: Mapped["Organization"] = relationship(back_populates="projects")
     
