@@ -60,6 +60,12 @@ export interface ProjectResponse {
   progress: number;
   start_date: string | null;
   end_date: string | null;
+  project_type: string | null;
+  industry: string | null;
+  target_platform: string | null;
+  expected_users: string | null;
+  budget: string | null;
+  tech_preferences: string | null;
   key: string;
   organization_id: string;
   created_by_id: string;
@@ -90,6 +96,12 @@ export interface ProjectCreate {
   progress?: number;
   start_date?: string;
   end_date?: string;
+  project_type?: string;
+  industry?: string;
+  target_platform?: string;
+  expected_users?: string;
+  budget?: string;
+  tech_preferences?: string;
 }
 
 export interface ProjectUpdate {
@@ -100,6 +112,12 @@ export interface ProjectUpdate {
   progress?: number;
   start_date?: string;
   end_date?: string;
+  project_type?: string;
+  industry?: string;
+  target_platform?: string;
+  expected_users?: string;
+  budget?: string;
+  tech_preferences?: string;
 }
 
 // ============================================================
