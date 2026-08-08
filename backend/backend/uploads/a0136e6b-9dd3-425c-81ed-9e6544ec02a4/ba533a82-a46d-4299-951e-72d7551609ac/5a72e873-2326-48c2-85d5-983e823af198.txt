@@ -1,0 +1,58 @@
+You are an expert full-stack developer. Build a used book 
+marketplace called "KareebBookBuy" with these specs:
+Prompt:
+Build a mobile and web platform for buying and selling second-hand books locally. The system should connect people who want to resell books like “Atomic Habits”, “Rich Dad Poor Dad”, etc., with nearby buyers who are interested in those same books.
+
+Core Concept:
+
+The platform allows users to list used books for sale and automatically matches them with nearby buyers using AI-based recommendation and location ranking.
+
+Key Features:
+User Roles
+Seller: uploads books they want to sell
+Buyer: searches or gets recommendations
+Both roles can switch anytime
+Book Listing System
+Title, author, condition (new, good, worn)
+Price suggestion (AI-based)
+Location (auto-detected or manual)
+Images of book
+AI Recommendation Engine
+Suggest books based on:
+User interest history
+Popular books in nearby area
+Trending books locally
+Prioritize nearby listings first
+Rank results by distance + relevance + price
+Smart Matching System
+If a buyer searches “Atomic Habits”, show:
+Nearby sellers first
+Then slightly far sellers
+Notify sellers when demand exists nearby
+Search System
+Search by book name, author, category
+Auto-suggestions using NLP
+Chat System
+Buyer and seller can chat
+Optional negotiation
+AI Pricing Assistant
+Suggest fair resale price based on:
+Book condition
+Local demand
+Past transactions
+Admin Panel
+Manage users
+Remove fake listings
+Monitor activity
+Technical Suggestions:
+Frontend: React Native (mobile), React (web)
+Backend: python
+Database: PostgreSQL
+AI layer:
+Recommendation system using embeddings (book title + user interest)
+Location-based ranking (geo distance API)
+Maps: Google Maps API or Mapbox
+Core AI Logic:
+Score = (Interest Match × 0.5) + (Distance Score × 0.3) + (Popularity × 0.2)
+
+Return highest scoring listings first.
