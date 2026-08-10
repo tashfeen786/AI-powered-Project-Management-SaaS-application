@@ -30,7 +30,8 @@ async def health_check(db: AsyncSession = Depends(get_db)):
         status["status"] = "degraded"
         
     # Check Redis
-    redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+    from app.core.config import settings
+    redis_url = settings.REDIS_URL
     try:
         r = redis.from_url(redis_url)
         await r.ping()

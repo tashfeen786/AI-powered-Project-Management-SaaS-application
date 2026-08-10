@@ -73,15 +73,27 @@ Output JSON ONLY in this exact format:
 """
         system_prompt = "You are a JSON-only API. No markdown, no conversation."
         
-        # 4. Call Groq
+        # 4. Call Groq with Retry
+        max_retries = 2
+        assignments_data = {}
+        for attempt in range(max_retries):
+            try:
+                result = await GroqService.generate(prompt=prompt, system_prompt=system_prompt, model="llama3-70b-8192")
+                raw_text = result["text"].strip()
+                if "```json" in raw_text:
+                    raw_text = raw_text.split("```json")[1].split("```")[0].strip()
+                elif "```" in raw_text:
+                    raw_text = raw_text.split("```")[1].strip()
+                
+                assignments_data = json.loads(raw_text)
+                break
+            except (json.JSONDecodeError, Exception) as e:
+                logger.warning(f"Groq parsing failed on attempt {attempt+1}", error=str(e))
+                if attempt == max_retries - 1:
+                    logger.error("Developer Assignment Failed completely due to unparseable output")
+                    return # Exit gracefully without crashing pipeline
+        
         try:
-            result = await GroqService.generate(prompt=prompt, system_prompt=system_prompt, model="llama3-70b-8192")
-            raw_text = result["text"].strip()
-            if raw_text.startswith("```json"):
-                raw_text = raw_text.replace("```json", "").replace("```", "")
-            
-            assignments_data = json.loads(raw_text)
-            
             # 5. Apply assignments to the payload
             assignment_map = { a.get("task_title"): a for a in assignments_data.get("assignments", []) }
             

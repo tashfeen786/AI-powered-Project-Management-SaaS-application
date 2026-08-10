@@ -46,32 +46,28 @@ class TaskGenerationService:
         prompt = TaskGenerationPromptService.build_task_generation_prompt(plan.planning_content)
         system_prompt = "You are an AI that exclusively outputs valid JSON. No markdown, no conversation."
 
-        # 3. Call Groq
-        try:
-            # DeepSeek or Llama3-70b configured for JSON output
-            result = await GroqService.generate(prompt=prompt, system_prompt=system_prompt, model="llama3-70b-8192")
-        except Exception as e:
-            logger.error("Task Generation Failed via Groq", error=str(e))
-            raise HTTPException(status_code=500, detail="AI task generation failed")
-
-        logger.info("Groq Request Completed", tokens_used=result["tokens"])
-
-        # 4. Parse JSON
-        try:
-            raw_text = result["text"].strip()
-            if raw_text.startswith("```json"):
-                raw_text = raw_text.replace("```json", "").replace("```", "")
-            
-            parsed_json = json.loads(raw_text)
-            # Validate against schema
-            validated_payload = TaskGenerationPayload(**parsed_json)
-            
-        except json.JSONDecodeError:
-            logger.error("Failed to parse Groq response into JSON")
-            raise HTTPException(status_code=500, detail="AI returned invalid JSON format")
-        except Exception as e:
-            logger.error("JSON Payload Validation Failed", error=str(e))
-            raise HTTPException(status_code=500, detail="AI JSON structure did not match required schema")
+        # 3. Call Groq with Retry
+        max_retries = 2
+        for attempt in range(max_retries):
+            try:
+                # DeepSeek or Llama3-70b configured for JSON output
+                result = await GroqService.generate(prompt=prompt, system_prompt=system_prompt, model="llama3-70b-8192")
+                logger.info("Groq Request Completed", tokens_used=result["tokens"])
+                
+                raw_text = result["text"].strip()
+                if "```json" in raw_text:
+                    raw_text = raw_text.split("```json")[1].split("```")[0].strip()
+                elif "```" in raw_text:
+                    raw_text = raw_text.split("```")[1].strip()
+                
+                parsed_json = json.loads(raw_text)
+                # Validate against schema
+                validated_payload = TaskGenerationPayload(**parsed_json)
+                break
+            except (json.JSONDecodeError, Exception) as e:
+                logger.error(f"Task Generation Failed on attempt {attempt+1}", error=str(e))
+                if attempt == max_retries - 1:
+                    raise HTTPException(status_code=500, detail="AI returned invalid JSON format or failed generation")
 
         # 5. Persistence (Pending Approval)
         generation = TaskGeneration(
