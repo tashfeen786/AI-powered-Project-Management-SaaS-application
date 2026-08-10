@@ -15,9 +15,9 @@ logger = structlog.get_logger()
 
 import redis.asyncio as aioredis
 import json
-import os
+from app.core.config import settings
 
-redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+redis_url = settings.REDIS_URL
 
 async def publish_ws_event(project_id: uuid.UUID, event: str, payload: dict):
     logger.info("Publishing WS Event via Redis", project_id=str(project_id), event=event)

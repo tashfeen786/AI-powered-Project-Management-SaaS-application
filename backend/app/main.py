@@ -18,36 +18,17 @@ from app.db.base import Base
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Auto-migrate missing tables to bypass sandbox limitations
-    try:
-        async with engine.begin() as conn:
-            await conn.execute(text("ALTER TABLE conversations ADD COLUMN agent_id VARCHAR(50) DEFAULT 'copilot'"))
-    except Exception:
-        pass
-        
-    try:
-        async with engine.begin() as conn:
-            await conn.execute(text("UPDATE organization_members SET status = 'accepted' WHERE role = 'owner' AND status = 'pending'"))
-    except Exception:
-        pass
-        
-    try:
-        async with engine.begin() as conn:
-            # Create any missing tables (like mentions, reactions, task_watchers)
-            await conn.run_sync(Base.metadata.create_all)
-    except Exception as e:
-        logger.error("Failed to auto-migrate tables", error=str(e))
-        
     import asyncio
     import json
     import redis.asyncio as aioredis
     import os
     from app.core.websocket_manager import manager
     from app.schemas.websocket import WsServerMessage
+    from app.core.config import settings
     import uuid
 
     try:
-        redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+        redis_url = settings.REDIS_URL
         redis_client = aioredis.from_url(redis_url)
         pubsub = redis_client.pubsub()
         await pubsub.subscribe("project_events")

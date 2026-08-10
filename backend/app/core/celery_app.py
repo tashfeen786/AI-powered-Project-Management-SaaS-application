@@ -4,9 +4,11 @@ import structlog
 
 logger = structlog.get_logger()
 
+from app.core.config import settings
+
 # If REDIS_URL is not provided, fall back to memory transport (only for dev, totally unsuitable for prod)
 # But we will use redis by default as requested.
-redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+redis_url = settings.REDIS_URL
 
 celery_app = Celery(
     "ai_pm_celery",
