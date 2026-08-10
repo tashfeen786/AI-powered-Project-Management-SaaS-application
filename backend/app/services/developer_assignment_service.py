@@ -83,13 +83,17 @@ Output JSON ONLY in this exact format:
             assignments_data = json.loads(raw_text)
             
             # 5. Apply assignments to the payload
-            assignment_map = { a["task_title"]: a["assigned_developer_id"] for a in assignments_data.get("assignments", []) }
+            assignment_map = { a.get("task_title"): a for a in assignments_data.get("assignments", []) }
             
             for sprint in payload.get("sprints", []):
                 for task in sprint.get("tasks", []):
                     title = task.get("title")
-                    if title in assignment_map and assignment_map[title]:
-                        task["assignee_id"] = assignment_map[title]
+                    if title in assignment_map:
+                        a = assignment_map[title]
+                        if a.get("assigned_developer_id"):
+                            task["assignee_id"] = a["assigned_developer_id"]
+                        elif a.get("hiring_recommendation"):
+                            task["hiring_recommendation"] = a["hiring_recommendation"]
                         
             # Save updated payload back
             gen.generated_tasks = payload
