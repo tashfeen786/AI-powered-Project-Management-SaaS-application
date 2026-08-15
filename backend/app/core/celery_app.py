@@ -22,6 +22,8 @@ celery_app.conf.update(
     result_serializer="json",
     timezone="UTC",
     enable_utc=True,
+    task_always_eager=True,
+    task_store_eager_result=True,
     # TODO: Kubernetes Workers configuration
     # TODO: Dead Letter Queue (DLQ) routing
     # TODO: Horizontal Scaling parameters

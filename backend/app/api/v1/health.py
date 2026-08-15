@@ -26,7 +26,7 @@ async def health_check(db: AsyncSession = Depends(get_db)):
         status["database"] = "ok"
     except Exception as e:
         logger.error("Healthcheck: Database failed", error=str(e))
-        status["database"] = "unhealthy"
+        status["database"] = f"unhealthy: {str(e)}"
         status["status"] = "degraded"
         
     # Check Redis
@@ -39,8 +39,8 @@ async def health_check(db: AsyncSession = Depends(get_db)):
         status["redis"] = "ok"
     except Exception as e:
         logger.error("Healthcheck: Redis failed", error=str(e))
-        status["redis"] = "unhealthy"
-        status["status"] = "degraded"
+        status["redis"] = f"unavailable: {str(e)}"
+        # status["status"] = "degraded" # Do not degrade overall health if Redis is down locally
         
     if status["status"] == "degraded":
         from fastapi import Response

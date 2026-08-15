@@ -107,7 +107,8 @@ async def global_exception_handler(request: Request, exc: Exception):
     logger.error("Unhandled exception", path=request.url.path, error=str(exc))
     return JSONResponse(
         status_code=500,
-        content=error_response("Internal Server Error").model_dump()
+        content=error_response(f"Internal Server Error: {str(exc)}").model_dump(),
+        headers={"Access-Control-Allow-Origin": "http://localhost:3000"}
     )
 
 # Routers
