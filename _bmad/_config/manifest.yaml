@@ -1,0 +1,57 @@
+installation:
+  version: 6.11.0
+  installDate: 2026-08-15T09:16:04.319Z
+  lastUpdated: 2026-08-15T09:16:04.319Z
+modules:
+  - name: core
+    version: 6.11.0
+    installDate: 2026-08-15T09:16:01.871Z
+    lastUpdated: 2026-08-15T09:16:04.275Z
+    source: built-in
+    npmPackage: null
+    repoUrl: null
+  - name: bmm
+    version: 6.11.0
+    installDate: 2026-08-15T09:16:02.207Z
+    lastUpdated: 2026-08-15T09:16:04.279Z
+    source: built-in
+    npmPackage: null
+    repoUrl: null
+  - name: bmb
+    version: v2.2.0
+    installDate: 2026-08-15T09:16:02.463Z
+    lastUpdated: 2026-08-15T09:16:04.286Z
+    source: external
+    npmPackage: bmad-builder
+    repoUrl: https://github.com/bmad-code-org/bmad-builder
+    channel: stable
+    sha: f9a44decf5dfe7ade84746a18bafd06939c42ed7
+  - name: cis
+    version: v0.3.0
+    installDate: 2026-08-15T09:16:02.539Z
+    lastUpdated: 2026-08-15T09:16:04.297Z
+    source: external
+    npmPackage: bmad-creative-intelligence-suite
+    repoUrl: https://github.com/bmad-code-org/bmad-module-creative-intelligence-suite
+    channel: stable
+    sha: 00191c6eb6357f1045472905e971a5df0507f157
+  - name: tea
+    version: v1.22.6
+    installDate: 2026-08-15T09:16:03.805Z
+    lastUpdated: 2026-08-15T09:16:04.305Z
+    source: external
+    npmPackage: bmad-method-test-architecture-enterprise
+    repoUrl: https://github.com/bmad-code-org/bmad-method-test-architecture-enterprise
+    channel: stable
+    sha: 5b2d8a0cc4ab5fec3e0e8ad8bc6acd0cdc3a7da3
+  - name: bmad-loop
+    version: v0.10.0
+    installDate: 2026-08-15T09:16:03.870Z
+    lastUpdated: 2026-08-15T09:16:04.319Z
+    source: external
+    npmPackage: null
+    repoUrl: https://github.com/bmad-code-org/bmad-loop
+    channel: stable
+    sha: 8d33e927d42158e034ba28043d1ce4c9ee237716
+ides:
+  - antigravity
