@@ -107,7 +107,14 @@ export const apiClient = {
 
     if (options.requireAuth) {
       const token = getToken();
-      if (token) headers["Authorization"] = `Bearer ${token}`;
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      } else {
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+        throw new Error("Unauthorized: No token found");
+      }
     }
 
     const response = await fetch(`${API_URL}${endpoint}${buildQueryString(params)}`, {
@@ -125,7 +132,14 @@ export const apiClient = {
 
     if (options.requireAuth) {
       const token = getToken();
-      if (token) headers["Authorization"] = `Bearer ${token}`;
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      } else {
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+        throw new Error("Unauthorized: No token found");
+      }
     }
 
     // Special case for FormData (file uploads)
@@ -150,7 +164,14 @@ export const apiClient = {
 
     if (options.requireAuth) {
       const token = getToken();
-      if (token) headers["Authorization"] = `Bearer ${token}`;
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      } else {
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+        throw new Error("Unauthorized: No token found");
+      }
     }
 
     const response = await fetch(`${API_URL}${endpoint}`, {
@@ -170,7 +191,14 @@ export const apiClient = {
 
     if (options.requireAuth) {
       const token = getToken();
-      if (token) headers["Authorization"] = `Bearer ${token}`;
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      } else {
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+        throw new Error("Unauthorized: No token found");
+      }
     }
 
     const response = await fetch(`${API_URL}${endpoint}`, {
@@ -190,7 +218,14 @@ export const apiClient = {
 
     if (options.requireAuth) {
       const token = getToken();
-      if (token) headers["Authorization"] = `Bearer ${token}`;
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      } else {
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+        throw new Error("Unauthorized: No token found");
+      }
     }
 
     const response = await fetch(`${API_URL}${endpoint}`, {
