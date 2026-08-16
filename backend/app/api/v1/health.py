@@ -17,8 +17,15 @@ async def health_check(db: AsyncSession = Depends(get_db)):
     status = {
         "status": "ok",
         "database": "unknown",
-        "redis": "unknown"
+        "redis": "unknown",
+        "aiosqlite": "unknown"
     }
+    
+    try:
+        import aiosqlite
+        status["aiosqlite"] = "installed"
+    except ImportError:
+        status["aiosqlite"] = "missing"
     
     # Check Database
     try:
