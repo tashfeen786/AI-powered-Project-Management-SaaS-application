@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import field_validator
 from typing import Optional
 
 # Resolve .env from backend/ or project root
@@ -21,6 +22,16 @@ class Settings(BaseSettings):
     
     # Database (Supabase PostgreSQL via asyncpg)
     DATABASE_URL: str
+
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def assemble_db_connection(cls, v: Optional[str]) -> str:
+        if isinstance(v, str):
+            if v.startswith("postgres://"):
+                v = v.replace("postgres://", "postgresql://", 1)
+            if v.startswith("postgresql://"):
+                v = v.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return v
     
     # Redis (local)
     REDIS_URL: str = "redis://localhost:6379/0"
