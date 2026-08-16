@@ -20,18 +20,14 @@ from app.core.config import settings
 redis_url = settings.REDIS_URL
 
 async def publish_ws_event(project_id: uuid.UUID, event: str, payload: dict):
-    logger.info("Publishing WS Event via Redis", project_id=str(project_id), event=event)
+    logger.info("Publishing WS Event (Direct)", project_id=str(project_id), event=event)
     try:
-        redis = aioredis.from_url(redis_url)
-        message = json.dumps({
-            "project_id": str(project_id),
-            "event": event,
-            "payload": payload
-        })
-        await redis.publish("project_events", message)
-        await redis.close()
+        from app.core.websocket_manager import manager
+        from app.schemas.websocket import WsServerMessage
+        ws_msg = WsServerMessage(event=event, payload=payload)
+        await manager.broadcast_to_project(project_id, ws_msg)
     except Exception as e:
-        logger.error("Redis Publish Failed", error=str(e))
+        logger.error("Direct WS Broadcast Failed", error=str(e))
 
 class AIOrchestratorService:
     def __init__(self, db: AsyncSession):
