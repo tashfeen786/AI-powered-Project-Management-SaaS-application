@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 import uuid
@@ -147,14 +147,191 @@ async def analyze_project(
     current_user: User = Depends(get_current_active_user),
     org_id: uuid.UUID = Depends(get_org_id)
 ):
-    # Enqueue celery task
-    from app.tasks.orchestrator_tasks import run_ai_orchestrator
+    """
+    Phase 1: Direct AI Requirements Analysis.
+    Calls Groq LLM to analyze the submitted requirements and returns structured output.
+    Persists the analysis as a Requirement record linked to the project.
+    """
+    import structlog
+    import json as json_module
+    _logger = structlog.get_logger()
+
+    # 1. Validate project exists
+    project_service = ProjectService(db)
+    project = await project_service.get_project(current_user.id, org_id, id)
+
+    # 2. Build structured analysis prompt
+    analysis_prompt = f"""You are an expert AI Project Architect and Technical Business Analyst.
+
+Analyze the following project requirements and produce a comprehensive, structured analysis.
+
+PROJECT NAME: {project.name}
+INDUSTRY: {project.industry or 'Not specified'}
+PROJECT TYPE: {project.project_type or 'Not specified'}
+TARGET PLATFORM: {project.target_platform or 'Not specified'}
+EXPECTED USERS: {project.expected_users or 'Not specified'}
+BUDGET: {project.budget or 'Not specified'}
+TECH PREFERENCES: {project.tech_preferences or 'Not specified'}
+
+REQUIREMENTS:
+{request.requirements}
+
+You MUST return ONLY valid JSON (no markdown, no code fences, no explanatory text before or after).
+
+Return this exact JSON structure:
+{{
+  "modules": [
+    {{
+      "name": "Module Name",
+      "description": "Brief description",
+      "priority": "high|medium|low",
+      "estimated_effort_days": 5
+    }}
+  ],
+  "features": [
+    {{
+      "name": "Feature Name",
+      "module": "Parent Module Name",
+      "description": "Brief description",
+      "priority": "high|medium|low",
+      "complexity": "simple|moderate|complex"
+    }}
+  ],
+  "missing_requirements": [
+    {{
+      "area": "Area name",
+      "description": "What is missing and why it matters",
+      "severity": "critical|important|nice-to-have"
+    }}
+  ],
+  "ambiguous_requirements": [
+    {{
+      "requirement": "The ambiguous requirement text",
+      "issue": "Why it is ambiguous",
+      "suggestion": "How to clarify it"
+    }}
+  ],
+  "suggested_priorities": [
+    {{
+      "phase": "Phase name (e.g. MVP, Phase 2, Phase 3)",
+      "modules": ["Module names in this phase"],
+      "rationale": "Why these modules should be in this phase"
+    }}
+  ],
+  "timeline_estimation": {{
+    "total_estimated_weeks": 20,
+    "phases": [
+      {{
+        "name": "Phase name",
+        "duration_weeks": 6,
+        "key_deliverables": ["deliverable1", "deliverable2"]
+      }}
+    ]
+  }},
+  "database_entities": [
+    {{
+      "name": "Entity Name",
+      "description": "Brief description",
+      "key_fields": ["field1", "field2"],
+      "relationships": ["Related to EntityX via foreign key"]
+    }}
+  ],
+  "api_requirements": [
+    {{
+      "endpoint_group": "Group name (e.g. Authentication, Chat)",
+      "endpoints": ["POST /api/auth/login", "GET /api/chats"],
+      "description": "Brief description of this API group"
+    }}
+  ],
+  "architecture_recommendations": {{
+    "pattern": "Recommended architecture pattern",
+    "tech_stack": {{
+      "frontend": "Recommended frontend",
+      "backend": "Recommended backend",
+      "database": "Recommended database",
+      "cache": "Recommended cache",
+      "ai_ml": "AI/ML components",
+      "infrastructure": "Infrastructure recommendations"
+    }},
+    "key_decisions": ["Decision 1", "Decision 2"],
+    "scalability_notes": "Scalability recommendations"
+  }},
+  "execution_recommendations": [
+    {{
+      "category": "Category (e.g. Security, Testing, DevOps)",
+      "recommendation": "Specific recommendation",
+      "priority": "high|medium|low"
+    }}
+  ]
+}}
+
+Be thorough, specific, and base your analysis strictly on the provided requirements.
+Identify ALL modules and features explicitly or implicitly mentioned.
+Return ONLY the JSON object, nothing else."""
+
+    system_prompt = "You are an expert AI Project Architect. You analyze software requirements and produce structured JSON analysis. Return ONLY valid JSON."
+
+    # 3. Call Groq
+    from app.services.groq_service import GroqService
+    try:
+        result = await GroqService.generate(
+            prompt=analysis_prompt,
+            system_prompt=system_prompt,
+            model="llama3-70b-8192"
+        )
+    except Exception as e:
+        _logger.error("AI Requirements Analysis Failed", error=str(e))
+        raise HTTPException(status_code=500, detail=f"AI analysis failed: {str(e)}")
+
+    ai_text = result["text"]
+    _logger.info("AI Analysis Completed", tokens=result["tokens"], model=result["model"])
+
+    # 4. Parse the JSON response (handle potential markdown fences)
+    cleaned = ai_text.strip()
+    if cleaned.startswith("```"):
+        # Remove markdown code fences
+        lines = cleaned.split("\n")
+        lines = [l for l in lines if not l.strip().startswith("```")]
+        cleaned = "\n".join(lines)
     
-    run_ai_orchestrator.delay(
-        project_id=str(id),
-        org_id=str(org_id),
-        user_id=str(current_user.id),
-        requirements=request.requirements
+    try:
+        analysis_data = json_module.loads(cleaned)
+    except json_module.JSONDecodeError as e:
+        _logger.error("Failed to parse AI JSON response", error=str(e), raw_response=ai_text[:500])
+        # Store raw text anyway, but flag the parse failure
+        analysis_data = {"raw_response": ai_text, "parse_error": str(e)}
+
+    # 5. Persist as a Requirement record
+    from app.services.requirement_service import RequirementService
+    from app.schemas.requirement import GenerateRequirementRequest
+    from app.models.requirement import Requirement
+    from app.repositories.requirement_repository import RequirementRepository
+
+    req_repo = RequirementRepository(db)
+    latest_version = await req_repo.get_latest_version(org_id, id)
+
+    req = Requirement(
+        title="AI Requirements Analysis",
+        version=latest_version + 1,
+        status="Draft",
+        confidence_score=0.85,
+        generated_content=json_module.dumps(analysis_data, indent=2),
+        source_documents=[],
+        project_id=id,
+        organization_id=org_id,
+        created_by_id=current_user.id
     )
-    
-    return success_response(message="AI analysis pipeline started")
+    created_req = await req_repo.create(req)
+
+    _logger.info("Requirements Analysis Persisted",
+                 requirement_id=str(created_req.id),
+                 project_id=str(id))
+
+    return success_response(
+        data={
+            "requirement_id": str(created_req.id),
+            "project_id": str(id),
+            "analysis": analysis_data
+        },
+        message="AI requirements analysis completed"
+    )

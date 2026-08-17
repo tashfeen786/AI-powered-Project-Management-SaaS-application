@@ -50,7 +50,8 @@ export const ProjectService = {
     await apiClient.delete(`/projects/${id}`);
   },
 
-  analyzeProject: async (id: string, requirements: string): Promise<void> => {
-    await apiClient.post(`/projects/${id}/analyze`, { requirements });
+  analyzeProject: async (id: string, requirements: string): Promise<any> => {
+    const response = await apiClient.post(`/projects/${id}/analyze`, { requirements });
+    return response;
   },
 };
