@@ -29,7 +29,7 @@ type WizardPhase = "idle" | "creating" | "analyzing" | "complete" | "error";
 
 export function WizardStep3({ basicInfo, requirements, onPrev }: any) {
   const router = useRouter();
-  const { mutate: createProject } = useCreateProject();
+  const { mutateAsync: createProjectAsync } = useCreateProject();
   
   const [phase, setPhase] = useState<WizardPhase>("idle");
   const [createdProjectId, setCreatedProjectId] = useState<string | null>(null);
@@ -84,33 +84,37 @@ export function WizardStep3({ basicInfo, requirements, onPrev }: any) {
 
     setPhase("creating");
 
-    createProject(
-      {
-        name: basicInfo.name,
-        description: requirements,
-        project_type: basicInfo.project_type,
-        industry: basicInfo.industry,
-        target_platform: basicInfo.target_platform,
-        expected_users: basicInfo.expected_users,
-        budget: basicInfo.budget,
-        priority: basicInfo.priority,
-        tech_preferences: basicInfo.tech_preferences
-      },
-      {
-        onSuccess: (data: any) => {
-          const projectId = data.id || data.data?.id;
-          setCreatedProjectId(projectId);
-          // Transition state first. The second useEffect will pick this up and start analysis.
-          setPhase("analyzing");
-        },
-        onError: (err: any) => {
-          const msg = err?.message || err?.data?.detail || "Failed to create project";
-          setErrorMsg(msg);
-          setErrorPhase("creation");
-          setPhase("error");
+    const initializeProject = async () => {
+      try {
+        const data = await createProjectAsync({
+          name: basicInfo.name,
+          description: requirements,
+          project_type: basicInfo.project_type,
+          industry: basicInfo.industry,
+          target_platform: basicInfo.target_platform,
+          expected_users: basicInfo.expected_users,
+          budget: basicInfo.budget,
+          priority: basicInfo.priority,
+          tech_preferences: basicInfo.tech_preferences
+        });
+
+        const projectId = data.id || (data as any).data?.id;
+        
+        if (!projectId || projectId === "undefined") {
+          throw new Error("Project created but no valid Project ID was returned from the server.");
         }
+
+        setCreatedProjectId(projectId);
+        setPhase("analyzing");
+      } catch (err: any) {
+        const msg = err?.message || err?.data?.detail || "Failed to create project";
+        setErrorMsg(msg);
+        setErrorPhase("creation");
+        setPhase("error");
       }
-    );
+    };
+
+    initializeProject();
   }, []);
 
   // Effect to trigger analysis once the phase transitions to "analyzing"

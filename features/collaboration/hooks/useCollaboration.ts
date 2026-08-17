@@ -51,12 +51,17 @@ export function useCollaboration(projectId?: string, onMessage?: (event: Collabo
     const wsUrl = `${wsBaseUrl}/ws/organization?token=${token}`;
     
     let reconnectTimeout: NodeJS.Timeout;
+    let isUnmounted = false;
     
     const connect = () => {
       console.log(`[WS] Attempting connection to: ${wsUrl}`);
       const socket = new WebSocket(wsUrl);
 
       socket.onopen = () => {
+        if (isUnmounted) {
+          socket.close();
+          return;
+        }
         console.log("[WS] Connected successfully");
         setReconnectAttempt(0);
         if (projectId) {
@@ -66,6 +71,7 @@ export function useCollaboration(projectId?: string, onMessage?: (event: Collabo
       };
 
       socket.onmessage = (event) => {
+        if (isUnmounted) return;
         try {
           const data: WsMessage = JSON.parse(event.data);
           console.log("[WS] Message received:", data.event);
@@ -93,6 +99,7 @@ export function useCollaboration(projectId?: string, onMessage?: (event: Collabo
       };
 
       socket.onclose = (event) => {
+        if (isUnmounted) return;
         console.log(`[WS] Connection closed. Code: ${event.code}, Reason: ${event.reason || 'None'}, Clean: ${event.wasClean}`);
         
         // Reconnect with exponential backoff (max 30 seconds)
@@ -100,7 +107,9 @@ export function useCollaboration(projectId?: string, onMessage?: (event: Collabo
           const delay = Math.min(1000 * Math.pow(2, reconnectAttempt), 30000);
           console.log(`[WS] Scheduling reconnect attempt ${reconnectAttempt + 1} in ${delay}ms...`);
           reconnectTimeout = setTimeout(() => {
-            setReconnectAttempt(prev => prev + 1);
+            if (!isUnmounted) {
+              setReconnectAttempt(prev => prev + 1);
+            }
           }, delay);
         } else {
           console.error("[WS] Max reconnect attempts reached. Giving up.");
@@ -114,7 +123,9 @@ export function useCollaboration(projectId?: string, onMessage?: (event: Collabo
     const socket = connect();
 
     return () => {
+      isUnmounted = true;
       clearTimeout(reconnectTimeout);
+      socket.onclose = null; // Prevent reconnect logic from firing
       if (projectId && socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify({ event: "leave_project", project_id: projectId }));
       }
