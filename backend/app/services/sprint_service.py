@@ -108,8 +108,7 @@ class SprintService:
         try:
             result = await GroqService.generate(
                 prompt=prompt, 
-                system_prompt="You are a helpful Agile planner that responds ONLY in valid JSON format.", 
-                model="llama3-70b-8192"
+                system_prompt="You are a helpful Agile planner that responds ONLY in valid JSON format."
             )
             content = result["text"].strip()
             

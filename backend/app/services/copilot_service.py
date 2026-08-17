@@ -1,4 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.config import settings
 from fastapi import HTTPException
 from app.repositories.conversation_repository import ConversationRepository
 from app.repositories.message_repository import MessageRepository

@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { 
   Loader2, CheckCircle2, Bot, Database, Layout, Users, ListTodo, 
   Shield, FileText, Check, AlertTriangle, Layers, Code2, Clock, 
-  ChevronDown, ChevronRight, XCircle 
+  ChevronDown, ChevronRight, XCircle, RotateCcw
 } from "lucide-react";
 import { useCreateProject } from "@/features/projects/hooks/useCreateProject";
 import { ProjectService } from "@/services/project.service";
@@ -25,13 +25,16 @@ interface AnalysisResult {
   parse_error?: string;
 }
 
+type WizardPhase = "idle" | "creating" | "analyzing" | "complete" | "error";
+
 export function WizardStep3({ basicInfo, requirements, onPrev }: any) {
   const router = useRouter();
   const { mutate: createProject } = useCreateProject();
   
-  const [phase, setPhase] = useState<"creating" | "analyzing" | "complete" | "error">("creating");
+  const [phase, setPhase] = useState<WizardPhase>("idle");
   const [createdProjectId, setCreatedProjectId] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [errorPhase, setErrorPhase] = useState<"creation" | "analysis" | null>(null);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     modules: true, features: false, missing: false, ambiguous: false,
@@ -53,11 +56,34 @@ export function WizardStep3({ basicInfo, requirements, onPrev }: any) {
     }
   };
 
+  // Run AI analysis on a project that already exists
+  const runAnalysis = useCallback(async (projectId: string) => {
+    setPhase("analyzing");
+    setErrorMsg(null);
+    setErrorPhase(null);
+    
+    try {
+      const result = await ProjectService.analyzeProject(projectId, requirements);
+      const analysis = (result as any)?.data?.analysis || (result as any)?.analysis;
+      if (analysis) {
+        setAnalysisResult(analysis);
+      }
+      setPhase("complete");
+    } catch (err: any) {
+      const msg = err?.message || err?.data?.detail || "Failed to analyze requirements";
+      setErrorMsg(msg);
+      setErrorPhase("analysis");
+      setPhase("error");
+    }
+  }, [requirements]);
+
+  // Create project + run analysis (only runs once)
   useEffect(() => {
     if (startedRef.current) return;
     startedRef.current = true;
 
-    // 1. Create the project
+    setPhase("creating");
+
     createProject(
       {
         name: basicInfo.name,
@@ -74,28 +100,24 @@ export function WizardStep3({ basicInfo, requirements, onPrev }: any) {
         onSuccess: async (data: any) => {
           const projectId = data.id || data.data?.id;
           setCreatedProjectId(projectId);
-          setPhase("analyzing");
-          
-          // 2. Run AI analysis
-          try {
-            const result = await ProjectService.analyzeProject(projectId, requirements);
-            const analysis = (result as any)?.data?.analysis || (result as any)?.analysis;
-            if (analysis) {
-              setAnalysisResult(analysis);
-            }
-            setPhase("complete");
-          } catch (err: any) {
-            setErrorMsg(err.message || "Failed to analyze requirements");
-            setPhase("error");
-          }
+          // Transition to analyzing BEFORE starting the async call
+          await runAnalysis(projectId);
         },
         onError: (err: any) => {
-          setErrorMsg(err.message || "Failed to create project");
+          const msg = err?.message || err?.data?.detail || "Failed to create project";
+          setErrorMsg(msg);
+          setErrorPhase("creation");
           setPhase("error");
         }
       }
     );
   }, []);
+
+  const handleRetryAnalysis = () => {
+    if (createdProjectId) {
+      runAnalysis(createdProjectId);
+    }
+  };
 
   const handleFinish = () => {
     if (createdProjectId) {
@@ -165,15 +187,31 @@ export function WizardStep3({ basicInfo, requirements, onPrev }: any) {
           <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mb-6">
             <XCircle className="w-10 h-10 text-red-500" />
           </div>
-          <h2 className="text-3xl font-bold text-text-primary mb-2 text-center">Analysis Failed</h2>
+          <h2 className="text-3xl font-bold text-text-primary mb-2 text-center">
+            {errorPhase === "creation" ? "Project Creation Failed" : "Analysis Failed"}
+          </h2>
           <p className="text-red-400 text-center max-w-lg mb-8 font-mono text-sm bg-red-500/5 p-4 rounded-lg border border-red-500/20">
             {errorMsg}
           </p>
+          {createdProjectId && (
+            <p className="text-text-secondary text-sm mb-4">
+              Project was created successfully (ID: {createdProjectId.slice(0, 8)}...)
+            </p>
+          )}
         </div>
         <div className="p-4 border-t border-border bg-surface flex justify-center gap-4">
           <button onClick={onPrev} className="h-11 px-6 bg-transparent border border-border text-text-primary rounded-lg font-medium hover:bg-background transition-colors">
             Back
           </button>
+          {errorPhase === "analysis" && createdProjectId && (
+            <button 
+              onClick={handleRetryAnalysis} 
+              className="h-11 px-6 bg-primary/10 border border-primary/30 text-primary rounded-lg font-medium hover:bg-primary/20 transition-colors flex items-center gap-2"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Retry Analysis
+            </button>
+          )}
           <button onClick={handleFinish} className="h-11 px-8 bg-primary text-surface rounded-lg font-medium hover:opacity-90 transition-opacity">
             {createdProjectId ? "Go to Project" : "Go to Projects"}
           </button>

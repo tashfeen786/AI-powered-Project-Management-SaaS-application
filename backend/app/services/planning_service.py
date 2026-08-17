@@ -84,8 +84,8 @@ class PlanningService:
 
         # 3. Call Groq
         try:
-            # Using llama3-70b-8192 for logical structuring and planning
-            result = await GroqService.generate(prompt=prompt, system_prompt=system_prompt, model="llama3-70b-8192")
+            # Using centralized settings.GROQ_MODEL for logical structuring and planning
+            result = await GroqService.generate(prompt=prompt, system_prompt=system_prompt)
         except Exception as e:
             logger.error("Planning Failed", error=str(e))
             raise HTTPException(status_code=500, detail="AI planning generation failed")
