@@ -121,7 +121,7 @@ Do not hallucinate external knowledge outside the scope of software project mana
         # 7. Call Groq
         # Advanced functionality like Streaming, Tool Calling, and Code Interpreter 
         # are managed via separate dedicated microservices in production.
-        result = await GroqService.generate(prompt=final_prompt, system_prompt=system_prompt, model="llama3-70b-8192")
+        result = await GroqService.generate(prompt=final_prompt, system_prompt=system_prompt)
         
         # 8. Build Sources list
         sources = []
@@ -143,7 +143,7 @@ Do not hallucinate external knowledge outside the scope of software project mana
         if len(history) <= 2 and conv.title == "New Conversation":
             # Very brief generation
             title_prompt = f"Summarize this query into a short 3-4 word title: {request.content}"
-            t_res = await GroqService.generate(prompt=title_prompt, system_prompt="Output only the title.", model="llama3-8b-8192")
+            t_res = await GroqService.generate(prompt=title_prompt, system_prompt="Output only the title.", model=settings.GROQ_MODEL_SMALL)
             conv.title = t_res["text"].replace('"', '').strip()
             await self.conv_repo.update(conv)
             
@@ -217,7 +217,7 @@ Do not hallucinate external knowledge outside the scope of software project mana
             })
             
         full_text = ""
-        async for chunk in GroqService.generate_stream(prompt=final_prompt, system_prompt=system_prompt, model="llama3-70b-8192"):
+        async for chunk in GroqService.generate_stream(prompt=final_prompt, system_prompt=system_prompt):
             full_text += chunk
             yield chunk, None
             
@@ -231,7 +231,7 @@ Do not hallucinate external knowledge outside the scope of software project mana
         
         if len(history) <= 2 and conv.title == "New Conversation":
             title_prompt = f"Summarize this query into a short 3-4 word title: {request.content}"
-            t_res = await GroqService.generate(prompt=title_prompt, system_prompt="Output only the title.", model="llama3-8b-8192")
+            t_res = await GroqService.generate(prompt=title_prompt, system_prompt="Output only the title.", model=settings.GROQ_MODEL_SMALL)
             conv.title = t_res["text"].replace('"', '').strip()
             await self.conv_repo.update(conv)
             

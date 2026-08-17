@@ -59,8 +59,8 @@ class RequirementService:
 
         # 4. Call Groq
         try:
-            # Using llama3-70b-8192 for high reasoning capabilities required for SRS
-            result = await GroqService.generate(prompt=prompt, system_prompt=system_prompt, model="llama3-70b-8192")
+            # Using centralized settings.GROQ_MODEL for high reasoning capabilities required for SRS
+            result = await GroqService.generate(prompt=prompt, system_prompt=system_prompt)
         except Exception as e:
             logger.error("Generation Failed", error=str(e))
             raise HTTPException(status_code=500, detail="AI generation failed")

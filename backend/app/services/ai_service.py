@@ -34,8 +34,8 @@ class AIService:
         
         # 3. Call Groq
         # You can make the model configurable or dynamically choose based on complexity.
-        model_name = "llama3-70b-8192" 
-        result = await GroqService.generate(prompt=prompt, system_prompt=system_prompt, model=model_name)
+        # Model is configured centrally via settings.GROQ_MODEL
+        result = await GroqService.generate(prompt=prompt, system_prompt=system_prompt)
         
         # 4. Format Sources
         sources = [

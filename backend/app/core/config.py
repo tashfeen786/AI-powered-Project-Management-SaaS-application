@@ -38,6 +38,8 @@ class Settings(BaseSettings):
     
     # AI Keys — Groq is the sole LLM provider. OpenAI is not used.
     GROQ_API_KEY: Optional[str] = None
+    GROQ_MODEL: str = "llama-3.3-70b-versatile"       # primary model (was llama3-70b-8192, decommissioned)
+    GROQ_MODEL_SMALL: str = "llama-3.1-8b-instant"     # lightweight model for simple tasks
 
     model_config = SettingsConfigDict(
         env_file=str(_env_file),

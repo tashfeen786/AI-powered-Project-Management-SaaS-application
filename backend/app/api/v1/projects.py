@@ -277,7 +277,6 @@ Return ONLY the JSON object, nothing else."""
         result = await GroqService.generate(
             prompt=analysis_prompt,
             system_prompt=system_prompt,
-            model="llama3-70b-8192",
             max_tokens=4096
         )
     except Exception as e:

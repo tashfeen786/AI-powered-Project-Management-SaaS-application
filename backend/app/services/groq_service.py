@@ -22,11 +22,13 @@ class GroqService:
         return _groq_client
 
     @staticmethod
-    async def generate(prompt: str, system_prompt: str = "You are a helpful AI project management assistant.", model: str = "llama3-70b-8192", tools: list = None, max_tokens: int = 2048) -> dict:
+    async def generate(prompt: str, system_prompt: str = "You are a helpful AI project management assistant.", model: str = None, tools: list = None, max_tokens: int = 2048) -> dict:
         """
         Calls Groq API to generate a response.
         Supports Llama 3, DeepSeek, Gemma (configurable via model param).
         """
+        if model is None:
+            model = settings.GROQ_MODEL
         if not settings.GROQ_API_KEY or settings.GROQ_API_KEY == "gsk_your_groq_api_key_here":
             logger.info("Using MOCK AI Response (No Valid API Key)")
             return {
@@ -67,7 +69,9 @@ class GroqService:
             raise e
 
     @staticmethod
-    async def generate_stream(prompt: str, system_prompt: str = "You are a helpful AI project management assistant.", model: str = "llama3-70b-8192", tools: list = None):
+    async def generate_stream(prompt: str, system_prompt: str = "You are a helpful AI project management assistant.", model: str = None, tools: list = None):
+        if model is None:
+            model = settings.GROQ_MODEL
         if not settings.GROQ_API_KEY or settings.GROQ_API_KEY == "gsk_your_groq_api_key_here":
             logger.info("Using MOCK AI Stream Response (No Valid API Key)")
             import asyncio

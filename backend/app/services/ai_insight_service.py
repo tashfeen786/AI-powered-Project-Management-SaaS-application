@@ -69,7 +69,7 @@ class AIInsightService:
         
         # 3. Call Groq
         try:
-            result = await GroqService.generate(prompt=prompt, system_prompt=system_prompt, model="llama3-70b-8192")
+            result = await GroqService.generate(prompt=prompt, system_prompt=system_prompt)
         except Exception as e:
             logger.error("Insight Generation Failed", error=str(e))
             raise HTTPException(status_code=500, detail="AI insight generation failed")

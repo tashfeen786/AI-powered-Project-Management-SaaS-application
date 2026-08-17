@@ -78,7 +78,7 @@ Output JSON ONLY in this exact format:
         assignments_data = {}
         for attempt in range(max_retries):
             try:
-                result = await GroqService.generate(prompt=prompt, system_prompt=system_prompt, model="llama3-70b-8192")
+                result = await GroqService.generate(prompt=prompt, system_prompt=system_prompt)
                 raw_text = result["text"].strip()
                 if "```json" in raw_text:
                     raw_text = raw_text.split("```json")[1].split("```")[0].strip()
