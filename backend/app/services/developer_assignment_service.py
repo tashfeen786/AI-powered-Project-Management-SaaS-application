@@ -90,8 +90,8 @@ Output JSON ONLY in this exact format:
             except (json.JSONDecodeError, Exception) as e:
                 logger.warning(f"Groq parsing failed on attempt {attempt+1}", error=str(e))
                 if attempt == max_retries - 1:
-                    logger.error("Developer Assignment Failed completely due to unparseable output")
-                    return # Exit gracefully without crashing pipeline
+                    logger.error("Developer Assignment Failed completely due to unparseable output or AI error")
+                    raise Exception("AI developer assignment failed due to invalid response or API error.")
         
         try:
             # 5. Apply assignments to the payload

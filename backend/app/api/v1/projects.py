@@ -288,11 +288,10 @@ Return ONLY the JSON object, nothing else."""
 
     # 4. Parse the JSON response (handle potential markdown fences)
     cleaned = ai_text.strip()
-    if cleaned.startswith("```"):
-        # Remove markdown code fences
-        lines = cleaned.split("\n")
-        lines = [l for l in lines if not l.strip().startswith("```")]
-        cleaned = "\n".join(lines)
+    if "```json" in cleaned:
+        cleaned = cleaned.split("```json")[1].split("```")[0].strip()
+    elif "```" in cleaned:
+        cleaned = cleaned.split("```")[1].strip()
     
     try:
         analysis_data = json_module.loads(cleaned)

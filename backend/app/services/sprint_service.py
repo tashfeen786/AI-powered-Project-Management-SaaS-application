@@ -112,11 +112,10 @@ class SprintService:
             )
             content = result["text"].strip()
             
-            # Clean up markdown formatting if present
-            if content.startswith("```json"):
-                content = content.replace("```json", "", 1)
-            if content.endswith("```"):
-                content = content.replace("```", "")
+            if "```json" in content:
+                content = content.split("```json")[1].split("```")[0].strip()
+            elif "```" in content:
+                content = content.split("```")[1].strip()
                 
             parsed = json.loads(content.strip())
             return parsed

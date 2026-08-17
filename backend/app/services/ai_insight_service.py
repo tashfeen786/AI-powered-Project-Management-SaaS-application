@@ -77,8 +77,10 @@ class AIInsightService:
         # 4. Parse & Validate JSON
         try:
             raw_text = result["text"].strip()
-            if raw_text.startswith("```json"):
-                raw_text = raw_text.replace("```json", "").replace("```", "")
+            if "```json" in raw_text:
+                raw_text = raw_text.split("```json")[1].split("```")[0].strip()
+            elif "```" in raw_text:
+                raw_text = raw_text.split("```")[1].strip()
                 
             parsed_json = json.loads(raw_text)
             payload = GeneratedInsightsPayload(**parsed_json)
