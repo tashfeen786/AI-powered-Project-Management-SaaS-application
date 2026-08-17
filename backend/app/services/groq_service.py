@@ -65,8 +65,22 @@ class GroqService:
             }
             
         except Exception as e:
-            logger.error("Groq Generation Failed", error=str(e))
-            raise e
+            error_str = str(e).lower()
+            if "timeout" in error_str:
+                logger.error("Groq Generation Failed: Timeout", error=str(e))
+                raise Exception("AI service timed out. Please try again later.")
+            elif "rate_limit" in error_str or "429" in error_str:
+                logger.error("Groq Generation Failed: Rate Limit Exceeded", error=str(e))
+                raise Exception("AI service is currently busy. Please wait a moment and try again.")
+            elif "invalid_model" in error_str or "deprecated" in error_str:
+                logger.error("Groq Generation Failed: Invalid or Deprecated Model", error=str(e))
+                raise Exception("The configured AI model is no longer supported. Please update the configuration.")
+            elif "api_key" in error_str or "unauthorized" in error_str or "401" in error_str:
+                logger.error("Groq Generation Failed: API Key Invalid", error=str(e))
+                raise Exception("AI service authentication failed. Please check your API key.")
+            else:
+                logger.error("Groq Generation Failed", error=str(e))
+                raise Exception(f"AI service encountered an error: {str(e)}")
 
     @staticmethod
     async def generate_stream(prompt: str, system_prompt: str = "You are a helpful AI project management assistant.", model: str = None, tools: list = None):
@@ -109,5 +123,19 @@ class GroqService:
                     yield chunk.choices[0].delta.content
                     
         except Exception as e:
-            logger.error("Groq Stream Failed", error=str(e))
-            raise e
+            error_str = str(e).lower()
+            if "timeout" in error_str:
+                logger.error("Groq Stream Failed: Timeout", error=str(e))
+                raise Exception("AI service timed out. Please try again later.")
+            elif "rate_limit" in error_str or "429" in error_str:
+                logger.error("Groq Stream Failed: Rate Limit Exceeded", error=str(e))
+                raise Exception("AI service is currently busy. Please wait a moment and try again.")
+            elif "invalid_model" in error_str or "deprecated" in error_str:
+                logger.error("Groq Stream Failed: Invalid or Deprecated Model", error=str(e))
+                raise Exception("The configured AI model is no longer supported. Please update the configuration.")
+            elif "api_key" in error_str or "unauthorized" in error_str or "401" in error_str:
+                logger.error("Groq Stream Failed: API Key Invalid", error=str(e))
+                raise Exception("AI service authentication failed. Please check your API key.")
+            else:
+                logger.error("Groq Stream Failed", error=str(e))
+                raise Exception(f"AI service encountered an error: {str(e)}")

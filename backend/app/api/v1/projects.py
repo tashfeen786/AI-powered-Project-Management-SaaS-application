@@ -298,8 +298,7 @@ Return ONLY the JSON object, nothing else."""
         analysis_data = json_module.loads(cleaned)
     except json_module.JSONDecodeError as e:
         _logger.error("Failed to parse AI JSON response", error=str(e), raw_response=ai_text[:500])
-        # Store raw text anyway, but flag the parse failure
-        analysis_data = {"raw_response": ai_text, "parse_error": str(e)}
+        raise HTTPException(status_code=500, detail="AI returned malformed JSON data. Please try again.")
 
     # 5. Persist as a Requirement record
     from app.services.requirement_service import RequirementService

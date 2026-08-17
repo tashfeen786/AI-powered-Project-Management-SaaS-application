@@ -50,7 +50,7 @@ class TaskGenerationService:
         max_retries = 2
         for attempt in range(max_retries):
             try:
-                # DeepSeek or Llama3-70b configured for JSON output
+                # DeepSeek or Llama 3.3 configured for JSON output
                 result = await GroqService.generate(prompt=prompt, system_prompt=system_prompt)
                 logger.info("Groq Request Completed", tokens_used=result["tokens"])
                 

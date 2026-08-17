@@ -38,7 +38,7 @@ A production-ready, highly modular, AI-native Project Management Platform. This 
 - GitHub Actions (CI/CD Pipeline)
 
 **AI Integrations**
-- Groq API (High-speed LLM inference - `llama3-70b-8192`)
+- Groq API (High-speed LLM inference - `llama-3.3-70b-versatile`)
 - SentenceTransformers (Local lightweight embedding model - `all-MiniLM-L6-v2`)
 
 ## 📂 Architecture Overview

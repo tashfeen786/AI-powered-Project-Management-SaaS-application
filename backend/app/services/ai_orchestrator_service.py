@@ -107,4 +107,14 @@ class AIOrchestratorService:
             
         except Exception as e:
             logger.error("AI Orchestrator Pipeline Failed", error=str(e))
+            
+            # Mark project as Failed
+            try:
+                project = await self.project_repo.get_by_id(project_id, org_id)
+                if project:
+                    project.status = "Failed"
+                    await self.db.commit()
+            except Exception as db_err:
+                logger.error("Failed to update project status to Failed", error=str(db_err))
+                
             await publish_ws_event(project_id, "pipeline_failed", {"error": str(e)})
