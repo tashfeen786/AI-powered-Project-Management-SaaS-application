@@ -97,11 +97,11 @@ export function WizardStep3({ basicInfo, requirements, onPrev }: any) {
         tech_preferences: basicInfo.tech_preferences
       },
       {
-        onSuccess: async (data: any) => {
+        onSuccess: (data: any) => {
           const projectId = data.id || data.data?.id;
           setCreatedProjectId(projectId);
-          // Transition to analyzing BEFORE starting the async call
-          await runAnalysis(projectId);
+          // Transition state first. The second useEffect will pick this up and start analysis.
+          setPhase("analyzing");
         },
         onError: (err: any) => {
           const msg = err?.message || err?.data?.detail || "Failed to create project";
@@ -112,6 +112,13 @@ export function WizardStep3({ basicInfo, requirements, onPrev }: any) {
       }
     );
   }, []);
+
+  // Effect to trigger analysis once the phase transitions to "analyzing"
+  useEffect(() => {
+    if (phase === "analyzing" && createdProjectId) {
+      runAnalysis(createdProjectId);
+    }
+  }, [phase, createdProjectId, runAnalysis]);
 
   const handleRetryAnalysis = () => {
     if (createdProjectId) {
