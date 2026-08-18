@@ -127,7 +127,7 @@ export default function RequirementsWorkspacePage({ params }: { params: Promise<
         </div>
 
         <ProjectTabs projectId={resolvedParams.id}>
-          <WorkspaceHeader aiStatus={draft.aiStatus} onApprove={handleApprove} />
+          <WorkspaceHeader aiStatus={draft.aiStatus} onApprove={handleApprove} projectId={resolvedParams.id} />
           
           {/* Main Split Layout */}
           <div className="flex-1 min-h-[600px] flex flex-col md:flex-row gap-4 mt-6">
