@@ -271,7 +271,7 @@ Return ONLY the JSON object, nothing else."""
 
     system_prompt = "You are an expert AI Project Architect. You analyze software requirements and produce structured JSON analysis. Return ONLY valid JSON."
 
-    # 3. Call Groq
+    # 3. Call Groq — with JSON mode enabled so the model is constrained to pure JSON output
     from app.services.groq_service import GroqService
     try:
         result = await GroqService.generate(
@@ -286,18 +286,49 @@ Return ONLY the JSON object, nothing else."""
     ai_text = result["text"]
     _logger.info("AI Analysis Completed", tokens=result["tokens"], model=result["model"])
 
-    # 4. Parse the JSON response (handle potential markdown fences)
-    cleaned = ai_text.strip()
-    if "```json" in cleaned:
-        cleaned = cleaned.split("```json")[1].split("```")[0].strip()
-    elif "```" in cleaned:
-        cleaned = cleaned.split("```")[1].strip()
-    
+    # 4. Robust JSON extraction — handles pure JSON, markdown fences, and embedded JSON in prose
+    import re as _re
+
+    def _extract_json(raw: str) -> dict:
+        """Extract the first valid JSON object from raw text using multiple strategies."""
+        text = raw.strip()
+
+        # Strategy 1: direct parse (model returned pure JSON)
+        try:
+            return json_module.loads(text)
+        except json_module.JSONDecodeError:
+            pass
+
+        # Strategy 2: strip ```json ... ``` or ``` ... ``` fences
+        fence_match = _re.search(r"```(?:json)?\s*([\s\S]*?)```", text)
+        if fence_match:
+            try:
+                return json_module.loads(fence_match.group(1).strip())
+            except json_module.JSONDecodeError:
+                pass
+
+        # Strategy 3: find the outermost { ... } block in the text
+        brace_match = _re.search(r"(\{[\s\S]*\})", text)
+        if brace_match:
+            try:
+                return json_module.loads(brace_match.group(1))
+            except json_module.JSONDecodeError:
+                pass
+
+        raise ValueError("No valid JSON object could be extracted from the AI response")
+
     try:
-        analysis_data = json_module.loads(cleaned)
-    except json_module.JSONDecodeError as e:
-        _logger.error("Failed to parse AI JSON response", error=str(e), raw_response=ai_text[:500])
-        raise HTTPException(status_code=500, detail="AI returned malformed JSON data. Please try again.")
+        analysis_data = _extract_json(ai_text)
+    except (ValueError, Exception) as e:
+        _logger.error(
+            "Failed to parse AI JSON response",
+            error=str(e),
+            raw_response_preview=ai_text[:500]
+        )
+        raise HTTPException(
+            status_code=500,
+            detail=f"AI returned malformed JSON data: {str(e)}. Please try again."
+        )
 
     # 5. Persist as a Requirement record
     from app.services.requirement_service import RequirementService
