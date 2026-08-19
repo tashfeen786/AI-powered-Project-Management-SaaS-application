@@ -107,6 +107,18 @@ async def update_requirement(
     req = await req_service.update_requirement(current_user.id, org_id, id, update_in)
     return success_response(data=RequirementResponse.model_validate(req), message="Requirement updated")
 
+@router.post("/requirements/{id}/approve", response_model=StandardResponse[RequirementResponse])
+async def approve_requirement(
+    id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    org_id = await verify_org_and_role(current_user, db, Permission.EDIT_PROJECTS)
+    req_service = RequirementService(db)
+    
+    req = await req_service.approve_requirement(current_user.id, org_id, id)
+    return success_response(data=RequirementResponse.model_validate(req), message="Requirement approved")
+
 @router.delete("/requirements/{id}", response_model=StandardResponse)
 async def delete_requirement(
     id: uuid.UUID,

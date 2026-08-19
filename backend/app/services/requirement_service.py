@@ -178,6 +178,28 @@ class RequirementService:
         
         return await self.req_repo.update(req)
 
+    async def approve_requirement(self, user_id: uuid.UUID, org_id: uuid.UUID, req_id: uuid.UUID) -> Requirement:
+        req = await self.get_requirement(org_id, req_id)
+        
+        if req.status == "Approved":
+            return req
+            
+        req.status = "Approved"
+        req.updated_by_id = user_id
+        
+        updated_req = await self.req_repo.update(req)
+        
+        act_service = ActivityService(self.db)
+        await act_service.log_activity(
+            project_id=req.project_id,
+            actor_id=user_id,
+            type="requirement_approved",
+            description=f"Requirement '{req.title}' was approved",
+            org_id=org_id
+        )
+        
+        return updated_req
+
     async def delete_requirement(self, org_id: uuid.UUID, req_id: uuid.UUID) -> None:
         req = await self.get_requirement(org_id, req_id)
         await self.req_repo.delete(req)
