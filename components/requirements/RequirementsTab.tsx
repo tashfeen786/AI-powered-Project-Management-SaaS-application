@@ -7,6 +7,7 @@ import { RequirementList } from "./RequirementList";
 import { RequirementModal } from "./RequirementModal";
 import { GenerateRequirementModal } from "./GenerateRequirementModal";
 import { DeleteRequirementModal } from "./DeleteRequirementModal";
+import { RequirementHistoryModal } from "./RequirementHistoryModal";
 import { RequirementResponse } from "@/types/api";
 
 export function RequirementsTab({ projectId }: { projectId: string }) {
@@ -17,6 +18,7 @@ export function RequirementsTab({ projectId }: { projectId: string }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [selectedReq, setSelectedReq] = useState<RequirementResponse | null>(null);
 
   const { data, isLoading, isError, refetch } = useRequirements(projectId, {
@@ -41,6 +43,11 @@ export function RequirementsTab({ projectId }: { projectId: string }) {
   const handleDelete = (req: RequirementResponse) => {
     setSelectedReq(req);
     setIsDeleteModalOpen(true);
+  };
+
+  const handleHistory = (req: RequirementResponse) => {
+    setSelectedReq(req);
+    setIsHistoryModalOpen(true);
   };
 
   const confirmDelete = () => {
@@ -123,11 +130,51 @@ export function RequirementsTab({ projectId }: { projectId: string }) {
             <p>Failed to load requirements. Please try again.</p>
           </div>
         ) : data?.items && data.items.length > 0 ? (
-          <RequirementList 
-            requirements={data.items} 
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
+          <div className="flex flex-col">
+            {(() => {
+              const functionalReqs = data.items.filter((r: RequirementResponse) => r.category === "Functional");
+              const nonFunctionalReqs = data.items.filter((r: RequirementResponse) => r.category === "Non-Functional");
+              const uncategorizedReqs = data.items.filter((r: RequirementResponse) => r.category !== "Functional" && r.category !== "Non-Functional");
+
+              return (
+                <>
+                  {functionalReqs.length > 0 && (
+                    <div className="mb-4">
+                      <h3 className="px-4 py-3 bg-background/80 border-b border-border text-sm font-semibold text-text-primary">Functional Requirements</h3>
+                      <RequirementList 
+                        requirements={functionalReqs} 
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        onHistory={handleHistory}
+                      />
+                    </div>
+                  )}
+                  {nonFunctionalReqs.length > 0 && (
+                    <div className="mb-4">
+                      <h3 className="px-4 py-3 bg-background/80 border-b border-border text-sm font-semibold text-text-primary">Non-Functional Requirements</h3>
+                      <RequirementList 
+                        requirements={nonFunctionalReqs} 
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        onHistory={handleHistory}
+                      />
+                    </div>
+                  )}
+                  {uncategorizedReqs.length > 0 && (
+                    <div className="mb-4">
+                      <h3 className="px-4 py-3 bg-background/80 border-b border-border text-sm font-semibold text-text-primary">Other Requirements</h3>
+                      <RequirementList 
+                        requirements={uncategorizedReqs} 
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        onHistory={handleHistory}
+                      />
+                    </div>
+                  )}
+                </>
+              );
+            })()}
+          </div>
         ) : (
           <div className="flex flex-col items-center justify-center h-64 text-text-secondary">
             <div className="w-16 h-16 bg-background rounded-full flex items-center justify-center mb-4 border border-border">
@@ -163,6 +210,12 @@ export function RequirementsTab({ projectId }: { projectId: string }) {
         onConfirm={confirmDelete}
         requirement={selectedReq}
         isDeleting={isDeleting}
+      />
+
+      <RequirementHistoryModal
+        isOpen={isHistoryModalOpen}
+        onClose={() => setIsHistoryModalOpen(false)}
+        requirement={selectedReq}
       />
     </div>
   );

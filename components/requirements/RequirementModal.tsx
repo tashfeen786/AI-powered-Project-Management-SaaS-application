@@ -98,13 +98,15 @@ export function RequirementModal({ isOpen, onClose, requirement, projectId }: Re
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-text-primary mb-1">Category</label>
-                <input 
-                  type="text" 
+                <select 
                   value={formData.category}
                   onChange={e => setFormData({...formData, category: e.target.value})}
                   className="w-full px-3 py-2 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary text-text-primary"
-                  placeholder="e.g. Security"
-                />
+                >
+                  <option value="">Select Category</option>
+                  <option value="Functional">Functional</option>
+                  <option value="Non-Functional">Non-Functional</option>
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-text-primary mb-1">Priority</label>
