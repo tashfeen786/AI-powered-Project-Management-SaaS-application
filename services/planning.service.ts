@@ -2,11 +2,10 @@ import { apiClient } from "./api";
 import { PlanningResponse, PaginatedData, StandardResponse } from "@/types/api";
 
 export const PlanningService = {
-  generatePlan: async (projectId: string, requirementId: string, additionalContext?: string): Promise<PlanningResponse> => {
+  generatePlan: async (projectId: string, additionalContext?: string): Promise<PlanningResponse> => {
     const response: StandardResponse<PlanningResponse> = await apiClient.post(
       `/projects/${projectId}/planning/generate`,
       {
-        requirement_id: requirementId,
         additional_context: additionalContext,
       }
     );

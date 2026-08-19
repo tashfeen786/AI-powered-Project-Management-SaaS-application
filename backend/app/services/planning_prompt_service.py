@@ -11,39 +11,44 @@ class PlanningPromptService:
             
         prompt = f"""
 You are an expert Agile Scrum Master and Technical Project Manager.
-Your task is to transform the provided Software Requirements Specification (SRS) into a realistic, structured Agile execution plan in Markdown format.
+Your task is to transform the provided approved requirements into a structured 5-phase project plan in JSON format.
 
 {additional_instructions}
 
-You MUST base the execution plan STRICTLY on the following SRS.
-If the SRS is insufficient to derive certain milestones, explicitly state that in your response.
-Do NOT hallucinate or invent features not mentioned in the SRS.
+You MUST base the execution plan STRICTLY on the following approved requirements.
+Do NOT hallucinate or invent features not mentioned in the requirements.
 
-SRS Document:
+Approved Requirements:
 ---
 {srs_content}
 ---
 
-You must include the following sections exactly formatted as Markdown headers (H2):
-## 1. Project Summary
-## 2. Milestones (e.g. Project Setup, Core Development, Testing, Deployment)
-## 3. Recommended Team Roles
-## 4. Dependencies & Risks
-## 5. Sprint 1
-### Sprint Goal
-### Tasks
-- [Task Title] | [Priority] | [Story Points] | [Estimated Hours] | [Suggested Role]
-  - Description: ...
-  - Acceptance Criteria: ...
-## 6. Sprint 2
-... (Continue for as many Sprints as reasonably needed to fulfill the SRS)
+You MUST generate EXACTLY 5 phases. The default structure is:
+1. Analysis & Architecture
+2. UI/UX & Design
+3. Backend Development
+4. Frontend Development & Integration
+5. Testing, Deployment & Documentation
+(You may adjust the names to fit the project, but you must output exactly 5 phases).
 
-At the very top of your response, you MUST provide these exactly formatted lines before the markdown content:
-ESTIMATED_DURATION: [e.g. 8 weeks]
-ESTIMATED_STORY_POINTS: [e.g. 120]
-ESTIMATED_HOURS: [e.g. 450.5]
+You must return ONLY a raw JSON object matching the following schema exactly:
 
-Format the output cleanly.
-Return ONLY the metadata lines and the Markdown content. Do not include conversational filler.
+{{
+  "phases": [
+    {{
+      "name": "Phase 1: Analysis & Architecture",
+      "description": "Detailed description of the phase.",
+      "objective": "Clear objective to achieve in this phase.",
+      "estimated_hours": 120,
+      "story_points": 40,
+      "dependencies": ["List of external dependencies or previous phases"],
+      "requirement_ids": ["uuid-1", "uuid-2"]
+    }}
+  ]
+}}
+
+Ensure that `estimated_hours` and `story_points` are numbers (not strings).
+Ensure that `requirement_ids` use the EXACT UUID strings provided in the input. 
+Return ONLY the JSON object. Do not include conversational filler or markdown formatting outside of the JSON block.
 """
         return prompt.strip()

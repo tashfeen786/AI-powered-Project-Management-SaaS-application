@@ -4,7 +4,6 @@ from datetime import datetime
 import uuid
 
 class GeneratePlanningRequest(BaseModel):
-    requirement_id: uuid.UUID = Field(..., description="The ID of the approved SRS to base the plan on")
     additional_context: Optional[str] = Field(None, description="Any specific focus, constraints, or instructions for the AI planner")
 
 class PlanningUpdate(BaseModel):
@@ -15,7 +14,7 @@ class PlanningResponse(BaseModel):
     id: uuid.UUID
     organization_id: uuid.UUID
     project_id: uuid.UUID
-    requirement_id: uuid.UUID
+    requirement_id: Optional[uuid.UUID] = None
     generated_by_id: uuid.UUID
     updated_by_id: Optional[uuid.UUID]
     version: int

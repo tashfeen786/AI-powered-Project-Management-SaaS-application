@@ -15,7 +15,7 @@ class Planning(BaseModel):
     estimated_story_points: Mapped[int | None] = mapped_column(Integer, default=0)
     estimated_hours: Mapped[float | None] = mapped_column(Float, default=0.0)
     
-    requirement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("requirements.id"))
+    requirement_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("requirements.id"), nullable=True)
     requirement: Mapped["Requirement"] = relationship()
     
     project_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("projects.id"))

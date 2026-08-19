@@ -57,34 +57,28 @@ class PlanningService:
         return "\n".join(content_lines).strip(), duration, story_points, hours
 
     async def generate_plan(self, user_id: uuid.UUID, org_id: uuid.UUID, project_id: uuid.UUID, request: GeneratePlanningRequest) -> Planning:
-        """
-        Transforms an Approved SRS into a Sprint Plan.
-        """
-        logger.info("Planning Started", project_id=str(project_id), requirement_id=str(request.requirement_id))
+        logger.info("Planning Started", project_id=str(project_id))
         
-        # 1. Validate Project & Requirement
         project = await self.project_repo.get_by_id(project_id, org_id)
         if not project:
             raise HTTPException(status_code=404, detail="Project not found")
             
-        req = await self.req_repo.get_by_id(request.requirement_id, org_id)
-        if not req:
-            raise HTTPException(status_code=404, detail="Requirement not found")
+        reqs, _ = await self.req_repo.get_by_project_paginated(org_id, project_id, page=1, limit=500, status="Approved")
+        if not reqs or len(reqs) == 0:
+            raise HTTPException(status_code=400, detail="No approved requirements are available for planning.")
             
-        if req.status != "Approved":
-            # Forcing approved SRS to maintain agile rigor, though this could be configurable
-            logger.warning("Using non-approved SRS for planning", status=req.status)
+        req_text = "\n\n---\n\n".join(
+            [f"ID: {r.id}\nTitle: {r.title}\nCategory: {r.category}\nPriority: {r.priority}\nDescription: {r.description}\nAcceptance Criteria: {r.acceptance_criteria}" for r in reqs]
+        )
+        approved_req_ids = {str(r.id) for r in reqs}
             
-        # 2. Build Prompt
         prompt = PlanningPromptService.build_sprint_plan_prompt(
-            srs_content=req.generated_content,
+            srs_content=req_text,
             additional_context=request.additional_context
         )
-        system_prompt = "You are an expert Technical Project Manager and Scrum Master."
+        system_prompt = "You are an expert Agile Scrum Master and Technical Project Manager. Output only valid JSON."
 
-        # 3. Call Groq
         try:
-            # Using centralized settings.GROQ_MODEL for logical structuring and planning
             result = await GroqService.generate(prompt=prompt, system_prompt=system_prompt)
         except Exception as e:
             logger.error("Planning Failed", error=str(e))
@@ -92,10 +86,36 @@ class PlanningService:
 
         logger.info("Planning Completed", tokens_used=result["tokens"])
 
-        # 4. Parse Metadata
-        content, duration, points, hours = self._parse_metadata(result["text"])
+        from app.utils.json_utils import extract_json
+        import json
+        
+        try:
+            parsed_json = extract_json(result["text"])
+        except ValueError as e:
+            logger.error("Planning JSON parsing failed", error=str(e), text=result["text"])
+            raise HTTPException(status_code=500, detail="Failed to parse AI planning response")
+            
+        phases = parsed_json.get("phases", [])
+        if len(phases) != 5:
+            raise HTTPException(status_code=500, detail=f"AI generated {len(phases)} phases instead of exactly 5.")
+            
+        total_hours = 0.0
+        total_points = 0
+        
+        for i, phase in enumerate(phases):
+            if "name" not in phase or "description" not in phase or "objective" not in phase:
+                raise HTTPException(status_code=500, detail="Missing required phase fields in AI response.")
+            total_hours += float(phase.get("estimated_hours", 0))
+            total_points += int(phase.get("story_points", 0))
+            
+            # Validate requirements
+            req_ids = phase.get("requirement_ids", [])
+            valid_req_ids = [rid for rid in req_ids if str(rid) in approved_req_ids]
+            phase["requirement_ids"] = valid_req_ids
+            
+        content = json.dumps(parsed_json)
+        duration = "5 Phases"
 
-        # 5. Versioning & Persistence
         latest_version = await self.plan_repo.get_latest_version(org_id, project_id)
         new_version = latest_version + 1
 
@@ -104,9 +124,9 @@ class PlanningService:
             status="Draft",
             planning_content=content,
             estimated_duration=duration,
-            estimated_story_points=points,
-            estimated_hours=hours,
-            requirement_id=req.id,
+            estimated_story_points=total_points,
+            estimated_hours=total_hours,
+            requirement_id=None,
             project_id=project_id,
             organization_id=org_id,
             generated_by_id=user_id
