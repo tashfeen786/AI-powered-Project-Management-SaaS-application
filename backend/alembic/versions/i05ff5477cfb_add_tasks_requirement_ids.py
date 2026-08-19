@@ -20,8 +20,13 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.add_column('tasks', sa.Column('requirement_ids', postgresql.JSONB(astext_type=sa.Text()), nullable=True))
-    op.add_column('tasks', sa.Column('phase', sa.String(length=255), nullable=True))
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
+    columns = [col['name'] for col in inspector.get_columns('tasks')]
+    if 'requirement_ids' not in columns:
+        op.add_column('tasks', sa.Column('requirement_ids', postgresql.JSONB(astext_type=sa.Text()), nullable=True))
+    if 'phase' not in columns:
+        op.add_column('tasks', sa.Column('phase', sa.String(length=255), nullable=True))
 
 
 def downgrade() -> None:

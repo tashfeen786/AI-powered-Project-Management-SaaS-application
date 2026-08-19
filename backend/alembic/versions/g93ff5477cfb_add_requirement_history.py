@@ -19,20 +19,24 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.create_table('requirement_histories',
-    sa.Column('requirement_id', sa.UUID(), nullable=False),
-    sa.Column('version', sa.Integer(), nullable=False),
-    sa.Column('change_summary', sa.Text(), nullable=True),
-    sa.Column('snapshot', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
-    sa.Column('changed_by_id', sa.UUID(), nullable=False),
-    sa.Column('id', sa.UUID(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.Column('updated_at', sa.DateTime(), nullable=False),
-    sa.Column('is_deleted', sa.Boolean(), nullable=False),
-    sa.ForeignKeyConstraint(['changed_by_id'], ['users.id'], ),
-    sa.ForeignKeyConstraint(['requirement_id'], ['requirements.id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id')
-    )
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
+    tables = inspector.get_table_names()
+    if 'requirement_histories' not in tables:
+        op.create_table('requirement_histories',
+        sa.Column('requirement_id', sa.UUID(), nullable=False),
+        sa.Column('version', sa.Integer(), nullable=False),
+        sa.Column('change_summary', sa.Text(), nullable=True),
+        sa.Column('snapshot', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
+        sa.Column('changed_by_id', sa.UUID(), nullable=False),
+        sa.Column('id', sa.UUID(), nullable=False),
+        sa.Column('created_at', sa.DateTime(), nullable=False),
+        sa.Column('updated_at', sa.DateTime(), nullable=False),
+        sa.Column('is_deleted', sa.Boolean(), nullable=False),
+        sa.ForeignKeyConstraint(['changed_by_id'], ['users.id'], ),
+        sa.ForeignKeyConstraint(['requirement_id'], ['requirements.id'], ondelete='CASCADE'),
+        sa.PrimaryKeyConstraint('id')
+        )
 
 
 def downgrade() -> None:

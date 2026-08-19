@@ -19,9 +19,15 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.alter_column('sprint_plans', 'requirement_id',
-               existing_type=sa.UUID(),
-               nullable=True)
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
+    columns = [col['name'] for col in inspector.get_columns('sprint_plans')]
+    if 'requirement_id' in columns:
+        col_info = next(col for col in inspector.get_columns('sprint_plans') if col['name'] == 'requirement_id')
+        if not col_info.get('nullable', False):
+            op.alter_column('sprint_plans', 'requirement_id',
+                       existing_type=sa.UUID(),
+                       nullable=True)
 
 
 def downgrade() -> None:
