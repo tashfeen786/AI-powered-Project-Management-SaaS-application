@@ -134,7 +134,7 @@ class TaskGenerationService:
                     title=task_data.get("title", "Untitled Task"),
                     description=full_desc,
                     priority=task_data.get("priority", "Medium"),
-                    status="To Do",
+                    status="Todo",
                     story_points=task_data.get("story_points", 0),
                     estimated_hours=task_data.get("estimated_hours", 0.0),
                     labels=task_data.get("labels", []),

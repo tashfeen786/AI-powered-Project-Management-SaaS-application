@@ -26,7 +26,7 @@ Your JSON must strictly match this schema:
           "title": "Task title",
           "description": "Detailed description of what needs to be done",
           "priority": "High", // Must be exactly one of: Low, Medium, High, Critical
-          "status": "To Do", // Must be exactly: To Do
+          "status": "Todo", // Must be exactly: Todo
           "story_points": 5, // Integer
           "estimated_hours": 8.0, // Float
           "labels": ["Frontend", "Auth"], // Array of short strings

@@ -1,5 +1,5 @@
 export type TaskPriority = 'High' | 'Medium' | 'Low';
-export type TaskStatus = 'To Do' | 'In Progress' | 'Review' | 'Done';
+export type TaskStatus = 'Backlog' | 'Todo' | 'In Progress' | 'Review' | 'Done';
 
 export interface Comment {
   id: string;

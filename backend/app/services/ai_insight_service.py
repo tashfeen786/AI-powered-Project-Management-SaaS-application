@@ -42,7 +42,7 @@ class AIInsightService:
         tasks = result.scalars().all()
         task_metrics = {
             "total": len(tasks),
-            "todo": len([t for t in tasks if t.status == "To Do"]),
+            "todo": len([t for t in tasks if t.status == "Todo"]),
             "in_progress": len([t for t in tasks if t.status == "In Progress"]),
             "done": len([t for t in tasks if t.status == "Done"]),
             "high_priority": len([t for t in tasks if t.priority in ["High", "Critical"] and t.status != "Done"])

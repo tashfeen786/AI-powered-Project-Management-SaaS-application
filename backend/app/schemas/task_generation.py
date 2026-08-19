@@ -11,7 +11,7 @@ class GeneratedTaskItem(BaseModel):
     title: str
     description: str
     priority: str = Field(pattern="^(Low|Medium|High|Critical)$")
-    status: str = Field(pattern="^(To Do|In Progress|Review|Done)$") # usually "To Do" on generation
+    status: str = Field(pattern="^(Todo|In Progress|Review|Done)$") # usually "Todo" on generation
     story_points: int
     estimated_hours: float
     labels: List[str] = []
