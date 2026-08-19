@@ -26,7 +26,8 @@ class TaskRepository:
         query = select(Task).options(
             selectinload(Task.comments),
             selectinload(Task.attachments),
-            selectinload(Task.activities)
+            selectinload(Task.activities),
+            selectinload(Task.assignee)
         ).where(
             Task.project_id == project_id, 
             Task.organization_id == org_id,
@@ -76,7 +77,8 @@ class TaskRepository:
         result = await self.db.execute(select(Task).options(
             selectinload(Task.comments),
             selectinload(Task.attachments),
-            selectinload(Task.activities)
+            selectinload(Task.activities),
+            selectinload(Task.assignee)
         ).where(
             Task.id == task_id, 
             Task.organization_id == org_id,

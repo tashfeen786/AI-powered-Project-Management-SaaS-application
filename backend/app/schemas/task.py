@@ -73,11 +73,20 @@ class TaskActivityResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class TaskAssigneeResponse(BaseModel):
+    id: uuid.UUID
+    email: str
+    full_name: str
+    
+    class Config:
+        from_attributes = True
+
 class TaskResponse(TaskBase):
     id: uuid.UUID
     project_id: uuid.UUID
     organization_id: uuid.UUID
     assignee_id: Optional[uuid.UUID]
+    assignee: Optional[TaskAssigneeResponse] = None
     reporter_id: Optional[uuid.UUID]
     order_index: float
     comments: List[TaskCommentResponse] = []

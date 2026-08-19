@@ -141,6 +141,7 @@ export interface TaskResponse {
   project_id: string;
   organization_id: string;
   assignee_id: string | null;
+  assignee?: { id: string; email: string; full_name: string } | null;
   reporter_id: string | null;
   order_index: number;
   comments: any[];

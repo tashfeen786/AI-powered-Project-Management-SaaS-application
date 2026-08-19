@@ -41,7 +41,10 @@ export function TaskCard({ task, onClick, onDragStart }: TaskCardProps) {
             {task.due_date ? task.due_date : "No date"}
           </div>
         </div>
-        <AssigneeAvatar initials={task.assignee_id ? "US" : "UN"} name={task.assignee_id ? "User" : "Unassigned"} />
+        <AssigneeAvatar 
+          initials={task.assignee ? task.assignee.full_name.substring(0, 2).toUpperCase() : "UN"} 
+          name={task.assignee ? task.assignee.full_name : "Unassigned"} 
+        />
       </div>
     </div>
   );
