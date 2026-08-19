@@ -62,6 +62,11 @@ export const TaskService = {
     return response.data!;
   },
 
+  recommendDeveloper: async (taskId: string): Promise<any> => {
+    const response: StandardResponse<any> = await apiClient.post(`/tasks/${taskId}/assignment-recommendation`, {});
+    return response.data!;
+  },
+
   deleteTask: async (taskId: string): Promise<void> => {
     await apiClient.delete(`/tasks/${taskId}`);
   },

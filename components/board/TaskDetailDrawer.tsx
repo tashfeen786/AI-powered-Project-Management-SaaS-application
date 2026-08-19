@@ -8,6 +8,7 @@ import { StatusBadge } from "./StatusBadge";
 import { AssigneeAvatar } from "./AssigneeAvatar";
 import { TaskComments } from "./TaskComments";
 import { TaskActivity } from "./TaskActivity";
+import { TaskAssigneeSection } from "./TaskAssigneeSection";
 
 interface TaskDetailDrawerProps {
   task: TaskResponse | null;
@@ -83,10 +84,7 @@ export function TaskDetailDrawer({ task, isOpen, onClose, onDelete, onEdit }: Ta
                 </div>
                 <div>
                   <div className="text-xs font-semibold text-text-secondary mb-1 uppercase tracking-wider">Assignee</div>
-                  <div className="flex items-center gap-2">
-                    <AssigneeAvatar initials={task.assignee_id ? "US" : "UN"} name={task.assignee_id ? "User" : "Unassigned"} />
-                    <span className="text-sm font-medium text-text-primary">{task.assignee_id ? "User" : "Unassigned"}</span>
-                  </div>
+                  <TaskAssigneeSection task={task} />
                 </div>
                 <div>
                   <div className="text-xs font-semibold text-text-secondary mb-1 uppercase tracking-wider">Sprint</div>

@@ -165,6 +165,18 @@ export interface TaskCreate {
   assignee_id?: string;
 }
 
+export interface AssignmentRecommendationResponse {
+  task_id: string;
+  recommended_developer_id: string;
+  developer_name: string;
+  job_role: string | null;
+  matching_skills: string[];
+  current_workload: number;
+  estimated_task_hours: number;
+  confidence: number;
+  reason: string;
+}
+
 export interface TaskUpdate {
   title?: string;
   description?: string;
@@ -217,6 +229,8 @@ export interface TeamMemberResponse {
   status: MemberStatus;
   email: string | null;
   full_name: string | null;
+  job_role?: string | null;
+  skills?: string[];
   created_at: string;
   updated_at: string;
 }
