@@ -42,6 +42,18 @@ async def generate_requirement(
     req = await req_service.generate_srs(current_user.id, org_id, project_id, request)
     return success_response(data=RequirementResponse.model_validate(req), message="SRS generated successfully")
 
+@router.post("/projects/{project_id}/requirements/analyze", response_model=StandardResponse)
+async def analyze_requirements(
+    project_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    org_id = await verify_org_and_role(current_user, db, Permission.GENERATE_SRS)
+    req_service = RequirementService(db)
+    
+    analysis = await req_service.analyze_requirements(current_user.id, org_id, project_id)
+    return success_response(data=analysis, message="Requirements analyzed successfully")
+
 @router.get("/projects/{project_id}/requirements", response_model=StandardResponse)
 async def list_requirements(
     project_id: uuid.UUID,

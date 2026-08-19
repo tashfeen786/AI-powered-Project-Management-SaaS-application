@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Search, Filter, Wand2, Loader2, RefreshCw } from "lucide-react";
-import { useRequirements, useDeleteRequirement } from "@/features/requirements/hooks/useRequirements";
-import { RequirementList } from "./RequirementList";
+import { Plus, Search, Filter, Wand2, Loader2, RefreshCw, Sparkles } from "lucide-react";
 import { RequirementModal } from "./RequirementModal";
 import { GenerateRequirementModal } from "./GenerateRequirementModal";
+import { AnalyzeRequirementsModal } from "./AnalyzeRequirementsModal";
 import { DeleteRequirementModal } from "./DeleteRequirementModal";
 import { RequirementHistoryModal } from "./RequirementHistoryModal";
+import { RequirementList } from "./RequirementList";
+import { useRequirements, useDeleteRequirement } from "@/features/requirements/hooks/useRequirements";
 import { RequirementResponse } from "@/types/api";
 
 export function RequirementsTab({ projectId }: { projectId: string }) {
@@ -17,6 +18,7 @@ export function RequirementsTab({ projectId }: { projectId: string }) {
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
+  const [isAnalyzeModalOpen, setIsAnalyzeModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [selectedReq, setSelectedReq] = useState<RequirementResponse | null>(null);
@@ -110,6 +112,13 @@ export function RequirementsTab({ projectId }: { projectId: string }) {
             Generate
           </button>
           <button 
+            onClick={() => setIsAnalyzeModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-background border border-primary/30 text-primary rounded-md text-sm font-medium hover:bg-primary/10 transition-colors focus:outline-none focus:ring-1 focus:ring-primary"
+          >
+            <Sparkles className="w-4 h-4" />
+            Analyze with AI
+          </button>
+          <button 
             onClick={handleCreate}
             className="flex items-center gap-2 px-4 py-2 bg-primary text-surface rounded-md text-sm font-medium hover:opacity-90 transition-opacity focus:outline-none focus:ring-1 focus:ring-primary focus:ring-offset-1 focus:ring-offset-background"
           >
@@ -201,6 +210,12 @@ export function RequirementsTab({ projectId }: { projectId: string }) {
       <GenerateRequirementModal
         isOpen={isGenerateModalOpen}
         onClose={() => setIsGenerateModalOpen(false)}
+        projectId={projectId}
+      />
+
+      <AnalyzeRequirementsModal
+        isOpen={isAnalyzeModalOpen}
+        onClose={() => setIsAnalyzeModalOpen(false)}
         projectId={projectId}
       />
 

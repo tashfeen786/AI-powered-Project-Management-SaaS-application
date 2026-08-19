@@ -47,3 +47,81 @@ Format the output cleanly with bullet points, bold text for emphasis, and clear 
 Return ONLY the Markdown content. Do not include any conversational filler before or after the Markdown.
 """
         return prompt.strip()
+
+    @staticmethod
+    def build_analysis_prompt(requirements: list) -> str:
+        req_text = "\n\n---\n\n".join(
+            [f"ID: {r.id}\nTitle: {r.title}\nCategory: {r.category}\nPriority: {r.priority}\nStatus: {r.status}\nDescription: {r.description}\nAcceptance Criteria: {r.acceptance_criteria}" for r in requirements]
+        )
+        
+        prompt = f"""
+You are an expert Technical Project Manager and Business Analyst.
+Your task is to analyze the following set of requirements for a project and identify potential issues or areas for improvement.
+
+Requirements:
+{req_text}
+
+You must return ONLY a raw JSON object (no markdown formatting, no code blocks, no conversational text) matching the following schema exactly:
+
+{{
+  "duplicates": [
+    {{
+      "requirement_ids": ["uuid-1", "uuid-2"],
+      "reason": "Explanation of why they are duplicates",
+      "suggested_action": "Merge / Delete"
+    }}
+  ],
+  "missing_requirements": [
+    {{
+      "title": "Suggested missing requirement title",
+      "description": "Explanation of what is missing and why it's needed",
+      "category": "Functional or Non-Functional"
+    }}
+  ],
+  "ambiguous_requirements": [
+    {{
+      "requirement_id": "uuid",
+      "reason": "Explanation of ambiguity",
+      "suggested_action": "Reword / Add details"
+    }}
+  ],
+  "conflicts": [
+    {{
+      "requirement_ids": ["uuid-1", "uuid-2"],
+      "reason": "Explanation of the conflict",
+      "suggested_action": "Modify one or both"
+    }}
+  ],
+  "dependencies": [
+    {{
+      "requirement_id": "uuid-1",
+      "depends_on_id": "uuid-2",
+      "reason": "Explanation of dependency"
+    }}
+  ],
+  "risks": [
+    {{
+      "requirement_id": "uuid",
+      "risk_description": "Explanation of technical or business risk",
+      "mitigation": "Suggested mitigation strategy"
+    }}
+  ],
+  "missing_acceptance_criteria": [
+    {{
+      "requirement_id": "uuid",
+      "suggested_criteria": "Suggested acceptance criteria text"
+    }}
+  ],
+  "priority_suggestions": [
+    {{
+      "requirement_id": "uuid",
+      "current_priority": "Low",
+      "suggested_priority": "High",
+      "reason": "Explanation for priority change"
+    }}
+  ]
+}}
+
+Ensure that requirement_id fields use the EXACT UUID strings provided in the input. Return ONLY the JSON object.
+"""
+        return prompt.strip()

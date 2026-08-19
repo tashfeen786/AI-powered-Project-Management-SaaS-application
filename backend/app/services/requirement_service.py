@@ -303,3 +303,43 @@ class RequirementService:
             .order_by(desc(RequirementHistory.created_at))
         )
         return result.scalars().all()
+
+    async def analyze_requirements(self, user_id: uuid.UUID, org_id: uuid.UUID, project_id: uuid.UUID) -> dict:
+        logger.info("Analysis Started", project_id=str(project_id))
+        
+        # 1. Fetch requirements
+        reqs, _ = await self.get_requirements(org_id, project_id, page=1, limit=500)
+        
+        empty_response = {
+            "duplicates": [],
+            "missing_requirements": [],
+            "ambiguous_requirements": [],
+            "conflicts": [],
+            "dependencies": [],
+            "risks": [],
+            "missing_acceptance_criteria": [],
+            "priority_suggestions": []
+        }
+        
+        if not reqs:
+            return empty_response
+            
+        # 2. Build prompt
+        prompt = RequirementPromptService.build_analysis_prompt(reqs)
+        system_prompt = "You are an AI that exclusively outputs valid JSON. No markdown, no conversation."
+        
+        # 3. Call Groq
+        try:
+            result = await GroqService.generate(prompt=prompt, system_prompt=system_prompt)
+        except Exception as e:
+            logger.error("Analysis Failed", error=str(e))
+            raise HTTPException(status_code=500, detail="AI generation failed")
+            
+        # 4. Parse JSON
+        from app.utils.json_utils import extract_json
+        try:
+            parsed_json = extract_json(result["text"])
+            return parsed_json
+        except ValueError as e:
+            logger.error("Analysis JSON parsing failed", error=str(e), text=result["text"])
+            raise HTTPException(status_code=500, detail="Failed to parse AI analysis response")

@@ -52,3 +52,9 @@ export function useGenerateRequirement() {
     },
   });
 }
+
+export function useAnalyzeRequirements() {
+  return useMutation({
+    mutationFn: (projectId: string) => RequirementsService.analyzeRequirements(projectId),
+  });
+}

@@ -10,6 +10,11 @@ export const RequirementsService = {
     return response.data!;
   },
 
+  analyzeRequirements: async (projectId: string): Promise<any> => {
+    const response: StandardResponse<any> = await apiClient.post(`/projects/${projectId}/requirements/analyze`, {});
+    return response.data;
+  },
+
   getRequirements: async (projectId: string, params?: RequirementQueryParams): Promise<PaginatedData<RequirementResponse>> => {
     const response: StandardResponse<PaginatedData<RequirementResponse>> = await apiClient.get(
       `/projects/${projectId}/requirements`,
