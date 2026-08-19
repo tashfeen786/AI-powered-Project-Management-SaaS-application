@@ -149,6 +149,24 @@ async def assign_task(
     task = await task_service.assign_task(current_user.id, org_id, id, assign_in)
     return success_response(data=TaskResponse.model_validate(task), message="Task assigned")
 
+from app.services.assignment_recommendation_service import AssignmentRecommendationService
+from app.schemas.task import AssignmentRecommendationResponse
+
+@router.post("/tasks/{id}/assignment-recommendation", response_model=StandardResponse[AssignmentRecommendationResponse])
+async def get_assignment_recommendation(
+    id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+    org_id: uuid.UUID = Depends(get_org_id)
+):
+    task_service = TaskService(db)
+    task = await task_service.get_task(current_user.id, org_id, id)
+    
+    rec_service = AssignmentRecommendationService(db)
+    recommendation = await rec_service.recommend_developer(org_id, task)
+    
+    return success_response(data=recommendation, message="AI generated assignment recommendation")
+
 @router.delete("/tasks/{id}", response_model=StandardResponse)
 async def delete_task(
     id: uuid.UUID,

@@ -13,6 +13,9 @@ class UserOrganization(BaseModel):
     role: Mapped[str] = mapped_column(String(50), default="viewer") # owner, admin, pm, developer, designer, qa, viewer
     status: Mapped[str] = mapped_column(String(50), default="pending") # pending, accepted, inactive, suspended
     
+    job_role: Mapped[str | None] = mapped_column(String(100))
+    skills: Mapped[list | None] = mapped_column(JSONB)
+    
     invited_by: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
     joined_at: Mapped[datetime | None] = mapped_column(DateTime)
     

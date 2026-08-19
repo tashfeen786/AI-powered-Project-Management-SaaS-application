@@ -42,6 +42,17 @@ class TaskMove(BaseModel):
 class TaskAssign(BaseModel):
     assignee_id: Optional[uuid.UUID] = None
 
+class AssignmentRecommendationResponse(BaseModel):
+    task_id: uuid.UUID
+    recommended_developer_id: uuid.UUID
+    developer_name: str
+    job_role: Optional[str]
+    matching_skills: List[str]
+    current_workload: float
+    estimated_task_hours: float
+    confidence: float
+    reason: str
+
 class CommentCreate(BaseModel):
     content: str = Field(..., min_length=1)
 

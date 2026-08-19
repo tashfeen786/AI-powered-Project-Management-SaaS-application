@@ -10,6 +10,8 @@ class TeamMemberInvite(BaseModel):
 class TeamMemberUpdate(BaseModel):
     role: Optional[str] = Field(None, pattern="^(owner|admin|pm|developer|designer|qa|viewer)$")
     status: Optional[str] = Field(None, pattern="^(pending|accepted|inactive|suspended)$")
+    job_role: Optional[str] = None
+    skills: Optional[List[str]] = None
 
 class TeamMemberResponse(BaseModel):
     id: uuid.UUID
@@ -17,6 +19,8 @@ class TeamMemberResponse(BaseModel):
     organization_id: uuid.UUID
     role: str
     status: str
+    job_role: Optional[str] = None
+    skills: Optional[List[str]] = None
     invited_by: Optional[uuid.UUID]
     joined_at: Optional[datetime]
     created_at: datetime
