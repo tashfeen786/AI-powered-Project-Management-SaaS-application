@@ -98,6 +98,24 @@ export function TaskDetailDrawer({ task, isOpen, onClose, onDelete, onEdit }: Ta
                   <div className="text-xs font-semibold text-text-secondary mb-1 uppercase tracking-wider">Due Date</div>
                   <span className="text-sm font-medium text-text-primary">{task.due_date || "No date"}</span>
                 </div>
+                {task.phase && (
+                  <div className="col-span-2 mt-2">
+                    <div className="text-xs font-semibold text-text-secondary mb-1 uppercase tracking-wider">Phase</div>
+                    <span className="text-sm font-medium text-text-primary bg-primary/10 px-2 py-1 rounded border border-primary/20">{task.phase}</span>
+                  </div>
+                )}
+                {task.requirement_ids && task.requirement_ids.length > 0 && (
+                  <div className="col-span-2 mt-2">
+                    <div className="text-xs font-semibold text-text-secondary mb-1 uppercase tracking-wider">Requirements Linked</div>
+                    <div className="flex flex-wrap gap-2">
+                      {task.requirement_ids.map(id => (
+                        <span key={id} className="text-xs font-medium text-text-secondary bg-background border border-border px-2 py-1 rounded">
+                          {id}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Description */}

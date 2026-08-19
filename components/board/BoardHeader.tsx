@@ -5,9 +5,11 @@ import { useState } from "react";
 
 interface BoardHeaderProps {
   onCreateClick?: () => void;
+  filters: any;
+  setFilters: (f: any) => void;
 }
 
-export function BoardHeader({ onCreateClick }: BoardHeaderProps) {
+export function BoardHeader({ onCreateClick, filters, setFilters }: BoardHeaderProps) {
   const [isAiMenuOpen, setIsAiMenuOpen] = useState(false);
 
   return (
@@ -57,7 +59,18 @@ export function BoardHeader({ onCreateClick }: BoardHeaderProps) {
         </div>
       </div>
       
-      <FilterBar />
+      <FilterBar 
+        search={filters.search}
+        onSearchChange={(v) => setFilters({ ...filters, search: v })}
+        assigneeId={filters.assigneeId}
+        onAssigneeChange={(v) => setFilters({ ...filters, assigneeId: v })}
+        priority={filters.priority}
+        onPriorityChange={(v) => setFilters({ ...filters, priority: v })}
+        phase={filters.phase}
+        onPhaseChange={(v) => setFilters({ ...filters, phase: v })}
+        isAiGenerated={filters.isAiGenerated}
+        onAiGeneratedChange={(v) => setFilters({ ...filters, isAiGenerated: v })}
+      />
     </div>
   );
 }

@@ -35,6 +35,15 @@ export default function KanbanBoardPage({ params }: { params: Promise<{ id: stri
   const { mutate: updateTask } = useUpdateTask(projectId);
   const [toastMessage, setToastMessage] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  
+  const [filters, setFilters] = useState({
+    search: "",
+    assigneeId: "",
+    priority: "",
+    phase: "",
+    isAiGenerated: false
+  });
+  
   const queryClient = useQueryClient();
   
   // Connect to WS and listen for updates
@@ -82,7 +91,11 @@ export default function KanbanBoardPage({ params }: { params: Promise<{ id: stri
         </div>
         
         <ProjectTabs projectId={projectId}>
-          <BoardHeader onCreateClick={() => setIsCreateModalOpen(true)} />
+          <BoardHeader 
+            onCreateClick={() => setIsCreateModalOpen(true)} 
+            filters={filters}
+            setFilters={setFilters}
+          />
           
           <div className="flex-1 min-h-[600px] relative mt-6">
             {isLoading ? (
@@ -100,7 +113,18 @@ export default function KanbanBoardPage({ params }: { params: Promise<{ id: stri
                 </p>
               </div>
             ) : (
-              <KanbanBoard tasks={tasks.items as any} onUpdateTaskStatus={handleUpdateTaskStatus} />
+              <KanbanBoard 
+                tasks={(tasks.items as any).filter((task: any) => {
+                  if (filters.search && !task.title.toLowerCase().includes(filters.search.toLowerCase()) && !task.description?.toLowerCase().includes(filters.search.toLowerCase())) return false;
+                  if (filters.assigneeId === "unassigned" && task.assignee_id) return false;
+                  if (filters.assigneeId && filters.assigneeId !== "unassigned" && task.assignee_id !== filters.assigneeId) return false;
+                  if (filters.priority && task.priority !== filters.priority) return false;
+                  if (filters.phase && task.phase !== filters.phase) return false;
+                  if (filters.isAiGenerated && !task.phase && (!task.requirement_ids || task.requirement_ids.length === 0)) return false;
+                  return true;
+                })} 
+                onUpdateTaskStatus={handleUpdateTaskStatus} 
+              />
             )}
           </div>
         </ProjectTabs>
