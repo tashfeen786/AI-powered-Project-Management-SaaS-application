@@ -23,7 +23,8 @@ export function RequirementList({
 }: { 
   requirements: RequirementResponse[], 
   onEdit: (req: RequirementResponse) => void,
-  onDelete: (req: RequirementResponse) => void
+  onDelete: (req: RequirementResponse) => void,
+  onHistory: (req: RequirementResponse) => void
 }) {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -102,6 +103,13 @@ export function RequirementList({
                   >
                     <Edit2 className="w-3.5 h-3.5" />
                     Edit
+                  </button>
+                  <button 
+                    onClick={() => { onHistory(req); setOpenMenuId(null); }}
+                    className="w-full text-left px-3 py-1.5 text-sm text-text-primary hover:bg-background flex items-center gap-2"
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    History
                   </button>
                   <button 
                     onClick={() => { onDelete(req); setOpenMenuId(null); }}

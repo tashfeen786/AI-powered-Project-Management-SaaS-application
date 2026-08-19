@@ -94,6 +94,27 @@ async def get_requirement(
     req = await req_service.get_requirement(org_id, id)
     return success_response(data=RequirementResponse.model_validate(req), message="Requirement retrieved")
 
+@router.get("/requirements/{id}/history", response_model=StandardResponse)
+async def get_requirement_history(
+    id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    org_id = await verify_org_and_role(current_user, db, Permission.VIEW_PROJECTS)
+    req_service = RequirementService(db)
+    
+    history = await req_service.get_requirement_history(org_id, id)
+    data = [
+        {
+            "id": str(h.id),
+            "version": h.version,
+            "change_summary": h.change_summary,
+            "changed_by_name": h.changed_by.username if h.changed_by else "System",
+            "created_at": h.created_at.isoformat()
+        } for h in history
+    ]
+    return success_response(data=data, message="History retrieved")
+
 @router.patch("/requirements/{id}", response_model=StandardResponse[RequirementResponse])
 async def update_requirement(
     id: uuid.UUID,

@@ -139,6 +139,25 @@ class RequirementService:
         )
         created = await self.req_repo.create(req)
         
+        # Record initial version
+        from app.models.requirement_history import RequirementHistory
+        history = RequirementHistory(
+            requirement_id=created.id,
+            version=1,
+            change_summary="Initial creation",
+            snapshot={
+                "title": req.title,
+                "description": req.description,
+                "category": req.category,
+                "priority": req.priority,
+                "status": req.status,
+                "acceptance_criteria": req.acceptance_criteria
+            },
+            changed_by_id=user_id
+        )
+        self.db.add(history)
+        await self.db.commit()
+        
         act_service = ActivityService(self.db)
         await act_service.log_activity(
             project_id=create_in.project_id,
@@ -159,24 +178,72 @@ class RequirementService:
     async def update_requirement(self, user_id: uuid.UUID, org_id: uuid.UUID, req_id: uuid.UUID, update_in: RequirementUpdate) -> Requirement:
         req = await self.get_requirement(org_id, req_id)
         
-        if update_in.title is not None:
+        changes = []
+        is_significant_change = False
+        
+        if update_in.title is not None and req.title != update_in.title:
+            changes.append(f"Title changed")
             req.title = update_in.title
-        if update_in.status is not None:
+            is_significant_change = True
+            
+        if update_in.status is not None and req.status != update_in.status:
+            changes.append(f"Status changed to {update_in.status}")
             req.status = update_in.status
-        if update_in.description is not None:
+            
+        if update_in.description is not None and req.description != update_in.description:
+            changes.append(f"Description changed")
             req.description = update_in.description
-        if update_in.category is not None:
+            is_significant_change = True
+            
+        if update_in.category is not None and req.category != update_in.category:
+            changes.append(f"Category changed to {update_in.category}")
             req.category = update_in.category
-        if update_in.priority is not None:
+            is_significant_change = True
+            
+        if update_in.priority is not None and req.priority != update_in.priority:
+            changes.append(f"Priority changed to {update_in.priority}")
             req.priority = update_in.priority
-        if update_in.acceptance_criteria is not None:
+            is_significant_change = True
+            
+        if update_in.acceptance_criteria is not None and req.acceptance_criteria != update_in.acceptance_criteria:
+            changes.append(f"Acceptance criteria updated")
             req.acceptance_criteria = update_in.acceptance_criteria
+            is_significant_change = True
+            
         if update_in.generated_content is not None:
             req.generated_content = update_in.generated_content
             
+        if is_significant_change and req.status == "Approved":
+            req.status = "Review"
+            changes.append("Status changed to Review (was Approved)")
+            
         req.updated_by_id = user_id
         
-        return await self.req_repo.update(req)
+        if is_significant_change:
+            req.version += 1
+            
+        updated_req = await self.req_repo.update(req)
+        
+        if changes:
+            from app.models.requirement_history import RequirementHistory
+            history = RequirementHistory(
+                requirement_id=req.id,
+                version=req.version,
+                change_summary=", ".join(changes),
+                snapshot={
+                    "title": req.title,
+                    "description": req.description,
+                    "category": req.category,
+                    "priority": req.priority,
+                    "status": req.status,
+                    "acceptance_criteria": req.acceptance_criteria
+                },
+                changed_by_id=user_id
+            )
+            self.db.add(history)
+            await self.db.commit()
+            
+        return updated_req
 
     async def approve_requirement(self, user_id: uuid.UUID, org_id: uuid.UUID, req_id: uuid.UUID) -> Requirement:
         req = await self.get_requirement(org_id, req_id)
@@ -188,6 +255,24 @@ class RequirementService:
         req.updated_by_id = user_id
         
         updated_req = await self.req_repo.update(req)
+        
+        from app.models.requirement_history import RequirementHistory
+        history = RequirementHistory(
+            requirement_id=req.id,
+            version=req.version,
+            change_summary="Requirement Approved",
+            snapshot={
+                "title": req.title,
+                "description": req.description,
+                "category": req.category,
+                "priority": req.priority,
+                "status": req.status,
+                "acceptance_criteria": req.acceptance_criteria
+            },
+            changed_by_id=user_id
+        )
+        self.db.add(history)
+        await self.db.commit()
         
         act_service = ActivityService(self.db)
         await act_service.log_activity(
@@ -203,3 +288,18 @@ class RequirementService:
     async def delete_requirement(self, org_id: uuid.UUID, req_id: uuid.UUID) -> None:
         req = await self.get_requirement(org_id, req_id)
         await self.req_repo.delete(req)
+
+    async def get_requirement_history(self, org_id: uuid.UUID, req_id: uuid.UUID):
+        from sqlalchemy import select, desc
+        from sqlalchemy.orm import selectinload
+        from app.models.requirement_history import RequirementHistory
+        
+        await self.get_requirement(org_id, req_id)
+        
+        result = await self.db.execute(
+            select(RequirementHistory)
+            .options(selectinload(RequirementHistory.changed_by))
+            .where(RequirementHistory.requirement_id == req_id)
+            .order_by(desc(RequirementHistory.created_at))
+        )
+        return result.scalars().all()
