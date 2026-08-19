@@ -40,34 +40,65 @@ class TaskGenerationService:
             raise HTTPException(status_code=404, detail="Planning document not found")
             
         if plan.status != "Approved":
-            raise HTTPException(status_code=400, detail="Tasks can only be generated from an Approved Sprint Plan")
+            raise HTTPException(status_code=400, detail="No approved planning is available for task generation.")
+            
+        # Also need approved requirements
+        from app.repositories.requirement_repository import RequirementRepository
+        req_repo = RequirementRepository(self.db)
+        reqs, _ = await req_repo.get_by_project_paginated(org_id, project_id, page=1, limit=500, status="Approved")
+        if not reqs or len(reqs) == 0:
+            raise HTTPException(status_code=400, detail="No approved requirements are available for task generation.")
+            
+        req_text = "\n\n---\n\n".join(
+            [f"ID: {r.id}\nTitle: {r.title}\nCategory: {r.category}\nPriority: {r.priority}\nDescription: {r.description}\nAcceptance Criteria: {r.acceptance_criteria}" for r in reqs]
+        )
+        approved_req_ids = {str(r.id) for r in reqs}
+            
+        # Validate plan has 5 phases
+        import json
+        from app.utils.json_utils import extract_json
+        
+        try:
+            plan_json = json.loads(plan.planning_content)
+        except Exception:
+            raise HTTPException(status_code=500, detail="Approved planning is malformed.")
+            
+        phases = plan_json.get("phases", [])
+        if len(phases) != 5:
+            raise HTTPException(status_code=500, detail="Approved planning must have exactly 5 phases.")
+            
+        valid_phase_names = {p.get("name") for p in phases}
             
         # 2. Build Prompt
-        prompt = TaskGenerationPromptService.build_task_generation_prompt(plan.planning_content)
+        prompt = TaskGenerationPromptService.build_task_generation_prompt(req_text, plan.planning_content)
         system_prompt = "You are an AI that exclusively outputs valid JSON. No markdown, no conversation."
 
         # 3. Call Groq with Retry
         max_retries = 2
         for attempt in range(max_retries):
             try:
-                # DeepSeek or Llama 3.3 configured for JSON output
                 result = await GroqService.generate(prompt=prompt, system_prompt=system_prompt)
                 logger.info("Groq Request Completed", tokens_used=result["tokens"])
                 
-                raw_text = result["text"].strip()
-                if "```json" in raw_text:
-                    raw_text = raw_text.split("```json")[1].split("```")[0].strip()
-                elif "```" in raw_text:
-                    raw_text = raw_text.split("```")[1].strip()
+                parsed_json = extract_json(result["text"])
                 
-                parsed_json = json.loads(raw_text)
                 # Validate against schema
                 validated_payload = TaskGenerationPayload(**parsed_json)
+                
+                # Validate requirement IDs and phases
+                for task in validated_payload.tasks:
+                    if task.phase not in valid_phase_names:
+                        raise ValueError(f"Task phase '{task.phase}' not found in approved planning.")
+                    if not task.requirement_ids:
+                        raise ValueError(f"Task '{task.title}' has no requirement IDs linked.")
+                    for req_id in task.requirement_ids:
+                        if req_id not in approved_req_ids:
+                            raise ValueError(f"Task '{task.title}' references invalid or unapproved requirement {req_id}.")
                 break
-            except (json.JSONDecodeError, Exception) as e:
+            except Exception as e:
                 logger.error(f"Task Generation Failed on attempt {attempt+1}", error=str(e))
                 if attempt == max_retries - 1:
-                    raise HTTPException(status_code=500, detail="AI returned invalid JSON format or failed generation")
+                    raise HTTPException(status_code=500, detail=f"AI returned invalid format or failed validation: {str(e)}")
 
         # 5. Persistence (Pending Approval)
         generation = TaskGeneration(
@@ -92,6 +123,15 @@ class TaskGenerationService:
     async def get_generations_for_project(self, org_id: uuid.UUID, project_id: uuid.UUID) -> Sequence[TaskGeneration]:
         return await self.gen_repo.get_by_project(org_id, project_id)
 
+    async def update_generation(self, user_id: uuid.UUID, org_id: uuid.UUID, gen_id: uuid.UUID, payload: TaskGenerationPayload) -> TaskGeneration:
+        gen = await self.get_generation(org_id, gen_id)
+        if gen.status != "Pending":
+            raise HTTPException(status_code=400, detail="Only Pending task generations can be updated")
+        
+        gen.generated_tasks = payload.model_dump()
+        await self.db.commit()
+        return gen
+
     async def approve_generation(self, user_id: uuid.UUID, org_id: uuid.UUID, gen_id: uuid.UUID) -> TaskGeneration:
         """
         Takes a pending TaskGeneration and officially materializes it into the database
@@ -104,50 +144,43 @@ class TaskGenerationService:
             
         payload = gen.generated_tasks
         
-        # We need to map sprints to actual database rows, and tasks to actual task rows
+        # We need to map tasks to actual task rows
         current_time = time.time()
         
-        for sprint_data in payload.get("sprints", []):
-            # Create Sprint
-            sprint = Sprint(
-                name=sprint_data.get("name", "Generated Sprint"),
-                project_id=gen.project_id,
-                organization_id=org_id
-            )
-            self.db.add(sprint)
-            await self.db.flush() # get ID
+        # We don't create Sprints automatically here anymore since they are grouped by Phase now.
+        # We just create Tasks and assign them to the Project.
+        
+        for idx, task_data in enumerate(payload.get("tasks", [])):
+            desc = task_data.get("description", "")
+            ac = task_data.get("acceptance_criteria", [])
             
-            # Create Tasks
-            for idx, task_data in enumerate(sprint_data.get("tasks", [])):
-                desc = task_data.get("description", "")
-                ac = task_data.get("acceptance_criteria", "")
+            full_desc = desc
+            if ac and len(ac) > 0:
+                full_desc += f"\n\n**Acceptance Criteria:**\n" + "\n".join([f"- {a}" for a in ac])
                 
-                full_desc = desc
-                if ac:
-                    full_desc += f"\n\n**Acceptance Criteria:**\n{ac}"
-                    
-                deps = task_data.get("dependencies", [])
-                if deps:
-                    full_desc += f"\n\n**Dependencies:**\n" + "\n".join([f"- {d}" for d in deps])
-                    
-                task = Task(
-                    title=task_data.get("title", "Untitled Task"),
-                    description=full_desc,
-                    priority=task_data.get("priority", "Medium"),
-                    status="Todo",
-                    story_points=task_data.get("story_points", 0),
-                    estimated_hours=task_data.get("estimated_hours", 0.0),
-                    labels=task_data.get("labels", []),
-                    order_index=current_time + idx,
-                    sprint_id=sprint.id,
-                    project_id=gen.project_id,
-                    organization_id=org_id,
-                    reporter_id=user_id
-                )
-                self.db.add(task)
+            deps = task_data.get("dependencies", [])
+            if deps and len(deps) > 0:
+                full_desc += f"\n\n**Dependencies:**\n" + "\n".join([f"- {d}" for d in deps])
                 
-            # Flush tasks for this sprint
-            await self.db.flush()
+            task = Task(
+                title=task_data.get("title", "Untitled Task"),
+                description=full_desc,
+                priority=task_data.get("priority", "Medium"),
+                status="Todo",
+                story_points=task_data.get("story_points", 0),
+                estimated_hours=task_data.get("estimated_hours", 0.0),
+                requirement_ids=task_data.get("requirement_ids", []),
+                phase=task_data.get("phase", ""),
+                order_index=current_time + idx,
+                sprint_id=None,
+                project_id=gen.project_id,
+                organization_id=org_id,
+                reporter_id=user_id
+            )
+            self.db.add(task)
+            
+        # Flush tasks
+        await self.db.flush()
             
         gen.status = "Approved"
         await self.db.commit()

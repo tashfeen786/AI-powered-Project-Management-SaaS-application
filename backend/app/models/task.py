@@ -20,6 +20,9 @@ class Task(BaseModel):
     order_index: Mapped[float] = mapped_column(Float, default=0.0, index=True) # Useful for Kanban drag & drop sorting
     labels: Mapped[list | None] = mapped_column(JSONB)
     
+    requirement_ids: Mapped[list | None] = mapped_column(JSONB)
+    phase: Mapped[str | None] = mapped_column(String(255))
+    
     project_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("projects.id"))
     project: Mapped["Project"] = relationship(back_populates="tasks")
     

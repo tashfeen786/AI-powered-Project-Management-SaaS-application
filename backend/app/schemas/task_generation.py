@@ -10,20 +10,17 @@ class GenerateTasksRequest(BaseModel):
 class GeneratedTaskItem(BaseModel):
     title: str
     description: str
+    requirement_ids: List[str]
+    phase: str
     priority: str = Field(pattern="^(Low|Medium|High|Critical)$")
-    status: str = Field(pattern="^(Todo|In Progress|Review|Done)$") # usually "Todo" on generation
+    status: str = Field(pattern="^(Todo|In Progress|Review|Done)$", default="Todo")
     story_points: int
     estimated_hours: float
-    labels: List[str] = []
-    acceptance_criteria: str = ""
+    acceptance_criteria: List[str] = []
     dependencies: List[str] = []
 
-class GeneratedSprintItem(BaseModel):
-    name: str
-    tasks: List[GeneratedTaskItem]
-
 class TaskGenerationPayload(BaseModel):
-    sprints: List[GeneratedSprintItem]
+    tasks: List[GeneratedTaskItem]
 # ------------------------------------
 
 class TaskGenerationResponse(BaseModel):

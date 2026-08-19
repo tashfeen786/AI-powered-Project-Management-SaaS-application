@@ -4,7 +4,8 @@ import { use, useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ProjectTabs } from "@/components/projects/ProjectTabs";
 import { PlanningService } from "@/services/planning.service";
-import { Loader2, Sparkles, Check, Edit2, AlertCircle } from "lucide-react";
+import { TaskGenerationModal } from "@/components/tasks/TaskGenerationModal";
+import { Loader2, Sparkles, Check, Edit2, AlertCircle, ListTodo } from "lucide-react";
 
 export default function PlanningWorkspacePage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -18,6 +19,8 @@ export default function PlanningWorkspacePage({ params }: { params: Promise<{ id
   
   const [editingPhaseIndex, setEditingPhaseIndex] = useState<number | null>(null);
   const [editedPhase, setEditedPhase] = useState<any>(null);
+  
+  const [isTaskGenModalOpen, setIsTaskGenModalOpen] = useState(false);
 
   const fetchDraft = async () => {
     try {
@@ -144,10 +147,19 @@ export default function PlanningWorkspacePage({ params }: { params: Promise<{ id
                   </button>
                 )}
                 {draft?.status === "Approved" && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-success/10 text-success rounded-md text-sm font-medium border border-success/20">
-                    <Check className="w-4 h-4" />
-                    Plan Approved
-                  </div>
+                  <>
+                    <button 
+                      onClick={() => setIsTaskGenModalOpen(true)}
+                      className="flex items-center gap-2 px-4 py-2 bg-primary text-surface rounded-md text-sm font-medium hover:opacity-90 transition-opacity"
+                    >
+                      <ListTodo className="w-4 h-4" />
+                      Generate Tasks
+                    </button>
+                    <div className="flex items-center gap-2 px-4 py-2 bg-success/10 text-success rounded-md text-sm font-medium border border-success/20">
+                      <Check className="w-4 h-4" />
+                      Plan Approved
+                    </div>
+                  </>
                 )}
                 {draft?.status !== "Approved" && (
                   <button 
@@ -347,6 +359,15 @@ export default function PlanningWorkspacePage({ params }: { params: Promise<{ id
           </div>
         </ProjectTabs>
       </div>
+
+      {draft?.status === "Approved" && (
+        <TaskGenerationModal 
+          isOpen={isTaskGenModalOpen} 
+          onClose={() => setIsTaskGenModalOpen(false)} 
+          projectId={projectId} 
+          planningId={draft.id} 
+        />
+      )}
     </AppLayout>
   );
 }

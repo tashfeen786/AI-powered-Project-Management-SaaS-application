@@ -57,6 +57,21 @@ async def list_task_generations(
         message="Task generations retrieved"
     )
 
+from app.schemas.task_generation import TaskGenerationPayload
+
+@router.put("/task-generation/{id}", response_model=StandardResponse[TaskGenerationResponse])
+async def update_task_generation(
+    id: uuid.UUID,
+    payload: TaskGenerationPayload,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    org_id = await verify_org_and_role(current_user, db, Permission.EDIT_PROJECTS)
+    gen_service = TaskGenerationService(db)
+    
+    gen = await gen_service.update_generation(current_user.id, org_id, id, payload)
+    return success_response(data=TaskGenerationResponse.model_validate(gen), message="Task generation updated")
+
 @router.post("/task-generation/{id}/approve", response_model=StandardResponse[TaskGenerationResponse])
 async def approve_task_generation(
     id: uuid.UUID,

@@ -13,6 +13,8 @@ class TaskBase(BaseModel):
     actual_hours: Optional[float] = 0.0
     due_date: Optional[date] = None
     labels: Optional[List[str]] = None
+    requirement_ids: Optional[List[str]] = None
+    phase: Optional[str] = None
     sprint_id: Optional[uuid.UUID] = None
 
 class TaskCreate(TaskBase):
@@ -29,6 +31,8 @@ class TaskUpdate(BaseModel):
     actual_hours: Optional[float] = None
     due_date: Optional[date] = None
     labels: Optional[List[str]] = None
+    requirement_ids: Optional[List[str]] = None
+    phase: Optional[str] = None
     sprint_id: Optional[uuid.UUID] = None
 
 class TaskMove(BaseModel):

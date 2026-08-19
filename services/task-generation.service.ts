@@ -24,4 +24,12 @@ export const TaskGenerationService = {
     );
     return response.data!;
   },
+
+  updateGeneration: async (generationId: string, payload: any): Promise<TaskGenerationResponse> => {
+    const response: StandardResponse<TaskGenerationResponse> = await apiClient.put(
+      `/task-generation/${generationId}`,
+      payload
+    );
+    return response.data!;
+  },
 };
