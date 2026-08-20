@@ -121,7 +121,7 @@ async def get_requirement_history(
             "id": str(h.id),
             "version": h.version,
             "change_summary": h.change_summary,
-            "changed_by_name": h.changed_by.username if h.changed_by else "System",
+            "changed_by_name": h.changed_by.full_name or h.changed_by.email if h.changed_by else "System",
             "created_at": h.created_at.isoformat()
         } for h in history
     ]
