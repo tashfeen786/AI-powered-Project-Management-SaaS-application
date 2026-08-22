@@ -4,26 +4,25 @@ A production-ready, highly modular, AI-native Project Management Platform. This 
 
 ## 1. Project Overview and Purpose
 
-This platform fundamentally changes how teams plan and execute software projects. Instead of manually writing tickets, project managers can upload raw context (PDFs, docs, notes) to a secure, localized Retrieval-Augmented Generation (RAG) pipeline. The system's AI engines then automatically extract requirements, map out sprint timelines, generate detailed kanban tasks, and continuously monitor the project's health—all while enforcing strict role-based access control and tenant isolation. 
+This platform fundamentally changes how teams plan and execute software projects. Instead of manually writing tickets, project managers can upload raw context (PDFs, docs, notes) to a secure, localized Retrieval-Augmented Generation (RAG) pipeline. The system provides tools for direct CRUD requirement management, augmented by AI Analysis that provides suggestions. From approved requirements, the system generates exactly 5 project phases, generates detailed kanban tasks with full traceability, and recommends task assignments—all while enforcing strict role-based access control and tenant isolation. 
 
 ## 2. Key Features
 
-- **Requirements Generation (SRS)**: Transforms sparse uploaded context into structured Agile requirement documents using high-speed LLM inference.
-- **AI Analysis (Project Intelligence Engine)**: Actively watches for delayed sprints, blocked tasks, overloaded team members, and missing requirements, emitting automated risks directly to the dashboard.
-- **5-Phase Planning**: Mathematically scopes approved requirements, maps them to distinct project phases, and distributes them across logical Sprints.
-- **AI Task Generation**: Automatically breaks down planned requirements into actionable sub-tasks and materializes them onto the Kanban board.
-- **Developer Recommendation**: Intelligently assigns or suggests team members for specific tasks based on workload and historical context.
+- **Requirement Management & AI Analysis**: Direct CRUD interface for requirements, with a secondary AI workflow providing suggestions (AI does not directly modify requirements). Features full version history and approved-requirement re-versioning.
+- **5-Phase Planning**: Generates exactly 5 project phases directly from approved requirements.
+- **AI Task Generation**: Automatically breaks down planned requirements into actionable sub-tasks, maintaining strict traceability to both the parent requirement and the planned phase.
+- **Developer Recommendation**: Intelligently recommends team members for specific tasks based on workload. It does not automatically assign them; human approval is strictly required.
 - **Team/Roles (RBAC)**: Comprehensive permission matrices controlling view, edit, and AI-generation capabilities across Owners, Admins, Project Managers, and Members within isolated organizations.
-- **Kanban Board**: Real-time task tracking with WebSocket integration, tracking task states without aggressive polling.
+- **Kanban Board**: Real-time task tracking with WebSocket integration, using real task records and real assignee data.
 
 ## 3. Human-in-the-Loop AI Workflow
 
 The platform relies on a "Human-in-the-Loop" approval concept to ensure AI accuracy and safety before executing actions:
 
 1. **Upload**: User uploads raw project context or documentation.
-2. **AI Analysis & SRS**: The AI analyzes the vector store and drafts a comprehensive Software Requirement Specification.
-3. **Human Approval (Phase 1)**: The Project Manager reviews, edits, and explicitly approves the SRS.
-4. **AI Sprint Planning**: The system maps the approved SRS to sprints and calculates workloads.
+2. **Requirements & AI Analysis**: Users manually create requirements via Direct CRUD, utilizing AI suggestions based on the vector store.
+3. **Human Approval (Phase 1)**: The Project Manager reviews, edits, and explicitly approves the requirements, tracking the version history.
+4. **Planning**: The system generates exactly 5 phases from the approved requirements.
 5. **Human Approval (Phase 2)**: The team reviews the sprint plan and approves it.
 6. **AI Task Generation**: The AI generates detailed, atomic Kanban tasks and recommends developer assignments.
 7. **Human Approval (Phase 3)**: Final approval materializes the AI's proposed tasks directly to the active Kanban board for execution.
@@ -80,10 +79,10 @@ frontend/
 The core backend API (`/api/v1`) revolves around these primary domains:
 - `/auth`, `/organizations`, `/team`: Handles JWT authentication, multi-tenant workspace routing, and RBAC enforcement.
 - `/projects`, `/documents`: Manages project creation and ingests files into the vector database via async Celery tasks.
-- `/requirements`: Interfaces with the LLM to generate and approve structured SRS data.
-- `/planning`, `/sprints`: Maps requirements to chronological sprints and phases.
+- `/requirements`: Interfaces with the CRUD logic and LLM to manage and version structured SRS data.
+- `/planning`, `/sprints`: Maps requirements to the 5 chronological phases.
 - `/task-generation`, `/tasks`: Handles the AI task breakdown logic, approval endpoints, and Kanban state mutation.
-- `/ai_insights`, `/copilot`: Global AI assistant endpoints and automated risk detection.
+- `/ai_insights`, `/copilot`: Global AI assistant endpoints.
 - `/collaboration`: WebSocket endpoints for real-time presence and task updates.
 
 ## 7. Database and Migration Setup
