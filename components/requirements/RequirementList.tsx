@@ -51,8 +51,10 @@ export function RequirementList({
       </div>
       
       <div className="divide-y divide-border">
-        {requirements.map(req => (
-          <div key={req.id} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-background/50 transition-colors group">
+        {requirements.map((req, index) => {
+          if (!req) return null;
+          return (
+          <div key={req.id || index} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-background/50 transition-colors group">
             <div className="col-span-4 sm:col-span-5 flex items-start gap-3">
               <div className="mt-0.5 p-1.5 bg-background border border-border rounded text-text-secondary shrink-0">
                 <FileText className="w-4 h-4" />
@@ -87,13 +89,13 @@ export function RequirementList({
             
             <div className="col-span-1 text-right relative">
               <button 
-                onClick={() => setOpenMenuId(openMenuId === req.id ? null : req.id)}
+                onClick={() => setOpenMenuId(openMenuId === req?.id ? null : req?.id)}
                 className="p-1.5 text-text-secondary hover:text-text-primary rounded focus:outline-none focus:ring-1 focus:ring-primary opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 <MoreVertical className="w-4 h-4" />
               </button>
               
-              {openMenuId === req.id && (
+              {openMenuId === req?.id && (
                 <div 
                   ref={menuRef}
                   className="absolute right-0 top-8 w-36 bg-surface border border-border rounded-md shadow-lg z-10 py-1"
@@ -123,7 +125,8 @@ export function RequirementList({
               )}
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
