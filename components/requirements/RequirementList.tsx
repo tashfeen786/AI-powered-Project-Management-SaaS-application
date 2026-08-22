@@ -19,7 +19,8 @@ const priorityStyles = {
 export function RequirementList({ 
   requirements, 
   onEdit, 
-  onDelete 
+  onDelete,
+  onHistory 
 }: { 
   requirements: RequirementResponse[], 
   onEdit: (req: RequirementResponse) => void,
