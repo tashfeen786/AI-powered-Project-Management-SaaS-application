@@ -6,7 +6,30 @@ A production-ready, highly modular, AI-native Project Management Platform. This 
 
 This platform fundamentally changes how teams plan and execute software projects. Instead of manually writing tickets, project managers can upload raw context (PDFs, docs, notes) to a secure, localized Retrieval-Augmented Generation (RAG) pipeline. The system provides tools for direct CRUD requirement management, augmented by AI Analysis that provides suggestions. From approved requirements, the system generates exactly 5 project phases, generates detailed kanban tasks with full traceability, and recommends task assignments—all while enforcing strict role-based access control and tenant isolation. 
 
-## 2. Key Features
+## 2. Screenshots / Product Preview
+
+**1. Login / Dashboard**  
+![Dashboard](./docs/screenshots/1-dashboard.png)
+
+**2. Requirements CRUD + AI Analysis**  
+![Requirements CRUD](./docs/screenshots/2-requirements.png)
+
+**3. Requirement Version History**  
+![Requirement History](./docs/screenshots/3-req-history.png)
+
+**4. 5-Phase Planning**  
+![5-Phase Planning](./docs/screenshots/4-planning.png)
+
+**5. AI Task Generation / Task Review**  
+![Task Generation](./docs/screenshots/5-task-generation.png)
+
+**6. Developer Recommendation**  
+![Developer Recommendation](./docs/screenshots/6-dev-recommendation.png)
+
+**7. Kanban Board**  
+![Kanban Board](./docs/screenshots/7-kanban.png)
+
+## 3. Key Features
 
 - **Requirement Management & AI Analysis**: Direct CRUD interface for requirements, with a secondary AI workflow providing suggestions (AI does not directly modify requirements). Features full version history and approved-requirement re-versioning.
 - **5-Phase Planning**: Generates exactly 5 project phases directly from approved requirements.
@@ -15,7 +38,7 @@ This platform fundamentally changes how teams plan and execute software projects
 - **Team/Roles (RBAC)**: Comprehensive permission matrices controlling view, edit, and AI-generation capabilities across Owners, Admins, Project Managers, and Members within isolated organizations.
 - **Kanban Board**: Real-time task tracking with WebSocket integration, using real task records and real assignee data.
 
-## 3. Human-in-the-Loop AI Workflow
+## 4. Human-in-the-Loop AI Workflow
 
 The platform relies on a "Human-in-the-Loop" approval concept to ensure AI accuracy and safety before executing actions:
 
@@ -27,7 +50,7 @@ The platform relies on a "Human-in-the-Loop" approval concept to ensure AI accur
 6. **AI Task Generation**: The AI generates detailed, atomic Kanban tasks and recommends developer assignments.
 7. **Human Approval (Phase 3)**: Final approval materializes the AI's proposed tasks directly to the active Kanban board for execution.
 
-## 4. Technology Stack
+## 5. Technology Stack
 
 **Frontend**
 - Next.js 15 (App Router)
@@ -53,7 +76,7 @@ The platform relies on a "Human-in-the-Loop" approval concept to ensure AI accur
 - Groq API (High-speed LLM inference - `llama-3.3-70b-versatile`)
 - SentenceTransformers (Local lightweight embeddings - `all-MiniLM-L6-v2`)
 
-## 5. Architecture / Project Structure
+## 6. Architecture / Project Structure
 
 The system strictly adheres to **Clean Architecture** to separate concerns:
 
@@ -74,7 +97,7 @@ frontend/
 ├── hooks/            # Custom React hooks
 ```
 
-## 6. Main API / Workflow Overview
+## 7. Main API / Workflow Overview
 
 The core backend API (`/api/v1`) revolves around these primary domains:
 - `/auth`, `/organizations`, `/team`: Handles JWT authentication, multi-tenant workspace routing, and RBAC enforcement.
@@ -85,7 +108,7 @@ The core backend API (`/api/v1`) revolves around these primary domains:
 - `/ai_insights`, `/copilot`: Global AI assistant endpoints.
 - `/collaboration`: WebSocket endpoints for real-time presence and task updates.
 
-## 7. Database and Migration Setup
+## 8. Database and Migration Setup
 
 The application uses **PostgreSQL** alongside **pgvector** for traditional relational data and AI embeddings. 
 Schema migrations are handled by **Alembic**.
@@ -98,7 +121,7 @@ alembic revision --autogenerate -m "Add new feature table"
 alembic upgrade head
 ```
 
-## 8. Local Installation and Run Instructions
+## 9. Local Installation and Run Instructions
 
 ### Prerequisites
 - Docker and Docker Compose
@@ -127,12 +150,12 @@ docker-compose up --build -d
 
 Wait roughly 30 seconds on the first boot for Alembic to migrate the external PostgreSQL database schema.
 
-## 9. Testing & Validation Overview
+## 10. Testing & Validation Overview
 
 The project incorporates multiple testing layers to ensure stability:
 - **Backend (Pytest)**: Located in `backend/tests/`. Run tests locally or inside the Docker container using `pytest`. Evaluates core domain logic, AI service abstractions, and HTTP route health.
 - **Frontend (Jest & React Testing Library)**: Located in `__tests__/`. Covers React component rendering and frontend unit logic.
 - **E2E (Puppeteer)**: Basic integration and end-to-end user flows validated via Puppeteer scripts.
 
-## 10. Author
+## 11. Author
 Created by **[Your Name / Organization]**
