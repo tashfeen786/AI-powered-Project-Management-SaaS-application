@@ -125,13 +125,13 @@ docker-compose up --build -d
 - **Backend API & Swagger Docs**: `http://localhost:8000/docs`
 - **Flower (Celery Worker Dashboard)**: `http://localhost:5555`
 
-Wait roughly 30 seconds on the first boot for PostgreSQL to initialize and Alembic to migrate the schema.
+Wait roughly 30 seconds on the first boot for Alembic to migrate the external PostgreSQL database schema.
 
 ## 9. Testing & Validation Overview
 
 The project incorporates multiple testing layers to ensure stability:
 - **Backend (Pytest)**: Located in `backend/tests/`. Run tests locally or inside the Docker container using `pytest`. Evaluates core domain logic, AI service abstractions, and HTTP route health.
-- **Frontend (Jest & React Testing Library)**: Located in `__tests__/`. Covers React component rendering and frontend unit logic (`npm test`).
+- **Frontend (Jest & React Testing Library)**: Located in `__tests__/`. Covers React component rendering and frontend unit logic.
 - **E2E (Puppeteer)**: Basic integration and end-to-end user flows validated via Puppeteer scripts.
 
 ## 10. Author
