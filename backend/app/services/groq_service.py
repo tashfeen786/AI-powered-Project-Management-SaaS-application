@@ -15,7 +15,10 @@ class GroqService:
                 from groq import AsyncGroq
                 if not settings.GROQ_API_KEY:
                     logger.warning("GROQ_API_KEY is missing. AI generations will fail.")
-                _groq_client = AsyncGroq(api_key=settings.GROQ_API_KEY)
+                _groq_client = AsyncGroq(
+                    api_key=settings.GROQ_API_KEY,
+                    timeout=120.0,  # 120s — large SRS prompts on 120B models need headroom
+                )
             except ImportError:
                 logger.error("groq package not installed.")
                 raise Exception("Groq is not installed")
@@ -38,7 +41,7 @@ class GroqService:
             }
             
         client = GroqService._get_client()
-        logger.info("Calling Groq", model=model, prompt_length=len(prompt))
+        logger.info("Calling Groq", model=model, prompt_length=len(prompt), max_tokens=max_tokens)
         
         try:
             kwargs = {

@@ -5,7 +5,8 @@ export const RequirementsService = {
   generateRequirement: async (projectId: string, request: GenerateRequirementRequest): Promise<RequirementResponse> => {
     const response: StandardResponse<RequirementResponse> = await apiClient.post(
       `/projects/${projectId}/requirements/generate`,
-      request
+      request,
+      { requireAuth: true, timeoutMs: 150_000 }  // 150s — matches 120s backend AI timeout + headroom
     );
     return response.data!;
   },

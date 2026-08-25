@@ -14,6 +14,7 @@ const API_URL = getApiUrl();
 
 interface RequestOptions extends RequestInit {
   requireAuth?: boolean;
+  timeoutMs?: number;
 }
 
 const getToken = () => {
@@ -147,14 +148,33 @@ export const apiClient = {
       delete headers["Content-Type"]; // Let browser set boundary
     }
 
-    const response = await fetch(`${API_URL}${endpoint}`, {
-      ...options,
-      method: "POST",
-      headers: { ...headers, ...options.headers },
-      body: body instanceof FormData ? body : JSON.stringify(body),
-    });
+    // Apply timeout via AbortController if timeoutMs is set
+    let signal = options.signal;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    if (options.timeoutMs && !signal) {
+      const controller = new AbortController();
+      signal = controller.signal;
+      timeoutId = setTimeout(() => controller.abort(), options.timeoutMs);
+    }
 
-    return handleResponse(response);
+    try {
+      const response = await fetch(`${API_URL}${endpoint}`, {
+        ...options,
+        method: "POST",
+        headers: { ...headers, ...options.headers },
+        body: body instanceof FormData ? body : JSON.stringify(body),
+        signal,
+      });
+
+      return handleResponse(response);
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        throw new Error("Request timed out. The AI generation is taking too long — please try again.");
+      }
+      throw err;
+    } finally {
+      if (timeoutId) clearTimeout(timeoutId);
+    }
   },
 
   put: async (endpoint: string, body: any, options: RequestOptions = { requireAuth: true }) => {

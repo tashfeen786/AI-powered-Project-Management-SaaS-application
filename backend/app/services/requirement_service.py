@@ -57,13 +57,16 @@ class RequirementService:
         )
         system_prompt = "You are an expert Technical Business Analyst."
 
-        # 4. Call Groq
+        # 4. Call Groq — SRS needs higher token budget than the default 2048
         try:
-            # Using centralized settings.GROQ_MODEL for high reasoning capabilities required for SRS
-            result = await GroqService.generate(prompt=prompt, system_prompt=system_prompt)
+            result = await GroqService.generate(
+                prompt=prompt,
+                system_prompt=system_prompt,
+                max_tokens=4096,
+            )
         except Exception as e:
             logger.error("Generation Failed", error=str(e))
-            raise HTTPException(status_code=500, detail="AI generation failed")
+            raise HTTPException(status_code=502, detail=f"AI generation failed: {e}")
 
         logger.info("Generation Completed", tokens_used=result["tokens"])
 
