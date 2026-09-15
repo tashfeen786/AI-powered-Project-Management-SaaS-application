@@ -1,7 +1,25 @@
 version: "3.8"
 
 services:
-
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: ai_pm_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ai_pm_network
 
   redis:
     image: redis:7-alpine
@@ -124,6 +142,7 @@ services:
 
 volumes:
   redis_data:
+  postgres_data:
 
 networks:
   ai_pm_network:
