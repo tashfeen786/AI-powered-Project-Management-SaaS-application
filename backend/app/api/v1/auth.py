@@ -3,9 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.schemas.auth import UserCreate, UserLogin, Token, UserResponse
 from app.services.auth_service import AuthService
-from app.dependencies.auth import get_current_active_user, oauth2_scheme
-from app.core.redis import redis_client
-from app.core.config import settings
+from app.dependencies.auth import get_current_active_user
 from app.models.user import User
 from app.utils.response import StandardResponse, success_response
 from pydantic import BaseModel
@@ -35,12 +33,8 @@ async def refresh(request: RefreshRequest, db: AsyncSession = Depends(get_db)):
     return success_response(data=token, message="Token refreshed")
 
 @router.post("/logout", response_model=StandardResponse)
-async def logout(
-    current_user: User = Depends(get_current_active_user),
-    token: str = Depends(oauth2_scheme)
-):
-    ttl = settings.JWT_EXPIRE_MINUTES * 60
-    await redis_client.setex(f"bl_{token}", ttl, "1")
+async def logout(current_user: User = Depends(get_current_active_user)):
+    # Placeholder for token invalidation / blacklist
     return success_response(message="Logout successful")
 
 @router.get("/me", response_model=StandardResponse[UserResponse])

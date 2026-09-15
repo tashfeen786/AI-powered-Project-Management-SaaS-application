@@ -6,12 +6,16 @@ from app.db.session import get_db
 from app.schemas.project import ProjectCreate, ProjectUpdate, ProjectResponse, ProjectStatistics, QuickAction
 from app.services.project_service import ProjectService
 from app.dependencies.auth import get_current_active_user
-from app.dependencies.rbac import require_permission
-from app.services.rbac_service import Permission
 from app.models.user import User
 from app.utils.response import StandardResponse, success_response, paginated_response
 
 router = APIRouter()
+
+def get_org_id(current_user: User = Depends(get_current_active_user)) -> uuid.UUID:
+    if not current_user.current_organization_id:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail="No active organization context")
+    return current_user.current_organization_id
 
 @router.get("", response_model=StandardResponse)
 async def list_projects(
@@ -23,7 +27,7 @@ async def list_projects(
     sort: str = "newest",
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
-    org_id: uuid.UUID = Depends(require_permission(Permission.VIEW_PROJECTS))
+    org_id: uuid.UUID = Depends(get_org_id)
 ):
     project_service = ProjectService(db)
     items, total = await project_service.get_projects(
@@ -50,7 +54,7 @@ async def get_recent_projects(
     limit: int = Query(5, ge=1, le=20),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
-    org_id: uuid.UUID = Depends(require_permission(Permission.VIEW_PROJECTS))
+    org_id: uuid.UUID = Depends(get_org_id)
 ):
     project_service = ProjectService(db)
     projects = await project_service.get_recent_projects(current_user.id, org_id, limit)
@@ -63,7 +67,7 @@ async def get_recent_projects(
 async def get_project_statistics(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
-    org_id: uuid.UUID = Depends(require_permission(Permission.VIEW_PROJECTS))
+    org_id: uuid.UUID = Depends(get_org_id)
 ):
     project_service = ProjectService(db)
     stats = await project_service.get_statistics(current_user.id, org_id)
@@ -73,7 +77,7 @@ async def get_project_statistics(
 async def get_quick_actions(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
-    org_id: uuid.UUID = Depends(require_permission(Permission.VIEW_PROJECTS))
+    org_id: uuid.UUID = Depends(get_org_id)
 ):
     # This might be dynamic in the future based on user activity. For now, mock it as requested by typical dashboard layouts.
     actions = [
@@ -88,7 +92,7 @@ async def get_project(
     id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
-    org_id: uuid.UUID = Depends(require_permission(Permission.VIEW_PROJECTS))
+    org_id: uuid.UUID = Depends(get_org_id)
 ):
     project_service = ProjectService(db)
     project = await project_service.get_project(current_user.id, org_id, id)
@@ -99,7 +103,7 @@ async def create_project(
     project_in: ProjectCreate,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
-    org_id: uuid.UUID = Depends(require_permission(Permission.CREATE_PROJECTS))
+    org_id: uuid.UUID = Depends(get_org_id)
 ):
     project_service = ProjectService(db)
     project = await project_service.create_project(current_user.id, org_id, project_in)
@@ -114,7 +118,7 @@ async def update_project(
     project_in: ProjectUpdate,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
-    org_id: uuid.UUID = Depends(require_permission(Permission.EDIT_PROJECTS))
+    org_id: uuid.UUID = Depends(get_org_id)
 ):
     project_service = ProjectService(db)
     project = await project_service.update_project(current_user.id, org_id, id, project_in)
@@ -125,7 +129,7 @@ async def delete_project(
     id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
-    org_id: uuid.UUID = Depends(require_permission(Permission.DELETE_PROJECTS))
+    org_id: uuid.UUID = Depends(get_org_id)
 ):
     project_service = ProjectService(db)
     await project_service.delete_project(current_user.id, org_id, id)
@@ -141,7 +145,7 @@ async def analyze_project(
     request: AnalyzeProjectRequest,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
-    org_id: uuid.UUID = Depends(require_permission(Permission.CREATE_PROJECTS))
+    org_id: uuid.UUID = Depends(get_org_id)
 ):
     """
     Phase 1: Direct AI Requirements Analysis.

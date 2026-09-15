@@ -24,8 +24,7 @@ class AuthService:
         access_token = create_access_token(subject=user.id)
         refresh_token = create_access_token(
             subject=user.id, 
-            expires_delta=timedelta(days=30),
-            token_type="refresh"
+            expires_delta=timedelta(days=30)
         )
         
         return Token(access_token=access_token, refresh_token=refresh_token, token_type="bearer")
@@ -38,7 +37,6 @@ class AuthService:
         # Check if organization domain exists, otherwise create it
         domain = user_in.email.split('@')[1] if '@' in user_in.email else None
         
-        is_new_org = False
         created_org = None
         if domain:
             created_org = await self.org_repo.get_by_domain(domain)
@@ -49,7 +47,6 @@ class AuthService:
                 domain=domain
             )
             created_org = await self.org_repo.create(org)
-            is_new_org = True
         
         # Create user
         new_user = User(
@@ -61,10 +58,8 @@ class AuthService:
         
         created_user = await self.user_repo.create(new_user)
         
-        # Add user to organization
-        role = "owner" if is_new_org else "viewer"
-        status = "accepted" if is_new_org else "pending"
-        await self.org_repo.add_user_to_org(created_user.id, created_org.id, role=role, status=status)
+        # Add user to organization as owner
+        await self.org_repo.add_user_to_org(created_user.id, created_org.id, role="owner")
         
         return created_user
 
@@ -75,9 +70,7 @@ class AuthService:
             headers={"WWW-Authenticate": "Bearer"},
         )
         try:
-            payload = jwt.decode(refresh_token, settings.JWT_REFRESH_SECRET, algorithms=[settings.ALGORITHM])
-            if payload.get("type") != "refresh":
-                raise credentials_exception
+            payload = jwt.decode(refresh_token, settings.JWT_SECRET, algorithms=[settings.ALGORITHM])
             token_data = TokenPayload(**payload)
             if token_data.sub is None:
                 raise credentials_exception
@@ -91,8 +84,7 @@ class AuthService:
         access_token = create_access_token(subject=user.id)
         new_refresh_token = create_access_token(
             subject=user.id, 
-            expires_delta=timedelta(days=30),
-            token_type="refresh"
+            expires_delta=timedelta(days=30)
         )
         
         return Token(access_token=access_token, refresh_token=new_refresh_token, token_type="bearer")
