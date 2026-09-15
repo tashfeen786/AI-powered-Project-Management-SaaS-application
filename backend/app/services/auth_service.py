@@ -24,7 +24,8 @@ class AuthService:
         access_token = create_access_token(subject=user.id)
         refresh_token = create_access_token(
             subject=user.id, 
-            expires_delta=timedelta(days=30)
+            expires_delta=timedelta(days=30),
+            token_type="refresh"
         )
         
         return Token(access_token=access_token, refresh_token=refresh_token, token_type="bearer")
@@ -70,7 +71,9 @@ class AuthService:
             headers={"WWW-Authenticate": "Bearer"},
         )
         try:
-            payload = jwt.decode(refresh_token, settings.JWT_SECRET, algorithms=[settings.ALGORITHM])
+            payload = jwt.decode(refresh_token, settings.JWT_REFRESH_SECRET, algorithms=[settings.ALGORITHM])
+            if payload.get("type") != "refresh":
+                raise credentials_exception
             token_data = TokenPayload(**payload)
             if token_data.sub is None:
                 raise credentials_exception
@@ -84,7 +87,8 @@ class AuthService:
         access_token = create_access_token(subject=user.id)
         new_refresh_token = create_access_token(
             subject=user.id, 
-            expires_delta=timedelta(days=30)
+            expires_delta=timedelta(days=30),
+            token_type="refresh"
         )
         
         return Token(access_token=access_token, refresh_token=new_refresh_token, token_type="bearer")

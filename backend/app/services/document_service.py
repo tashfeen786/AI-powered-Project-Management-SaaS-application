@@ -87,7 +87,8 @@ class DocumentService:
         )
         
         # Queue Processing immediately
-        await self.process_document(created.id, org_id, file_bytes)
+        from app.tasks.document_tasks import process_document_job
+        process_document_job.delay(str(uuid.uuid4()), str(org_id), str(created.id))
         
         return created
 

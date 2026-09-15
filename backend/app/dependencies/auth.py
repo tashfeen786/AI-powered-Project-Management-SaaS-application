@@ -7,6 +7,7 @@ from app.db.session import get_db
 from app.models.user import User
 from app.schemas.auth import TokenPayload
 from app.repositories.user_repository import UserRepository
+from app.core.redis import redis_client
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login")
 
@@ -20,7 +21,15 @@ async def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
+        # Check blacklist
+        is_blacklisted = await redis_client.get(f"bl_{token}")
+        if is_blacklisted:
+            raise credentials_exception
+            
         payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.ALGORITHM])
+        if payload.get("type", "access") != "access":
+            raise credentials_exception
+            
         token_data = TokenPayload(**payload)
         if token_data.sub is None:
             raise credentials_exception

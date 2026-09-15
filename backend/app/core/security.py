@@ -12,19 +12,23 @@ def get_password_hash(password: str) -> str:
     hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
     return hashed.decode('utf-8')
 
-def create_access_token(subject: Union[str, Any], expires_delta: Optional[timedelta] = None) -> str:
+def create_access_token(subject: Union[str, Any], expires_delta: Optional[timedelta] = None, token_type: str = "access") -> str:
     if expires_delta:
         expire = datetime.now(UTC) + expires_delta
     else:
         expire = datetime.now(UTC) + timedelta(minutes=settings.JWT_EXPIRE_MINUTES)
     
-    to_encode = {"exp": expire, "sub": str(subject)}
-    encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET, algorithm=settings.ALGORITHM)
+    to_encode = {"exp": expire, "sub": str(subject), "type": token_type}
+    secret = settings.JWT_REFRESH_SECRET if token_type == "refresh" else settings.JWT_SECRET
+    encoded_jwt = jwt.encode(to_encode, secret, algorithm=settings.ALGORITHM)
     return encoded_jwt
 
-def verify_token(token: str) -> Optional[dict]:
+def verify_token(token: str, token_type: str = "access") -> Optional[dict]:
+    secret = settings.JWT_REFRESH_SECRET if token_type == "refresh" else settings.JWT_SECRET
     try:
-        payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.ALGORITHM])
+        payload = jwt.decode(token, secret, algorithms=[settings.ALGORITHM])
+        if payload.get("type", "access") != token_type:
+            return None
         return payload
     except jwt.JWTError:
         return None
