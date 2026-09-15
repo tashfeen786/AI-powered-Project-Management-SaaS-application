@@ -50,7 +50,7 @@ async def get_recent_projects(
     limit: int = Query(5, ge=1, le=20),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
-    org_id: uuid.UUID = Depends(get_org_id)
+    org_id: uuid.UUID = Depends(require_permission(Permission.VIEW_PROJECTS))
 ):
     project_service = ProjectService(db)
     projects = await project_service.get_recent_projects(current_user.id, org_id, limit)
@@ -63,7 +63,7 @@ async def get_recent_projects(
 async def get_project_statistics(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
-    org_id: uuid.UUID = Depends(get_org_id)
+    org_id: uuid.UUID = Depends(require_permission(Permission.VIEW_PROJECTS))
 ):
     project_service = ProjectService(db)
     stats = await project_service.get_statistics(current_user.id, org_id)
@@ -73,7 +73,7 @@ async def get_project_statistics(
 async def get_quick_actions(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
-    org_id: uuid.UUID = Depends(get_org_id)
+    org_id: uuid.UUID = Depends(require_permission(Permission.VIEW_PROJECTS))
 ):
     # This might be dynamic in the future based on user activity. For now, mock it as requested by typical dashboard layouts.
     actions = [
@@ -88,7 +88,7 @@ async def get_project(
     id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
-    org_id: uuid.UUID = Depends(get_org_id)
+    org_id: uuid.UUID = Depends(require_permission(Permission.VIEW_PROJECTS))
 ):
     project_service = ProjectService(db)
     project = await project_service.get_project(current_user.id, org_id, id)
@@ -125,7 +125,7 @@ async def delete_project(
     id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
-    org_id: uuid.UUID = Depends(get_org_id)
+    org_id: uuid.UUID = Depends(require_permission(Permission.DELETE_PROJECTS))
 ):
     project_service = ProjectService(db)
     await project_service.delete_project(current_user.id, org_id, id)
