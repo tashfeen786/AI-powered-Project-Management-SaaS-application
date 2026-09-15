@@ -38,6 +38,7 @@ class AuthService:
         # Check if organization domain exists, otherwise create it
         domain = user_in.email.split('@')[1] if '@' in user_in.email else None
         
+        is_new_org = False
         created_org = None
         if domain:
             created_org = await self.org_repo.get_by_domain(domain)
@@ -48,6 +49,7 @@ class AuthService:
                 domain=domain
             )
             created_org = await self.org_repo.create(org)
+            is_new_org = True
         
         # Create user
         new_user = User(
@@ -59,8 +61,10 @@ class AuthService:
         
         created_user = await self.user_repo.create(new_user)
         
-        # Add user to organization as owner
-        await self.org_repo.add_user_to_org(created_user.id, created_org.id, role="owner")
+        # Add user to organization
+        role = "owner" if is_new_org else "viewer"
+        status = "accepted" if is_new_org else "pending"
+        await self.org_repo.add_user_to_org(created_user.id, created_org.id, role=role, status=status)
         
         return created_user
 
