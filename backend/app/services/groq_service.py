@@ -25,7 +25,7 @@ class GroqService:
         return _groq_client
 
     @staticmethod
-    async def generate(prompt: str, system_prompt: str = "You are a helpful AI project management assistant.", model: str = None, tools: list = None, max_tokens: int = 2048, response_format: dict = None) -> dict:
+    async def generate(prompt: str, system_prompt: str = "You are a helpful AI project management assistant.", model: str = None, tools: list = None, max_tokens: int = 4096, response_format: dict = None) -> dict:
         """
         Calls Groq API to generate a response.
         Supports Llama 3, DeepSeek, Gemma (configurable via model param).
